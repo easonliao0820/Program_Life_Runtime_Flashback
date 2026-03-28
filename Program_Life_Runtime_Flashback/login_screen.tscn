@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://cik3wl46ws6nq"]
+
+[ext_resource type="Script" uid="uid://bwkhp4x7eb77e" path="res://google_login_button.gd" id="1_wplbs"]
+
+[node name="LoginScreen" type="Control" unique_id=1440686289]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GoogleLoginButton" type="Button" parent="." unique_id=1535640810]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -83.5
+offset_top = -15.5
+offset_right = 83.5
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "使用 Google 帳號登入"
+script = ExtResource("1_wplbs")
