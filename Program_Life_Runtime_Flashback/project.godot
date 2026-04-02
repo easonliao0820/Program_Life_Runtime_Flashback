@@ -15,6 +15,10 @@ run/main_scene="uid://cik3wl46ws6nq"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+SandboxManager="*uid://ni2ao0arbsmd"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

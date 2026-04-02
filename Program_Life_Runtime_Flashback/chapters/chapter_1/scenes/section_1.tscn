@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://dyhgj63xq4udj"]
+
+[ext_resource type="Script" uid="uid://diyb0bpfykvug" path="res://chapters/chapter_1/scripts/intro_controller.gd" id="1_36xvx"]
+
+[node name="Section1" type="Node2D" unique_id=1428661838]
+script = ExtResource("1_36xvx")
+
+[node name="CodeEdit" type="CodeEdit" parent="." unique_id=1052160676]
+offset_left = 877.0
+offset_right = 1150.0
+offset_bottom = 646.0
+size_flags_horizontal = 8
+size_flags_vertical = 0
+text = "print(\"哈囉{userName}\")"
+
+[node name="OutputLabel" type="Label" parent="." unique_id=1811184019]
+offset_left = 2.0
+offset_top = 568.0
+offset_right = 879.0
+offset_bottom = 648.0
+
+[node name="RunButton" type="Button" parent="." unique_id=1913786656]
+offset_left = 1080.0
+offset_top = -2.0
+offset_right = 1150.0
+offset_bottom = 45.0
+text = "Run"
