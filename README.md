@@ -26,3 +26,6 @@ AI 整合：Google Gemini API (NLP 語意理解)
 身分驗證：Google OAuth 2.0
 
 部署環境：GitHub Pages / Vercel
+
+上傳原則
+開fork->拉一下->PUSH自己家->做事情->COMMIT->拉一下->PUSH自己家->推到MAIN
