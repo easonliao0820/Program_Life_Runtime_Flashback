@@ -1,5 +1,5 @@
 # 排除所有 addons
-/addons/
+Program_Life_Runtime_Flashback/addons/
 
 # 排除 macOS 特有的暫存檔
 .DS_Store
