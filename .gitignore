@@ -1,16 +1,9 @@
-# Godot 4+ specific ignores
-.godot/
-.nomedia
+# 排除所有 addons
+/addons/
 
-# Godot-specific ignores
-.import/
-export.cfg
-export_credentials.cfg
+# 排除 macOS 特有的暫存檔
+.DS_Store
 
-# Imported translations (automatically generated from CSV files)
-*.translation
-
-# Mono-specific ignores
-.mono/
-data_*/
-mono_crash.*.json
+# 排除 Python 編譯檔
+__pycache__/
+*.py[cod]
