@@ -28,4 +28,8 @@ AI 整合：Google Gemini API (NLP 語意理解)
 部署環境：GitHub Pages / Vercel
 
 上傳原則
-開fork->拉一下->PUSH自己家->做事情->COMMIT->拉一下->PUSH自己家->推到MAIN
+開fork->拉麵->PUSH自己家->做事情->COMMIT->拉麵->PUSH自己家->推到MAIN
+
+Setup
+下載 Python for Godot (py4godot)
+開啟 Godot 專案
