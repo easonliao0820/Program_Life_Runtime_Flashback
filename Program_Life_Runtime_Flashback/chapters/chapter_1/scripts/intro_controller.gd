@@ -25,6 +25,6 @@ func fake_execute(code: String) -> String:
 	for line in code.split("\n"):
 		line = line.strip_edges()
 		if line.begins_with("print(") and line.ends_with(")"):
-			var content = line.substr(6, line.length() - 7)
+			var content = line.substr(7, line.length() - 9)
 			outputs.append(content)
 	return "\n".join(outputs) if outputs.size() > 0 else "(沒有輸出)"
