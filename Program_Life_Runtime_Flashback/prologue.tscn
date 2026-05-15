@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://bq52awcjnvoq0"]
+[gd_scene format=3 uid="uid://xxmkdd23l1r5"]
 
-[ext_resource type="Script" path="res://src/scenes/prologue/prologue.gd" id="1_p4v3n"]
+[ext_resource type="Script" path="res://src/scenes/prologue/prologue.gd" id="1_ex3hv"]
 
 [node name="Prologue" type="Control" unique_id=1836687391]
 layout_mode = 3
@@ -9,7 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_p4v3n")
+script = ExtResource("1_ex3hv")
 
 [node name="Background" type="ColorRect" parent="." unique_id=1633581627]
 layout_mode = 1

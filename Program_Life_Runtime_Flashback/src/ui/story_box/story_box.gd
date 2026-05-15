@@ -20,9 +20,6 @@ func _ready() -> void:
 	# 1. 遊戲一開始，預設完全隱藏劇情介面（大、小長方形）
 	main_box.hide()
 	name_box.hide()
-	
-	# 2. 綁定打字機計時器訊號
-	type_timer.timeout.connect(_on_type_timer_timeout)
 
 ## 【外部呼叫核心】啟動劇情播放
 ## 使用範例：StorySystem.start_story(preload("res://chapters/chapter_1/data/ch1_intro_story.tres"))
