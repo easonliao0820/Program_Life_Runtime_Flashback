@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3 uid="uid://bx7job6qt8l73"]
+
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="1_gjdjd"]
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_lh0cy"]
+
+[sub_resource type="Resource" id="Resource_gtypr"]
+script = ExtResource("1_lh0cy")
+speaker = "…"
+line = "終於見到你了，我的朋友。"
+metadata/_custom_type_script = "uid://kdh4sgu4rltq"
+
+[sub_resource type="Resource" id="Resource_pjrmw"]
+script = ExtResource("1_lh0cy")
+speaker = ""
+line = "（被新生父母抱在懷裡的你想）"
+metadata/_custom_type_script = "uid://kdh4sgu4rltq"
+
+[sub_resource type="Resource" id="Resource_8hjhw"]
+script = ExtResource("1_lh0cy")
+speaker = "心聲"
+line = "不會吧，我該不會剛出生就要夭折了嗎，我也太雖了。"
+metadata/_custom_type_script = "uid://kdh4sgu4rltq"
+
+[sub_resource type="Resource" id="Resource_b1yt6"]
+script = ExtResource("1_lh0cy")
+speaker = ""
+line = "（嬰兒的小臉上慢慢地多了許多河流，但預想中震耳欲聾的哭聲卻沒有出現）"
+metadata/_custom_type_script = "uid://kdh4sgu4rltq"
+
+[sub_resource type="Resource" id="Resource_7cb7e"]
+script = ExtResource("1_lh0cy")
+speaker = "心聲"
+line = "為什麼哭不出來？！"
+metadata/_custom_type_script = "uid://kdh4sgu4rltq"
+
+[sub_resource type="Resource" id="Resource_cvmxt"]
+script = ExtResource("1_lh0cy")
+speaker = "…"
+line = "你是這個世界上獨一無二的存在，你的世界有著獨特的語言和與眾不同的規則，想要發出音的話，就學我怎麼做。"
+metadata/_custom_type_script = "uid://kdh4sgu4rltq"
+
+[resource]
+script = ExtResource("1_gjdjd")
+dialogue_sequence = Array[ExtResource("1_lh0cy")]([SubResource("Resource_gtypr"), SubResource("Resource_pjrmw"), SubResource("Resource_8hjhw"), SubResource("Resource_b1yt6"), SubResource("Resource_7cb7e"), SubResource("Resource_cvmxt")])
