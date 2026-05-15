@@ -9,7 +9,7 @@ func _ready():
 
 func _on_guest_login_pressed():
 	print("訪客登入：跳過驗證流程，進入前言...")
-	get_tree().change_scene_to_file("res://src/scenes/prologue/prologue.tscn")
+	get_tree().change_scene_to_file("res://chapters/prologue/prologue.tscn")
 
 func _on_mouse_entered():
 	var tween = create_tween()

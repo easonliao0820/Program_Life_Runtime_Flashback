@@ -1,8 +1,8 @@
-[gd_scene format=3 uid="uid://bq52awcjnvoq0"]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://src/scenes/prologue/prologue.gd" id="1_p4v3n"]
+[ext_resource type="Script" path="res://chapters/prologue/prologue.gd" id="1_p4v3n"]
 
-[node name="Prologue" type="Control" unique_id=1836687391]
+[node name="Prologue" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_p4v3n")
 
-[node name="Background" type="ColorRect" parent="." unique_id=1633581627]
+[node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
-[node name="NarrativeContainer" type="VBoxContainer" parent="." unique_id=802413697]
+[node name="NarrativeContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -36,11 +36,11 @@ grow_vertical = 2
 theme_override_constants/separation = 40
 alignment = 1
 
-[node name="ChineseAct" type="VBoxContainer" parent="NarrativeContainer" unique_id=927138824]
+[node name="ChineseAct" type="VBoxContainer" parent="NarrativeContainer"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Body" type="Label" parent="NarrativeContainer/ChineseAct" unique_id=1572479709]
+[node name="Body" type="Label" parent="NarrativeContainer/ChineseAct"]
 custom_minimum_size = Vector2(800, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
@@ -48,19 +48,19 @@ text = "我們寫下的程式，
 就像是由我們心中的靈魂所煉製而成的咒語。"
 autowrap_mode = 3
 
-[node name="Source" type="Label" parent="NarrativeContainer/ChineseAct" unique_id=1501700324]
+[node name="Source" type="Label" parent="NarrativeContainer/ChineseAct"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.784314, 0.784314, 0.784314, 1)
 theme_override_font_sizes/font_size = 18
 text = "——《計算機程序的構造和解釋》"
 horizontal_alignment = 2
 
-[node name="EnglishAct" type="VBoxContainer" parent="NarrativeContainer" unique_id=773972322]
+[node name="EnglishAct" type="VBoxContainer" parent="NarrativeContainer"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Body" type="Label" parent="NarrativeContainer/EnglishAct" unique_id=1240294070]
+[node name="Body" type="Label" parent="NarrativeContainer/EnglishAct"]
 custom_minimum_size = Vector2(800, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
@@ -68,14 +68,14 @@ text = "\"The programs we write are as spells
 fashioned from spirits out of our own minds.\""
 autowrap_mode = 3
 
-[node name="Source" type="Label" parent="NarrativeContainer/EnglishAct" unique_id=122638237]
+[node name="Source" type="Label" parent="NarrativeContainer/EnglishAct"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.784314, 0.784314, 0.784314, 1)
 theme_override_font_sizes/font_size = 14
 text = "— \"Structure and Interpretation of Computer Programs\""
 horizontal_alignment = 2
 
-[node name="ContinueHint" type="Label" parent="." unique_id=785196194]
+[node name="ContinueHint" type="Label" parent="."]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 12
