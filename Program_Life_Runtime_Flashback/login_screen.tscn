@@ -1,6 +1,52 @@
 [gd_scene format=3 uid="uid://cik3wl46ws6nq"]
 
-[ext_resource type="Script" uid="uid://bwkhp4x7eb77e" path="res://google_login_button.gd" id="1_wplbs"]
+[ext_resource type="VideoStream" uid="uid://bmswp45uooo50" path="res://src/ui/login/MRT.ogv" id="1_7xvqn"]
+[ext_resource type="Script" uid="uid://bwkhp4x7eb77e" path="res://src/ui/login/google_login_button.gd" id="1_wplbs"]
+[ext_resource type="Script" uid="uid://dt3h77mqmg6m2" path="res://src/ui/login/login_screen.gd" id="2_m4u1u"]
+[ext_resource type="Texture2D" uid="uid://1nufnbe7pu4h" path="res://src/ui/login/google-logo.png" id="4_v7w4v"]
+[ext_resource type="Texture2D" uid="uid://dy5chklj5a3is" path="res://src/ui/login/text-logo.png" id="5_8xvqn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.85098, 0.85098, 0.85098, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.117647)
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
+bg_color = Color(0.862745, 0.862745, 0.862745, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.705882, 0.705882, 0.705882, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_size = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
+bg_color = Color(0.960784, 0.960784, 0.960784, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.156863)
+shadow_size = 8
+shadow_offset = Vector2(0, 2)
 
 [node name="LoginScreen" type="Control" unique_id=1440686289]
 layout_mode = 3
@@ -9,19 +55,96 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("2_m4u1u")
 
-[node name="GoogleLoginButton" type="Button" parent="." unique_id=1535640810]
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="." unique_id=1779041960]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -83.5
-offset_top = -15.5
-offset_right = 83.5
-offset_bottom = 15.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "使用 Google 帳號登入"
+stream = ExtResource("1_7xvqn")
+autoplay = true
+expand = true
+
+[node name="Mask" type="ColorRect" parent="." unique_id=376687396]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.470588)
+
+[node name="TextLogo" type="TextureRect" parent="." unique_id=123456789]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.45
+anchor_right = 0.5
+anchor_bottom = 0.45
+offset_left = -250.0
+offset_top = -60.0
+offset_right = 250.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_8xvqn")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GoogleLoginButton" type="Button" parent="." unique_id=1535640810]
+modulate = Color(1, 1, 1, 0.77254903)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.65
+anchor_right = 0.5
+anchor_bottom = 0.65
+offset_left = -140.0
+offset_top = -25.0
+offset_right = 140.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(140, 25)
+theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 script = ExtResource("1_wplbs")
+
+[node name="Content" type="HBoxContainer" parent="GoogleLoginButton" unique_id=482110317]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PaddingLeft" type="Control" parent="GoogleLoginButton/Content" unique_id=1892156270]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Logo" type="TextureRect" parent="GoogleLoginButton/Content" unique_id=1728327190]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_v7w4v")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="GoogleLoginButton/Content" unique_id=1870679463]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.156863, 0.156863, 0.156863, 1)
+theme_override_font_sizes/font_size = 18
+text = "使用 Google 帳號登入"
+vertical_alignment = 1
+
+[connection signal="finished" from="VideoStreamPlayer" to="." method="_on_video_stream_player_finished"]

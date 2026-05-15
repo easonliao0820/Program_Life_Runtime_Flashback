@@ -8,6 +8,9 @@ const REDIRECT_URI = "http://localhost:8000"
 func _ready():
 	# 當按鈕被按下時，執行 _on_pressed 函式
 	self.pressed.connect(_on_google_login_button_pressed)
+	# 連結滑鼠移入與移出的訊號
+	self.mouse_entered.connect(_on_mouse_entered)
+	self.mouse_exited.connect(_on_mouse_exited)
 
 func _on_google_login_button_pressed():
 	var auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -26,3 +29,13 @@ func _on_google_login_button_pressed():
 	# 如果是在 Web 環境，這行會呼叫瀏覽器開啟新分頁
 	OS.shell_open(url)
 	print("正在導向 Google 登入...")
+
+func _on_mouse_entered():
+	# 建立平滑的放大動畫 (調慢至 0.3 秒)
+	var tween = create_tween()
+	tween.tween_property(self, "scale", Vector2(1.05, 1.05), 0.3).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+
+func _on_mouse_exited():
+	# 建立平滑的縮小動畫 (調慢至 0.3 秒)
+	var tween = create_tween()
+	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
