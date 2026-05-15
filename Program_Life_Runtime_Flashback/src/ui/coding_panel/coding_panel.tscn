@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://dt22je7t6mp"]
+
+[ext_resource type="Script" uid="uid://d0n4edoi454x1" path="res://src/ui/coding_panel/coding_panel.gd" id="1_3e7fl"]
+
+[node name="CodingPanel" type="CanvasLayer" unique_id=966593227]
+process_mode = 3
+script = ExtResource("1_3e7fl")
+
+[node name="SandboxContainer" type="Control" parent="." unique_id=807593441]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 3
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="CodeEdit" type="CodeEdit" parent="SandboxContainer" unique_id=481417443]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="OutputLabel" type="Label" parent="SandboxContainer" unique_id=1088865495]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -23.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="RunButton" type="Button" parent="SandboxContainer" unique_id=1734668199]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -39.0
+offset_bottom = 31.0
+grow_horizontal = 0
+text = "Run"
+
+[connection signal="pressed" from="SandboxContainer/RunButton" to="." method="_on_run_button_pressed"]

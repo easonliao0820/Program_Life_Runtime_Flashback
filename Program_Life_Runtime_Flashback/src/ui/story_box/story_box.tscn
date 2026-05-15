@@ -26,6 +26,7 @@ offset_bottom = 200.0
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 20
 
 [node name="ContentLabel" type="RichTextLabel" parent="Control/MainBox/MarginContainer" unique_id=24002221]
@@ -43,6 +44,7 @@ offset_bottom = 240.0
 [node name="MarginContainer" type="MarginContainer" parent="Control/NameBox" unique_id=381584415]
 layout_mode = 2
 theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 10
 
 [node name="NameLabel" type="Label" parent="Control/NameBox/MarginContainer" unique_id=129001825]
 layout_mode = 2
