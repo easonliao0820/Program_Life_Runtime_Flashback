@@ -10,14 +10,14 @@ length = 4.0
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("BabyBackground:modulate")
+tracks/0/path = NodePath("CanvasLayer/MainLayout/LeftPanel/StoryArea/BabyBackground:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 3),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0.8)]
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_main"]
@@ -28,39 +28,153 @@ _data = {
 [node name="Section1" type="Node2D" unique_id=1428661838]
 script = ExtResource("1_gds")
 
-[node name="BabyBackground" type="Sprite2D" parent="."]
-z_index = -1
-position = Vector2(576, 324)
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="MainLayout" type="HBoxContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="LeftPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 7.0
+theme_override_constants/separation = 0
+
+[node name="StoryArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.85098, 0.815686, 0.756863, 1)
+
+[node name="BabyBackground" type="TextureRect" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("2_baby")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="ObjectArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.572549, 0.52549, 0.47451, 1)
+
+[node name="Label" type="Label" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -36.0
+offset_top = -11.5
+offset_right = 36.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "物件區域"
+
+[node name="RightPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+theme_override_constants/separation = 0
+
+[node name="CodingArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/CodingArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.333333, 0.407843, 0.466667, 1)
+
+[node name="CodeEdit" type="CodeEdit" parent="CanvasLayer/MainLayout/RightPanel/CodingArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "print(\"哈囉{userName}\")"
+
+[node name="FeedbackArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.176471, 0.321569, 0.619608, 1)
+
+[node name="OutputLabel" type="Label" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+autowrap_mode = 3
+
+[node name="RunButton" type="Button" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -50.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Run"
+
+[node name="StoryBox" parent="CanvasLayer" instance=ExtResource("3_story")]
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 "": SubResource("AnimationLibrary_main")
 }
 autoplay = "fade_in"
-
-[node name="CodeEdit" type="CodeEdit" parent="." unique_id=1052160676]
-visible = false
-offset_left = 877.0
-offset_right = 1150.0
-offset_bottom = 646.0
-size_flags_horizontal = 8
-size_flags_vertical = 0
-text = "print(\"哈囉{userName}\")"
-
-[node name="OutputLabel" type="Label" parent="." unique_id=1811184019]
-visible = false
-offset_left = 2.0
-offset_top = 568.0
-offset_right = 879.0
-offset_bottom = 648.0
-
-[node name="RunButton" type="Button" parent="." unique_id=1913786656]
-visible = false
-offset_left = 1080.0
-offset_top = -2.0
-offset_right = 1150.0
-offset_bottom = 45.0
-text = "Run"
-
-[node name="StoryBox" parent="." instance=ExtResource("3_story")]

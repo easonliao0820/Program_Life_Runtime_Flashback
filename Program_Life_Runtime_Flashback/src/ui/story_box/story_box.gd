@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+signal story_finished
+
 # 透過節點路徑抓取 UI 元件 (請確保名稱與你左側場景樹一致)
 @onready var main_box: PanelContainer = $Control/MainBox
 @onready var name_box: PanelContainer = $Control/NameBox
@@ -116,4 +118,4 @@ func end_story() -> void:
 	name_box.hide()
 	is_waiting_for_sandbox = false
 	is_waiting_for_ai = false
-	# TODO: 這裡未來可以發送一個 Signal (例如: dialogue_finished)，通知 GameManager 解除玩家角色的移動鎖定
+	story_finished.emit()
