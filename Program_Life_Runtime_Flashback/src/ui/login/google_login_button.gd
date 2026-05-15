@@ -27,8 +27,9 @@ func _on_google_login_button_pressed():
 	]
 	
 	# 如果是在 Web 環境，這行會呼叫瀏覽器開啟新分頁
-	OS.shell_open(url)
-	print("正在導向 Google 登入...")
+	# OS.shell_open(url) # 暫時註解掉，直接進入遊戲
+	print("正在導向前言...")
+	get_tree().change_scene_to_file("res://src/scenes/prologue/prologue.tscn")
 
 func _on_mouse_entered():
 	# 建立平滑的放大動畫 (調慢至 0.3 秒)
