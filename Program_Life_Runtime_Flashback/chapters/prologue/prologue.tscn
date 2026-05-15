@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://chapters/prologue/prologue.gd" id="1_p4v3n"]
+[ext_resource type="Script" uid="uid://rie2uof8fhjh" path="res://chapters/prologue/prologue.gd" id="1_p4v3n"]
 
 [node name="Prologue" type="Control"]
 layout_mode = 3

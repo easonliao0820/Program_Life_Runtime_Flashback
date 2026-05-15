@@ -62,7 +62,7 @@ func _input(event):
 			skip_animation()
 		elif hint.modulate.a >= 0.9:
 			print("前言結束，進入第一章...")
-			# get_tree().change_scene_to_file("res://chapters/chapter_1/scenes/section_1.tscn")
+			get_tree().change_scene_to_file("res://chapters/chapter_1/scenes/section_1.tscn")
 
 func skip_animation():
 	if main_tween:
