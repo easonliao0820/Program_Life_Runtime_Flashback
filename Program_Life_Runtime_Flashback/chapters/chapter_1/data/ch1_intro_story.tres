@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="DialogueData" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = "…"
+line = "終於見到你了，我的朋友。"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（被新生父母抱在懷裡的你想）"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "心聲"
+line = "不會吧，我該不會剛出生就要夭折了嗎，我也太雖了"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（嬰兒的小臉上慢慢地多了許多河流，但預想中震耳欲聾的哭聲卻沒有出現）"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = "心聲"
+line = "為什麼哭不出來？！"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = "…"
+line = "你是這個世界上獨一無二的存在，你的世界有著獨特的語言和與眾不同的規則，想要發出音的話，就學我怎麼做。"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6")])
+next_interaction = 0
