@@ -53,8 +53,13 @@ func show_next_line() -> void:
 	# 獲取當前這一格的對話 Dictionary 資料
 	var current_step = current_dialogue.dialogue_sequence[current_line_index]
 	
-	# 【動態換名】更換小長方形顯示的名字（如果沒寫，預設顯示"未知"）
-	name_label.text = current_step.speaker
+	# 【動態換名與隱藏】若沒有說話者，則隱藏姓名框以免留下空白框
+	if current_step.speaker.is_empty():
+		name_box.hide()
+	else:
+		name_box.show()
+		name_label.text = current_step.speaker
+	
 	content_label.text = current_step.line
 	
 	# 啟動打字機動畫
@@ -94,6 +99,7 @@ func check_next_phase() -> void:
 	
 	if need_code_interaction:
 		is_waiting_for_sandbox = true
+		name_box.show()
 		name_label.text = "系統提示"
 		content_label.text = "[color=yellow]請在右側 Typing area 撰寫正確程式以回覆對話...[/color]"
 		# TODO: 這裡未來放「將右側撰寫區從 Disable 狀態解鎖，並註冊監聽 Sandbox 執行成功訊號」的代碼
@@ -104,6 +110,7 @@ func check_next_phase() -> void:
 	
 	if need_ai_reply:
 		is_waiting_for_ai = true
+		name_box.show()
 		name_label.text = "AI 導師"
 		content_label.text = "...正在讀取當前遊戲與錯誤資訊，Gemini 思考中..."
 		# TODO: 這裡未來放「呼叫 ai_bridge.gd 把資訊打包送給 Gemini，並等待 Gemini 回傳文字後重新 start_story()」的代碼
