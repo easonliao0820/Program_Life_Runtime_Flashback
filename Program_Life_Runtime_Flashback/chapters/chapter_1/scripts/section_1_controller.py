@@ -1,12 +1,13 @@
 from py4godot.classes import gdclass
 from py4godot.classes.Node import Node
+from src.core.ai_bridge import ai_translate_error
 
 @gdclass
 class section_1_controller(Node):
 
 	def _ready(self):
 		print("READY OK")
-
+		
 		self.code_edit = self.get_node("CodeEdit")
 		self.output = self.get_node("OutputLabel")
 		self.button = self.get_node("RunButton")
@@ -50,11 +51,22 @@ class section_1_controller(Node):
 			"print": fake_print,
 			"__builtins__": {}
 		}
-
+		
+		safe_locals = {
+			"userName": user_name
+		}
+	
+		#try:
+			#exec(code, safe_globals, {})
+		#except Exception as e:
+			#return f"Error: {e}"
+		# 加入了AI轉譯
 		try:
 			exec(code, safe_globals, {})
 		except Exception as e:
-			return f"Error: {e}"
+			raw_error = str(e)
+			return ai_translate_error(raw_error, code)
 
 		# 🔥 6. 加劇情回應（你原本設計）
+		#return output.strip()
 		return f"{output.strip()}\n\n✨ 系統：已記錄你的名字"
