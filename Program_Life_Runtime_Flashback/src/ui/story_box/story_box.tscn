@@ -1,0 +1,105 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8nu0iskb8prj"]
+
+[ext_resource type="Script" uid="uid://ccegqgkbsx7pt" path="res://src/ui/story_box/story_box.gd" id="1_2fpms"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_main"]
+bg_color = Color(0.117647, 0.164706, 0.219608, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.972549, 0.815686, 0.552941, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 5
+shadow_offset = Vector2(2, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_name"]
+bg_color = Color(0.176471, 0.321569, 0.619608, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.972549, 0.815686, 0.552941, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="StorySystem" type="CanvasLayer" unique_id=1044160469]
+script = ExtResource("1_2fpms")
+
+[node name="Control" type="Control" parent="." unique_id=730605150]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MainBox" type="PanelContainer" parent="Control" unique_id=312438972]
+custom_minimum_size = Vector2(900, 150)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -450.0
+offset_top = -180.0
+offset_right = 450.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_main")
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/MainBox" unique_id=59048285]
+layout_mode = 2
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 25
+theme_override_constants/margin_bottom = 20
+
+[node name="ContentLabel" type="RichTextLabel" parent="Control/MainBox/MarginContainer" unique_id=24002221]
+layout_mode = 2
+theme_override_colors/default_color = Color(0.94902, 0.960784, 0.972549, 1)
+theme_override_font_sizes/normal_font_size = 18
+bbcode_enabled = true
+vertical_alignment = 1
+
+[node name="NameBox" type="PanelContainer" parent="Control" unique_id=1094750499]
+custom_minimum_size = Vector2(150, 45)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -430.0
+offset_top = -215.0
+offset_right = -280.0
+offset_bottom = -170.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_name")
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/NameBox" unique_id=381584415]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+
+[node name="NameLabel" type="Label" parent="Control/NameBox/MarginContainer" unique_id=129001825]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TypeTimer" type="Timer" parent="." unique_id=1525049474]
+wait_time = 0.055
+
+[connection signal="timeout" from="TypeTimer" to="." method="_on_type_timer_timeout"]

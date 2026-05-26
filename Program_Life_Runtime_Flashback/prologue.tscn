@@ -1,0 +1,93 @@
+[gd_scene format=3 uid="uid://xxmkdd23l1r5"]
+
+[ext_resource type="Script" path="res://src/scenes/prologue/prologue.gd" id="1_ex3hv"]
+
+[node name="Prologue" type="Control" unique_id=1836687391]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ex3hv")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1633581627]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="NarrativeContainer" type="VBoxContainer" parent="." unique_id=802413697]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -150.0
+offset_right = 400.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="ChineseAct" type="VBoxContainer" parent="NarrativeContainer" unique_id=927138824]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Body" type="Label" parent="NarrativeContainer/ChineseAct" unique_id=1572479709]
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "我們寫下的程式，
+就像是由我們心中的靈魂所煉製而成的咒語。"
+autowrap_mode = 3
+
+[node name="Source" type="Label" parent="NarrativeContainer/ChineseAct" unique_id=1501700324]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.784314, 0.784314, 0.784314, 1)
+theme_override_font_sizes/font_size = 18
+text = "——《計算機程序的構造和解釋》"
+horizontal_alignment = 2
+
+[node name="EnglishAct" type="VBoxContainer" parent="NarrativeContainer" unique_id=773972322]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Body" type="Label" parent="NarrativeContainer/EnglishAct" unique_id=1240294070]
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "\"The programs we write are as spells
+fashioned from spirits out of our own minds.\""
+autowrap_mode = 3
+
+[node name="Source" type="Label" parent="NarrativeContainer/EnglishAct" unique_id=122638237]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.784314, 0.784314, 0.784314, 1)
+theme_override_font_sizes/font_size = 14
+text = "— \"Structure and Interpretation of Computer Programs\""
+horizontal_alignment = 2
+
+[node name="ContinueHint" type="Label" parent="." unique_id=785196194]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -100.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.705882, 0.705882, 0.705882, 1)
+theme_override_font_sizes/font_size = 18
+text = "{ 點擊畫面或是按下空白鍵繼續 }"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -2,8 +2,8 @@ from py4godot.classes import gdclass
 from py4godot.classes.Node import Node
 from src.core.ai_bridge import ai_translate_error
 
-@gdclass
-class section_1_controller(Node):
+# @gdclass
+# class section_1_controller(Node):
 
 	def _ready(self):
 		print("READY OK")
@@ -12,40 +12,43 @@ class section_1_controller(Node):
 		self.output = self.get_node("OutputLabel")
 		self.button = self.get_node("RunButton")
 
-		print("button:", self.button)
+# 		print("button:", self.button)
 
-		# ✅ 正確 connect（重點）
-		self.button.pressed.connect(self._on_run_pressed)
+# 		# ✅ 正確 connect（重點）
+# 		self.button.pressed.connect(self._on_run_pressed)
 
-	def _on_run_pressed(self):
-		code = self.code_edit.text
-		self.output.text = self.run_code(code, "玩家")
+# 		# 📖 啟動開場劇情
+# 		story_box = self.get_node("StoryBox")
+# 		if story_box:
+# 			# 延遲一下下，讓背景漸入動畫跑一點再開始對話
+# 			from py4godot.classes.ResourceLoader import ResourceLoader
+# 			data = ResourceLoader.get_instance().load("res://chapters/chapter_1/data/ch1_intro_story.tres")
+# 			story_box.start_story(data)
 
-	def run_code(self, code: str, user_name: str) -> str:
-		output = ""
+# 	def _on_run_pressed(self):
+# 		code = self.code_edit.text
+# 		self.output.text = self.run_code(code, "玩家")
 
-		# 🔥 1. 基本清理
-		code = code.strip()
+# 	def run_code(self, code: str, user_name: str) -> str:
+# 		output = ""
 
-		# 🔥 2. 規則限制（第一關核心）
-		if "import" in code or "=" in code or "\n" in code:
-			return "❌ 第一關只能使用 print(\"你的名字\")"
+# 		# 🔥 1. 基本清理
+# 		code = code.strip()
 
-		# 🔥 3. 必須是 print 開頭
-		if not code.startswith("print("):
-			return "❌ 只能使用 print()"
+# 		# 🔥 2. 規則限制（第一關核心）
+# 		if "import" in code or "=" in code or "\n" in code:
+# 			return "❌ 第一關只能使用 print(\"你的名字\")"
 
-		# 🔥 4. 必須是字串內容
-		if not (code.startswith('print("') or code.startswith("print('")):
-			return "❌ 只能輸入名字（字串）"
+# 		# 🔥 3. 必須是 print 開頭
+# 		if not code.startswith("print("):
+# 			return "❌ 只能使用 print()"
 
-		if not code.endswith(")") :
-			return "❌ 語法錯誤"
+# 		# 🔥 4. 必須是字串內容
+# 		if not (code.startswith('print("') or code.startswith("print('")):
+# 			return "❌ 只能輸入名字（字串）"
 
-		# 🔥 5. 執行安全 sandbox
-		def fake_print(*args):
-			nonlocal output
-			output += " ".join(str(a) for a in args) + "\n"
+# 		if not code.endswith(")") :
+# 			return "❌ 語法錯誤"
 
 		safe_globals = {
 			"print": fake_print,
