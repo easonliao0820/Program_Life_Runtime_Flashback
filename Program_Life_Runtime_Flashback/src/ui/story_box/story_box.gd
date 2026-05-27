@@ -93,22 +93,16 @@ func _input(event: InputEvent) -> void:
 
 ## 【預留互動阻斷區】處理對話播放完畢後的遊戲狀態判斷
 func check_next_phase() -> void:
-	# 💡 情境 A：未來當劇情結束，需要強制玩家點擊右側 Sandbox 撰寫區回覆才能前進
-	# 你可以在未來根據關卡進度或 `current_dialogue` 裡的變數來修改這個 bool
-	var need_code_interaction: bool = false 
-	
-	if need_code_interaction:
+	# 💡 情境 A：強制玩家點擊右側 Sandbox 撰寫區回覆才能前進
+	if current_dialogue and current_dialogue.next_interaction == DialogueData.InteractionType.WAIT_FOR_SANDBOX:
 		is_waiting_for_sandbox = true
 		name_box.show()
 		name_label.text = "系統提示"
-		content_label.text = "[color=yellow]請在右側 Typing area 撰寫正確程式以回覆對話...[/color]"
-		# TODO: 這裡未來放「將右側撰寫區從 Disable 狀態解鎖，並註冊監聽 Sandbox 執行成功訊號」的代碼
+		content_label.text = "請在右側【程式編輯區】修改或確認代碼為 [color=#F8D08D]print(\"哈囉小艾\")[/color]，然後點選右下角的 [color=yellow]Run[/color] 按鈕來發出聲音！\n（若不清楚規則，可以點選左下角的 [color=cyan]📖 教材[/color] 查看幫助）"
 		return
 		
 	# 💡 情境 B：未來需要交給 AI NPC (Gemini) 接手進行即時動態回覆
-	var need_ai_reply: bool = false
-	
-	if need_ai_reply:
+	if current_dialogue and current_dialogue.next_interaction == DialogueData.InteractionType.WAIT_FOR_AI:
 		is_waiting_for_ai = true
 		name_box.show()
 		name_label.text = "AI 導師"
@@ -126,3 +120,8 @@ func end_story() -> void:
 	is_waiting_for_sandbox = false
 	is_waiting_for_ai = false
 	story_finished.emit()
+
+## 解除沙盒等待狀態並關閉對話框
+func sandbox_resolved() -> void:
+	if is_waiting_for_sandbox:
+		end_story()

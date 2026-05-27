@@ -9,6 +9,11 @@ extends Node2D
 @onready var right_panel = $CanvasLayer/MainLayout/RightPanel
 @onready var object_area = $CanvasLayer/MainLayout/LeftPanel/ObjectArea
 
+@onready var textbook_button: Button = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/TextbookButton
+@onready var textbook_panel: Control = $CanvasLayer/TextbookPanel
+@onready var textbook_close_button: Button = $CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header/CloseButton
+@onready var textbook_mask: ColorRect = $CanvasLayer/TextbookPanel/BackgroundMask
+
 func _ready() -> void:
 	print("GDScript READY OK")
 	
@@ -18,6 +23,14 @@ func _ready() -> void:
 	
 	# 綁定按鈕訊號
 	button.pressed.connect(_on_run_pressed)
+	
+	# 綁定教材按鈕與關閉訊號
+	if textbook_button:
+		textbook_button.pressed.connect(_on_textbook_pressed)
+	if textbook_close_button:
+		textbook_close_button.pressed.connect(_on_textbook_close_pressed)
+	if textbook_mask:
+		textbook_mask.gui_input.connect(_on_textbook_mask_gui_input)
 	
 	# 綁定劇情結束訊號
 	if story_box:
@@ -67,4 +80,18 @@ func _on_run_pressed() -> void:
 	if result.begins_with("❌"):
 		output.text = result
 	else:
-		output.text = result + "\n\n✨ 系統：已記錄你的名字"
+		output.text = result + "\n\n✨ 系統：成功打招呼！已放聲大哭！"
+		if story_box:
+			story_box.sandbox_resolved()
+
+func _on_textbook_pressed() -> void:
+	if textbook_panel:
+		textbook_panel.show()
+
+func _on_textbook_close_pressed() -> void:
+	if textbook_panel:
+		textbook_panel.hide()
+
+func _on_textbook_mask_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_on_textbook_close_pressed()
