@@ -1,5 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://dyhgj63xq4udj"]
 
+[ext_resource type="Script" path="res://chapters/chapter_1/scripts/section_1_controller.py" id="1_36xvx"]
+[ext_resource type="Script" path="res://src/core/ai_bridge.py" id="2_erv6b"]
 [ext_resource type="Script" uid="uid://cnkfop8i4fdih" path="res://chapters/chapter_1/scripts/section_1_controller.gd" id="1_gds"]
 [ext_resource type="Texture2D" path="res://chapters/chapter_1/images/baby.png" id="2_baby"]
 [ext_resource type="PackedScene" uid="uid://c8nu0iskb8prj" path="res://src/ui/story_box/story_box.tscn" id="3_story"]
@@ -201,6 +203,18 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "Run"
 
+[node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=22561814]
+
+[node name="Node" type="Node" parent="." unique_id=2089883285]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+script = ExtResource("2_erv6b")
 [node name="StoryBox" parent="CanvasLayer" instance=ExtResource("3_story")]
 
 [node name="TextbookPanel" type="Control" parent="CanvasLayer"]

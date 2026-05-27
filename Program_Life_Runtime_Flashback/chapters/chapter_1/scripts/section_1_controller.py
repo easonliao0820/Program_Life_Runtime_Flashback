@@ -1,15 +1,16 @@
-# from py4godot.classes import gdclass
-# from py4godot.classes.Node import Node
+from py4godot.classes import gdclass
+from py4godot.classes.Node import Node
+from src.core.ai_bridge import ai_translate_error
 
 # @gdclass
 # class section_1_controller(Node):
 
-# 	def _ready(self):
-# 		print("READY OK")
-
-# 		self.code_edit = self.get_node("CodeEdit")
-# 		self.output = self.get_node("OutputLabel")
-# 		self.button = self.get_node("RunButton")
+	def _ready(self):
+		print("READY OK")
+		
+		self.code_edit = self.get_node("CodeEdit")
+		self.output = self.get_node("OutputLabel")
+		self.button = self.get_node("RunButton")
 
 # 		print("button:", self.button)
 
@@ -49,20 +50,26 @@
 # 		if not code.endswith(")") :
 # 			return "❌ 語法錯誤"
 
-# 		# 🔥 5. 執行安全 sandbox
-# 		def fake_print(*args):
-# 			nonlocal output
-# 			output += " ".join(str(a) for a in args) + "\n"
+		safe_globals = {
+			"print": fake_print,
+			"__builtins__": {}
+		}
+		
+		safe_locals = {
+			"userName": user_name
+		}
+	
+		#try:
+			#exec(code, safe_globals, {})
+		#except Exception as e:
+			#return f"Error: {e}"
+		# 加入了AI轉譯
+		try:
+			exec(code, safe_globals, {})
+		except Exception as e:
+			raw_error = str(e)
+			return ai_translate_error(raw_error, code)
 
-# 		safe_globals = {
-# 			"print": fake_print,
-# 			"__builtins__": {}
-# 		}
-
-# 		try:
-# 			exec(code, safe_globals, {})
-# 		except Exception as e:
-# 			return f"Error: {e}"
-
-# 		# 🔥 6. 加劇情回應（你原本設計）
-# 		return f"{output.strip()}\n\n✨ 系統：已記錄你的名字"
+		# 🔥 6. 加劇情回應（你原本設計）
+		#return output.strip()
+		return f"{output.strip()}\n\n✨ 系統：已記錄你的名字"
