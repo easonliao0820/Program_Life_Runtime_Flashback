@@ -119,6 +119,31 @@ func check_next_phase() -> void:
 	# 如果沒有任何需要互動或阻斷的條件，就單純結束這段劇情並關閉視窗
 	end_story()
 
+## 將對話框移至左上角（四象限版面展開後使用）
+## width_ratio: MainBox 佔螢幕寬度的比例（0.0 ~ 1.0）
+## box_height:  MainBox 的高度（px）
+func reposition_to_top_right(width_ratio: float = 0.6, box_height: float = 25.0) -> void:
+	main_box.custom_minimum_size = Vector2(0, box_height)
+
+	main_box.anchor_left   = 0.0
+	main_box.anchor_top    = 0.0
+	main_box.anchor_right  = width_ratio
+	main_box.anchor_bottom = 0.0
+	main_box.offset_left   = 180.0
+	main_box.offset_top    = 10.0
+	main_box.offset_right  = -20.0
+	main_box.offset_bottom = 65.0 + box_height
+
+	# NameBox 浮在 MainBox 下方左側，緊接在 MainBox 底部
+	name_box.anchor_left   = 0.0
+	name_box.anchor_top    = 0.0
+	name_box.anchor_right  = 0.0
+	name_box.anchor_bottom = 0.0
+	name_box.offset_left   = main_box.offset_left
+	name_box.offset_top    = main_box.offset_bottom + 5.0
+	name_box.offset_right  = main_box.offset_left + 150.0
+	name_box.offset_bottom = main_box.offset_bottom + 50.0
+
 ## 關閉劇情對話框
 func end_story() -> void:
 	main_box.hide()
