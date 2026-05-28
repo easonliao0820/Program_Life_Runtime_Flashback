@@ -41,4 +41,4 @@ line = "來——輸入你的名字，讓世界知道你來了。"
 [resource]
 script = ExtResource("2_data")
 dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_teach1"), SubResource("Resource_teach2"), SubResource("Resource_teach3"), SubResource("Resource_teach4"), SubResource("Resource_teach5"), SubResource("Resource_teach6"), SubResource("Resource_teach7")])
-next_interaction = 0
+next_interaction = 1

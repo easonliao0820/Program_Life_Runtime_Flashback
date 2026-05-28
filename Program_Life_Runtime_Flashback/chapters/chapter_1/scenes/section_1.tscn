@@ -1,10 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://dyhgj63xq4udj"]
+[gd_scene load_steps=7 format=3 uid="uid://dyhgj63xq4udj"]
 
-[ext_resource type="Script" path="res://chapters/chapter_1/scripts/section_1_controller.py" id="1_36xvx"]
-[ext_resource type="Script" path="res://src/core/ai_bridge.py" id="2_erv6b"]
 [ext_resource type="Script" uid="uid://cnkfop8i4fdih" path="res://chapters/chapter_1/scripts/section_1_controller.gd" id="1_gds"]
 [ext_resource type="Texture2D" path="res://chapters/chapter_1/images/baby.png" id="2_baby"]
 [ext_resource type="PackedScene" uid="uid://c8nu0iskb8prj" path="res://src/ui/story_box/story_box.tscn" id="3_story"]
+[ext_resource type="PackedScene" path="res://src/ui/chapter_buttons/chapter_buttons.tscn" id="4_chapter_buttons"]
 
 [sub_resource type="Animation" id="Animation_fade"]
 resource_name = "fade_in"
@@ -114,20 +113,7 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "物件區域"
 
-[node name="TextbookButton" type="Button" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea"]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -110.0
-offset_top = -45.0
-offset_right = -10.0
-offset_bottom = -10.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "📖 教材"
+[node name="ChapterButtons" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" instance=ExtResource("4_chapter_buttons")]
 
 [node name="RightPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout"]
 layout_mode = 2
@@ -160,7 +146,7 @@ offset_right = -10.0
 offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "print(\"哈囉小艾\")"
+text = "print(\"你的名稱\")"
 
 [node name="FeedbackArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel"]
 layout_mode = 2
@@ -203,21 +189,12 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "Run"
 
-[node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=22561814]
-
-[node name="Node" type="Node" parent="." unique_id=2089883285]
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-script = ExtResource("2_erv6b")
 [node name="StoryBox" parent="CanvasLayer" instance=ExtResource("3_story")]
 
-[node name="TextbookPanel" type="Control" parent="CanvasLayer"]
+[node name="TextbookLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="TextbookPanel" type="Control" parent="TextbookLayer"]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -226,7 +203,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="BackgroundMask" type="ColorRect" parent="CanvasLayer/TextbookPanel"]
+[node name="BackgroundMask" type="ColorRect" parent="TextbookLayer/TextbookPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -235,7 +212,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.588235)
 
-[node name="WindowContainer" type="PanelContainer" parent="CanvasLayer/TextbookPanel"]
+[node name="WindowContainer" type="PanelContainer" parent="TextbookLayer/TextbookPanel"]
 custom_minimum_size = Vector2(850, 480)
 layout_mode = 1
 anchors_preset = 8
@@ -251,81 +228,81 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_textbook")
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/TextbookPanel/WindowContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="TextbookLayer/TextbookPanel/WindowContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 25
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 25
 theme_override_constants/margin_bottom = 20
 
-[node name="VBox" type="VBoxContainer" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer"]
+[node name="VBox" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="Header" type="HBoxContainer" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
+[node name="Header" type="HBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header"]
+[node name="Title" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
 theme_override_font_sizes/font_size = 22
 text = "📖 學習教材 - 第一章：新生之聲"
 
-[node name="CloseButton" type="Button" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header"]
+[node name="CloseButton" type="Button" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header"]
 custom_minimum_size = Vector2(35, 35)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
 theme_override_font_sizes/font_size = 18
 text = "X"
 
-[node name="HSeparator" type="HSeparator" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
+[node name="HSeparator" type="HSeparator" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
 layout_mode = 2
 
-[node name="Body" type="HBoxContainer" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
+[node name="Body" type="HBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 25
 
-[node name="LeftCol" type="VBoxContainer" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
+[node name="LeftCol" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="SectionTitle" type="Label" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol"]
+[node name="SectionTitle" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
 theme_override_font_sizes/font_size = 18
 text = "🎬 章節介紹"
 
-[node name="StoryText" type="RichTextLabel" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol"]
+[node name="StoryText" type="RichTextLabel" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/default_color = Color(0.901961, 0.901961, 0.901961, 1)
 theme_override_font_sizes/normal_font_size = 15
 bbcode_enabled = true
-text = "你（主角小艾）剛誕生在這個世界上，卻驚奇地發現自己無法發出任何哭聲。
+text = "你剛誕生在這個世界上，卻驚奇地發現自己無法發出任何哭聲。
 
-虛空中浮現出神秘的投影——AI 導師「派森」。他告訴你：
+虛空中浮現出神秘的投影—--- 他告訴你：
 [color=#F8D08D]『你是這個世界上獨一無二的存在，你的世界有著獨特的語言和與眾不同的規則。想要發出聲音的話，就學我怎麼做。』[/color]
 
 為了在這世界發出你的第一聲，你必須透過 Python 的 [code]print()[/code] 函式向世界宣告你的存在！"
 
-[node name="VSeparator" type="VSeparator" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
+[node name="VSeparator" type="VSeparator" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
 layout_mode = 2
 
-[node name="RightCol" type="VBoxContainer" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
+[node name="RightCol" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="SectionTitle" type="Label" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol"]
+[node name="SectionTitle" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
 theme_override_font_sizes/font_size = 18
 text = "💻 程式概念：輸出與字串"
 
-[node name="ProgText" type="RichTextLabel" parent="CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol"]
+[node name="ProgText" type="RichTextLabel" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/default_color = Color(0.901961, 0.901961, 0.901961, 1)
@@ -337,8 +314,8 @@ text = "[b]1. print() 函式[/b]
 
 [b]2. 字串 (String)[/b]
 電腦無法直接看懂人類的文字。我們必須使用雙引號 [code]\"[/code] 或單引號 [code]'[/code] 將文字包起來，這在程式中稱為「字串」。
-• 正確：[code]print(\"哈囉小艾\")[/code]
-• 錯誤：[code]print(哈囉小艾)[/code] （電腦會看不懂「哈囉小艾」而報錯）
+• 正確：[code]print(\"小艾\")[/code]
+• 錯誤：[code]print(小艾)[/code] （電腦會看不懂「小艾」而報錯）
 
 [b]💡 小提示[/b]
 括號 [code]()[/code] 與引號 [code]\"\"[/code] 都必須是成對出現的半形符號喔！"

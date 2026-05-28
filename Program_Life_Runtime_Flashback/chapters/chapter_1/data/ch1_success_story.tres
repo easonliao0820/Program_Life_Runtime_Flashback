@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="DialogueData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_success1"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "你做到了。"
+
+[sub_resource type="Resource" id="Resource_success2"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（震耳欲聾的哭聲終於響徹了整個嬰兒房）"
+
+[sub_resource type="Resource" id="Resource_success3"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "這就是 print() 的力量——一行程式，讓世界聽見了你的存在。"
+
+[sub_resource type="Resource" id="Resource_success4"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "記住這個感覺。在這個世界裡，每一行程式都是你與世界溝通的語言。"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_success1"), SubResource("Resource_success2"), SubResource("Resource_success3"), SubResource("Resource_success4")])
+next_interaction = 0

@@ -9,45 +9,59 @@ extends Node2D
 @onready var right_panel = $CanvasLayer/MainLayout/RightPanel
 @onready var object_area = $CanvasLayer/MainLayout/LeftPanel/ObjectArea
 
-@onready var textbook_button: Button = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/TextbookButton
-@onready var textbook_panel: Control = $CanvasLayer/TextbookPanel
-@onready var textbook_close_button: Button = $CanvasLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header/CloseButton
-@onready var textbook_mask: ColorRect = $CanvasLayer/TextbookPanel/BackgroundMask
+var chapter_buttons = null
+var textbook_panel: Control = null
+var textbook_close_button: Button = null
+var textbook_mask: ColorRect = null
 var _intro_done: bool = false
+var _success_done: bool = false
 
 func _ready() -> void:
 	print("GDScript READY OK")
-	
+
+	chapter_buttons = get_node_or_null("CanvasLayer/MainLayout/LeftPanel/ObjectArea/ChapterButtons")
+	textbook_panel = get_node_or_null("TextbookLayer/TextbookPanel")
+	textbook_close_button = get_node_or_null("TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header/CloseButton")
+	textbook_mask = get_node_or_null("TextbookLayer/TextbookPanel/BackgroundMask")
+
 	# 初始隱藏
 	right_panel.hide()
 	object_area.hide()
-	
+
 	# 綁定按鈕訊號
 	button.pressed.connect(_on_run_pressed)
-	
-	# 綁定教材按鈕與關閉訊號
-	if textbook_button:
-		textbook_button.pressed.connect(_on_textbook_pressed)
+
+	# 綁定 ChapterButtons 訊號
+	if chapter_buttons:
+		chapter_buttons.next_chapter_pressed.connect(_on_next_chapter_pressed)
+		chapter_buttons.textbook_pressed.connect(_on_textbook_pressed)
 	if textbook_close_button:
 		textbook_close_button.pressed.connect(_on_textbook_close_pressed)
 	if textbook_mask:
 		textbook_mask.gui_input.connect(_on_textbook_mask_gui_input)
 	
-	# 綁定劇情結束訊號
+	# 綁定劇情訊號
 	if story_box:
 		story_box.story_finished.connect(_on_story_finished)
+		story_box.sandbox_waiting.connect(_on_sandbox_waiting)
 		var data = load("res://chapters/chapter_1/data/ch1_intro_story.tres")
 		story_box.start_story(data)
 
 func _on_story_finished() -> void:
-	if _intro_done:
+	if not _intro_done:
+		_intro_done = true
+	elif not _success_done:
+		_success_done = true
+		chapter_buttons.show_next_chapter()
 		return
-	_intro_done = true
+	else:
+		return
 
 	print("劇情結束，動態展開版面...")
 
 	right_panel.show()
 	object_area.show()
+	chapter_buttons.hide_textbook()
 	right_panel.size_flags_stretch_ratio = 0.01
 	object_area.size_flags_stretch_ratio = 0.01
 	right_panel.modulate.a = 0
@@ -85,6 +99,14 @@ func _on_run_pressed() -> void:
 		output.text = result + "\n\n✨ 系統：成功打招呼！已放聲大哭！"
 		if story_box:
 			story_box.sandbox_resolved()
+			var success_data = load("res://chapters/chapter_1/data/ch1_success_story.tres")
+			story_box.start_story(success_data)
+
+func _on_next_chapter_pressed() -> void:
+	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn")
+
+func _on_sandbox_waiting() -> void:
+	chapter_buttons.show_textbook()
 
 func _on_textbook_pressed() -> void:
 	if textbook_panel:

@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 signal story_finished
+signal sandbox_waiting
 
 # 透過節點路徑抓取 UI 元件 (請確保名稱與你左側場景樹一致)
 @onready var main_box: PanelContainer = $Control/MainBox
@@ -19,7 +20,6 @@ var is_waiting_for_sandbox: bool = false
 var is_waiting_for_ai: bool = false
 
 func _ready() -> void:
-	# 1. 遊戲一開始，預設完全隱藏劇情介面（大、小長方形）
 	main_box.hide()
 	name_box.hide()
 
@@ -74,22 +74,20 @@ func _on_type_timer_timeout() -> void:
 		type_timer.stop()
 		is_typing = false
 
-func _input(event: InputEvent) -> void:
-	# 偵測滑鼠點擊左鍵
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		# 如果劇情框根本沒顯示，或者正卡在「等待沙盒寫程式/等待AI回覆」的阻斷點，點擊就完全失效
-		if not main_box.visible or is_waiting_for_sandbox or is_waiting_for_ai:
-			return
-			
-		if is_typing:
-			# 打字途中點擊：立刻停止計時器，直接顯示整段話（跳過動畫）
-			type_timer.stop()
-			content_label.visible_characters = content_label.get_total_character_count()
-			is_typing = false
-		else:
-			# 播完文字點擊：進到下一句劇情
-			current_line_index += 1
-			show_next_line()
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SPACE:
+		_advance_dialogue()
+
+func _advance_dialogue() -> void:
+	if not main_box.visible or is_waiting_for_sandbox or is_waiting_for_ai:
+		return
+	if is_typing:
+		type_timer.stop()
+		content_label.visible_characters = content_label.get_total_character_count()
+		is_typing = false
+	else:
+		current_line_index += 1
+		show_next_line()
 
 ## 【預留互動阻斷區】處理對話播放完畢後的遊戲狀態判斷
 func check_next_phase() -> void:
@@ -99,6 +97,7 @@ func check_next_phase() -> void:
 		name_box.show()
 		name_label.text = "系統提示"
 		content_label.text = "請在右側【程式編輯區】修改或確認代碼為 [color=#F8D08D]print(\"哈囉小艾\")[/color]，然後點選右下角的 [color=yellow]Run[/color] 按鈕來發出聲音！\n（若不清楚規則，可以點選左下角的 [color=cyan]📖 教材[/color] 查看幫助）"
+		sandbox_waiting.emit()
 		return
 		
 	# 💡 情境 B：未來需要交給 AI NPC (Gemini) 接手進行即時動態回覆

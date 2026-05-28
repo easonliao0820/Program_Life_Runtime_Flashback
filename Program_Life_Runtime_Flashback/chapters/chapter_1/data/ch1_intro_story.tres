@@ -56,4 +56,4 @@ line = "「這是給你的第一個代價。跟這個世界打招呼吧」"
 [resource]
 script = ExtResource("2_data")
 dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8"), SubResource("Resource_line9"), SubResource("Resource_line10")])
-next_interaction = 1
+next_interaction = 0
