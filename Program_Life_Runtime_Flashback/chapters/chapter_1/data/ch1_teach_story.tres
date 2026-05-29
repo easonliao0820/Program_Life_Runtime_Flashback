@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="DialogueData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_teach1"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "看到右邊的區域了嗎？那是屬於你的聲帶。"
+
+[sub_resource type="Resource" id="Resource_teach2"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "在這個世界裡，想要發出聲音，只有一種方法——"
+
+[sub_resource type="Resource" id="Resource_teach3"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "print()"
+
+[sub_resource type="Resource" id="Resource_teach4"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "把你想說的文字，用引號包起來，放進括號裡。"
+
+[sub_resource type="Resource" id="Resource_teach5"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "就像這樣：print(\"你的名字\")"
+
+[sub_resource type="Resource" id="Resource_teach6"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "這樣，這個世界就能聽見你了。"
+
+[sub_resource type="Resource" id="Resource_teach7"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "來——輸入你的名字，讓世界知道你來了。"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_teach1"), SubResource("Resource_teach2"), SubResource("Resource_teach3"), SubResource("Resource_teach4"), SubResource("Resource_teach5"), SubResource("Resource_teach6"), SubResource("Resource_teach7")])
+next_interaction = 1

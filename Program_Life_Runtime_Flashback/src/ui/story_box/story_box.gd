@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 signal story_finished
+signal sandbox_waiting
 
 # 透過節點路徑抓取 UI 元件 (請確保名稱與你左側場景樹一致)
 @onready var main_box: PanelContainer = $Control/MainBox
@@ -19,7 +20,6 @@ var is_waiting_for_sandbox: bool = false
 var is_waiting_for_ai: bool = false
 
 func _ready() -> void:
-	# 1. 遊戲一開始，預設完全隱藏劇情介面（大、小長方形）
 	main_box.hide()
 	name_box.hide()
 
@@ -53,8 +53,13 @@ func show_next_line() -> void:
 	# 獲取當前這一格的對話 Dictionary 資料
 	var current_step = current_dialogue.dialogue_sequence[current_line_index]
 	
-	# 【動態換名】更換小長方形顯示的名字（如果沒寫，預設顯示"未知"）
-	name_label.text = current_step.speaker
+	# 【動態換名與隱藏】若沒有說話者，則隱藏姓名框以免留下空白框
+	if current_step.speaker.is_empty():
+		name_box.hide()
+	else:
+		name_box.show()
+		name_label.text = current_step.speaker
+	
 	content_label.text = current_step.line
 	
 	# 啟動打字機動畫
@@ -69,41 +74,36 @@ func _on_type_timer_timeout() -> void:
 		type_timer.stop()
 		is_typing = false
 
-func _input(event: InputEvent) -> void:
-	# 偵測滑鼠點擊左鍵
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		# 如果劇情框根本沒顯示，或者正卡在「等待沙盒寫程式/等待AI回覆」的阻斷點，點擊就完全失效
-		if not main_box.visible or is_waiting_for_sandbox or is_waiting_for_ai:
-			return
-			
-		if is_typing:
-			# 打字途中點擊：立刻停止計時器，直接顯示整段話（跳過動畫）
-			type_timer.stop()
-			content_label.visible_characters = content_label.get_total_character_count()
-			is_typing = false
-		else:
-			# 播完文字點擊：進到下一句劇情
-			current_line_index += 1
-			show_next_line()
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SPACE:
+		_advance_dialogue()
+
+func _advance_dialogue() -> void:
+	if not main_box.visible or is_waiting_for_sandbox or is_waiting_for_ai:
+		return
+	if is_typing:
+		type_timer.stop()
+		content_label.visible_characters = content_label.get_total_character_count()
+		is_typing = false
+	else:
+		current_line_index += 1
+		show_next_line()
 
 ## 【預留互動阻斷區】處理對話播放完畢後的遊戲狀態判斷
 func check_next_phase() -> void:
-	# 💡 情境 A：未來當劇情結束，需要強制玩家點擊右側 Sandbox 撰寫區回覆才能前進
-	# 你可以在未來根據關卡進度或 `current_dialogue` 裡的變數來修改這個 bool
-	var need_code_interaction: bool = false 
-	
-	if need_code_interaction:
+	# 💡 情境 A：強制玩家點擊右側 Sandbox 撰寫區回覆才能前進
+	if current_dialogue and current_dialogue.next_interaction == DialogueData.InteractionType.WAIT_FOR_SANDBOX:
 		is_waiting_for_sandbox = true
+		name_box.show()
 		name_label.text = "系統提示"
-		content_label.text = "[color=yellow]請在右側 Typing area 撰寫正確程式以回覆對話...[/color]"
-		# TODO: 這裡未來放「將右側撰寫區從 Disable 狀態解鎖，並註冊監聽 Sandbox 執行成功訊號」的代碼
+		content_label.text = "請在右側【程式編輯區】修改或確認代碼為 [color=#F8D08D]print(\"哈囉小艾\")[/color]，然後點選右下角的 [color=yellow]Run[/color] 按鈕來發出聲音！\n（若不清楚規則，可以點選左下角的 [color=cyan]📖 教材[/color] 查看幫助）"
+		sandbox_waiting.emit()
 		return
 		
 	# 💡 情境 B：未來需要交給 AI NPC (Gemini) 接手進行即時動態回覆
-	var need_ai_reply: bool = false
-	
-	if need_ai_reply:
+	if current_dialogue and current_dialogue.next_interaction == DialogueData.InteractionType.WAIT_FOR_AI:
 		is_waiting_for_ai = true
+		name_box.show()
 		name_label.text = "AI 導師"
 		content_label.text = "...正在讀取當前遊戲與錯誤資訊，Gemini 思考中..."
 		# TODO: 這裡未來放「呼叫 ai_bridge.gd 把資訊打包送給 Gemini，並等待 Gemini 回傳文字後重新 start_story()」的代碼
@@ -112,6 +112,31 @@ func check_next_phase() -> void:
 	# 如果沒有任何需要互動或阻斷的條件，就單純結束這段劇情並關閉視窗
 	end_story()
 
+## 將對話框移至左上角（四象限版面展開後使用）
+## width_ratio: MainBox 佔螢幕寬度的比例（0.0 ~ 1.0）
+## box_height:  MainBox 的高度（px）
+func reposition_to_top_right(width_ratio: float = 0.6, box_height: float = 25.0) -> void:
+	main_box.custom_minimum_size = Vector2(0, box_height)
+
+	main_box.anchor_left   = 0.0
+	main_box.anchor_top    = 0.0
+	main_box.anchor_right  = width_ratio
+	main_box.anchor_bottom = 0.0
+	main_box.offset_left   = 180.0
+	main_box.offset_top    = 10.0
+	main_box.offset_right  = -20.0
+	main_box.offset_bottom = 65.0 + box_height
+
+	# NameBox 浮在 MainBox 下方左側，緊接在 MainBox 底部
+	name_box.anchor_left   = 0.0
+	name_box.anchor_top    = 0.0
+	name_box.anchor_right  = 0.0
+	name_box.anchor_bottom = 0.0
+	name_box.offset_left   = main_box.offset_left
+	name_box.offset_top    = main_box.offset_bottom + 5.0
+	name_box.offset_right  = main_box.offset_left + 150.0
+	name_box.offset_bottom = main_box.offset_bottom + 50.0
+
 ## 關閉劇情對話框
 func end_story() -> void:
 	main_box.hide()
@@ -119,3 +144,8 @@ func end_story() -> void:
 	is_waiting_for_sandbox = false
 	is_waiting_for_ai = false
 	story_finished.emit()
+
+## 解除沙盒等待狀態並關閉對話框
+func sandbox_resolved() -> void:
+	if is_waiting_for_sandbox:
+		end_story()
