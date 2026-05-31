@@ -18,7 +18,7 @@ var _success_done: bool = false
 
 func _ready() -> void:
 	print("GDScript READY OK")
-
+	AiBridge.ai_response_received.connect(_on_ai_response)
 	chapter_buttons = get_node_or_null("CanvasLayer/MainLayout/LeftPanel/ObjectArea/ChapterButtons")
 	textbook_panel = get_node_or_null("TextbookLayer/TextbookPanel")
 	textbook_close_button = get_node_or_null("TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header/CloseButton")
@@ -79,6 +79,7 @@ func _on_story_finished() -> void:
 	var teach_data = load("res://chapters/chapter_1/data/ch1_teach_story.tres")
 	story_box.start_story(teach_data)
 
+
 func _on_run_pressed() -> void:
 	var code = code_edit.text
 	print("執行程式碼: ", code)
@@ -94,13 +95,18 @@ func _on_run_pressed() -> void:
 	print("執行結果: ", result)
 	
 	if result.begins_with("❌"):
-		output.text = result
+		#AI轉譯
+		AiBridge.translate_error(result,code)
 	else:
 		output.text = result + "\n\n✨ 系統：成功打招呼！已放聲大哭！"
 		if story_box:
 			story_box.sandbox_resolved()
 			var success_data = load("res://chapters/chapter_1/data/ch1_success_story.tres")
 			story_box.start_story(success_data)
+
+func _on_ai_response(text):
+	#顯示AI轉譯後資料
+	output.text = text
 
 func _on_next_chapter_pressed() -> void:
 	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn")

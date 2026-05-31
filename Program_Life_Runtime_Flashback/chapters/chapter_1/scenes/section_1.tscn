@@ -1,9 +1,24 @@
-[gd_scene load_steps=7 format=3 uid="uid://dyhgj63xq4udj"]
+[gd_scene format=3 uid="uid://dyhgj63xq4udj"]
 
 [ext_resource type="Script" uid="uid://cnkfop8i4fdih" path="res://chapters/chapter_1/scripts/section_1_controller.gd" id="1_gds"]
-[ext_resource type="Texture2D" path="res://chapters/chapter_1/images/baby.png" id="2_baby"]
+[ext_resource type="Texture2D" uid="uid://bfcuemo3bj5yt" path="res://chapters/chapter_1/images/baby.png" id="2_baby"]
 [ext_resource type="PackedScene" uid="uid://c8nu0iskb8prj" path="res://src/ui/story_box/story_box.tscn" id="3_story"]
 [ext_resource type="PackedScene" path="res://src/ui/chapter_buttons/chapter_buttons.tscn" id="4_chapter_buttons"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_textbook"]
+bg_color = Color(0.117647, 0.164706, 0.219608, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.972549, 0.815686, 0.552941, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(4, 4)
 
 [sub_resource type="Animation" id="Animation_fade"]
 resource_name = "fade_in"
@@ -23,30 +38,15 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_main"]
 _data = {
-"fade_in": SubResource("Animation_fade")
+&"fade_in": SubResource("Animation_fade")
 }
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_textbook"]
-bg_color = Color(0.117647, 0.164706, 0.219608, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.972549, 0.815686, 0.552941, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.5)
-shadow_size = 10
-shadow_offset = Vector2(4, 4)
 
 [node name="Section1" type="Node2D" unique_id=1428661838]
 script = ExtResource("1_gds")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=147097703]
 
-[node name="MainLayout" type="HBoxContainer" parent="CanvasLayer"]
+[node name="MainLayout" type="HBoxContainer" parent="CanvasLayer" unique_id=1225003341]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -54,18 +54,18 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
 
-[node name="LeftPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout"]
+[node name="LeftPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout" unique_id=1852012869]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 7.0
 theme_override_constants/separation = 0
 
-[node name="StoryArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel"]
+[node name="StoryArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel" unique_id=963107057]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 2.0
 
-[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea"]
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea" unique_id=1261414903]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -74,7 +74,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.85098, 0.815686, 0.756863, 1)
 
-[node name="BabyBackground" type="TextureRect" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea"]
+[node name="BabyBackground" type="TextureRect" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea" unique_id=370531031]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -83,13 +83,12 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_baby")
 expand_mode = 1
-stretch_mode = 0
 
-[node name="ObjectArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel"]
+[node name="ObjectArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel" unique_id=367580763]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea"]
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=64360208]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -98,7 +97,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.572549, 0.52549, 0.47451, 1)
 
-[node name="Label" type="Label" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea"]
+[node name="Label" type="Label" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=1454667453]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -113,20 +112,20 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "物件區域"
 
-[node name="ChapterButtons" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" instance=ExtResource("4_chapter_buttons")]
+[node name="ChapterButtons" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=550974535 instance=ExtResource("4_chapter_buttons")]
 
-[node name="RightPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout"]
+[node name="RightPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout" unique_id=1707972256]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 3.0
 theme_override_constants/separation = 0
 
-[node name="CodingArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel"]
+[node name="CodingArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel" unique_id=319502622]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 2.0
 
-[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/CodingArea"]
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/CodingArea" unique_id=1049287592]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -135,7 +134,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.333333, 0.407843, 0.466667, 1)
 
-[node name="CodeEdit" type="CodeEdit" parent="CanvasLayer/MainLayout/RightPanel/CodingArea"]
+[node name="CodeEdit" type="CodeEdit" parent="CanvasLayer/MainLayout/RightPanel/CodingArea" unique_id=1513407068]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -148,11 +147,11 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "print(\"你的名稱\")"
 
-[node name="FeedbackArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel"]
+[node name="FeedbackArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel" unique_id=1882770461]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea" unique_id=1793982802]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -161,7 +160,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.176471, 0.321569, 0.619608, 1)
 
-[node name="OutputLabel" type="Label" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+[node name="OutputLabel" type="Label" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea" unique_id=79973957]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -174,7 +173,7 @@ grow_horizontal = 2
 grow_vertical = 2
 autowrap_mode = 3
 
-[node name="RunButton" type="Button" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+[node name="RunButton" type="Button" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea" unique_id=237602836]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -189,12 +188,12 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "Run"
 
-[node name="StoryBox" parent="CanvasLayer" instance=ExtResource("3_story")]
+[node name="StoryBox" parent="CanvasLayer" unique_id=1009178172 instance=ExtResource("3_story")]
 
-[node name="TextbookLayer" type="CanvasLayer" parent="."]
+[node name="TextbookLayer" type="CanvasLayer" parent="." unique_id=2082825747]
 layer = 10
 
-[node name="TextbookPanel" type="Control" parent="TextbookLayer"]
+[node name="TextbookPanel" type="Control" parent="TextbookLayer" unique_id=2044997965]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -203,7 +202,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="BackgroundMask" type="ColorRect" parent="TextbookLayer/TextbookPanel"]
+[node name="BackgroundMask" type="ColorRect" parent="TextbookLayer/TextbookPanel" unique_id=624137505]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -212,7 +211,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.588235)
 
-[node name="WindowContainer" type="PanelContainer" parent="TextbookLayer/TextbookPanel"]
+[node name="WindowContainer" type="PanelContainer" parent="TextbookLayer/TextbookPanel" unique_id=1225827115]
 custom_minimum_size = Vector2(850, 480)
 layout_mode = 1
 anchors_preset = 8
@@ -228,54 +227,54 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_textbook")
 
-[node name="MarginContainer" type="MarginContainer" parent="TextbookLayer/TextbookPanel/WindowContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="TextbookLayer/TextbookPanel/WindowContainer" unique_id=171289282]
 layout_mode = 2
 theme_override_constants/margin_left = 25
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 25
 theme_override_constants/margin_bottom = 20
 
-[node name="VBox" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer"]
+[node name="VBox" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer" unique_id=1061971324]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="Header" type="HBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
+[node name="Header" type="HBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox" unique_id=1925580012]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header"]
+[node name="Title" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header" unique_id=1492601119]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
 theme_override_font_sizes/font_size = 22
 text = "📖 學習教材 - 第一章：新生之聲"
 
-[node name="CloseButton" type="Button" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header"]
+[node name="CloseButton" type="Button" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header" unique_id=780771935]
 custom_minimum_size = Vector2(35, 35)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
 theme_override_font_sizes/font_size = 18
 text = "X"
 
-[node name="HSeparator" type="HSeparator" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
+[node name="HSeparator" type="HSeparator" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox" unique_id=1313312814]
 layout_mode = 2
 
-[node name="Body" type="HBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
+[node name="Body" type="HBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox" unique_id=1093089015]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 25
 
-[node name="LeftCol" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
+[node name="LeftCol" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body" unique_id=1227142529]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="SectionTitle" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol"]
+[node name="SectionTitle" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol" unique_id=639445375]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
 theme_override_font_sizes/font_size = 18
 text = "🎬 章節介紹"
 
-[node name="StoryText" type="RichTextLabel" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol"]
+[node name="StoryText" type="RichTextLabel" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol" unique_id=1659052038]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/default_color = Color(0.901961, 0.901961, 0.901961, 1)
@@ -288,21 +287,21 @@ text = "你剛誕生在這個世界上，卻驚奇地發現自己無法發出任
 
 為了在這世界發出你的第一聲，你必須透過 Python 的 [code]print()[/code] 函式向世界宣告你的存在！"
 
-[node name="VSeparator" type="VSeparator" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
+[node name="VSeparator" type="VSeparator" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body" unique_id=704923239]
 layout_mode = 2
 
-[node name="RightCol" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
+[node name="RightCol" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body" unique_id=1048320077]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="SectionTitle" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol"]
+[node name="SectionTitle" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol" unique_id=568125968]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
 theme_override_font_sizes/font_size = 18
 text = "💻 程式概念：輸出與字串"
 
-[node name="ProgText" type="RichTextLabel" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol"]
+[node name="ProgText" type="RichTextLabel" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol" unique_id=488575339]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/default_color = Color(0.901961, 0.901961, 0.901961, 1)
@@ -320,8 +319,6 @@ text = "[b]1. print() 函式[/b]
 [b]💡 小提示[/b]
 括號 [code]()[/code] 與引號 [code]\"\"[/code] 都必須是成對出現的半形符號喔！"
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_main")
-}
-autoplay = "fade_in"
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=773528952]
+libraries/ = SubResource("AnimationLibrary_main")
+autoplay = &"fade_in"

@@ -22,6 +22,7 @@ StorySystem="*uid://c8nu0iskb8prj"
 CodingPanel="*uid://dt22je7t6mp"
 ThemeManager="*res://src/core/theme_manager.gd"
 PauseMenu="*uid://du1kp4ljdikh8"
+AiBridge="*uid://dl5ertv75mjxm"
 
 [physics]
 
