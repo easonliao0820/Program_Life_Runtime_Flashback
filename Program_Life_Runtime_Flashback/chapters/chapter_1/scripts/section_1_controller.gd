@@ -9,12 +9,18 @@ extends Node2D
 @onready var right_panel = $CanvasLayer/MainLayout/RightPanel
 @onready var object_area = $CanvasLayer/MainLayout/LeftPanel/ObjectArea
 
+# 聊天對話 UI 節點
+@onready var chat_input: LineEdit = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer/LineEdit
+@onready var chat_send_button: Button = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer/Button
+@onready var chat_container: HBoxContainer = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer
+
 var chapter_buttons = null
 var textbook_panel: Control = null
 var textbook_close_button: Button = null
 var textbook_mask: ColorRect = null
 var _intro_done: bool = false
 var _success_done: bool = false
+var _is_waiting_for_chat: bool = false
 
 func _ready() -> void:
 	print("GDScript READY OK")
@@ -24,12 +30,15 @@ func _ready() -> void:
 	textbook_close_button = get_node_or_null("TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header/CloseButton")
 	textbook_mask = get_node_or_null("TextbookLayer/TextbookPanel/BackgroundMask")
 
-	# 初始隱藏
+	# 初始隱藏對話與聊天輸入框
 	right_panel.hide()
 	object_area.hide()
+	chat_container.hide()
 
 	# 綁定按鈕訊號
 	button.pressed.connect(_on_run_pressed)
+	chat_send_button.pressed.connect(_on_chat_send_pressed)
+	chat_input.text_submitted.connect(_on_chat_text_submitted)
 
 	# 綁定 ChapterButtons 訊號
 	if chapter_buttons:
@@ -53,6 +62,8 @@ func _on_story_finished() -> void:
 	elif not _success_done:
 		_success_done = true
 		chapter_buttons.show_next_chapter()
+		# 成功結局播完後，顯示 AI 對話輸入框
+		chat_container.show()
 		return
 	else:
 		return
@@ -84,7 +95,6 @@ func _on_run_pressed() -> void:
 	var code = code_edit.text
 	print("執行程式碼: ", code)
 	
-	# 使用 get_node 確保能抓到單例 (或是直接使用單例名稱)
 	var sm = get_node_or_null("/root/SandboxManager")
 	var result = ""
 	if sm:
@@ -95,8 +105,8 @@ func _on_run_pressed() -> void:
 	print("執行結果: ", result)
 	
 	if result.begins_with("❌"):
-		#AI轉譯
-		AiBridge.translate_error(result,code)
+		# AI 轉譯錯誤
+		AiBridge.translate_error(result, code)
 	else:
 		output.text = result + "\n\n✨ 系統：成功打招呼！已放聲大哭！"
 		if story_box:
@@ -104,9 +114,64 @@ func _on_run_pressed() -> void:
 			var success_data = load("res://chapters/chapter_1/data/ch1_success_story.tres")
 			story_box.start_story(success_data)
 
-func _on_ai_response(text):
-	#顯示AI轉譯後資料
-	output.text = text
+func _on_chat_send_pressed() -> void:
+	_send_chat_message(chat_input.text)
+
+func _on_chat_text_submitted(new_text: String) -> void:
+	_send_chat_message(new_text)
+
+func _send_chat_message(message: String) -> void:
+	if message.strip_edges() == "":
+		return
+	
+	# 清空並暫時禁用輸入
+	chat_input.text = ""
+	chat_input.editable = false
+	chat_send_button.disabled = true
+	
+	_is_waiting_for_chat = true
+	
+	# 顯示 AI 思考中的對話框
+	if story_box:
+		var waiting_data = DialogueData.new()
+		var step = DialogueStep.new()
+		step.speaker = "AI 導師 派森"
+		step.line = "思考中..."
+		waiting_data.dialogue_sequence.append(step)
+		story_box.start_story(waiting_data)
+		story_box.is_waiting_for_ai = true
+
+	# 設定 AI 派森的人格設定 Prompt
+	var prompt = """
+你是遊戲中的 AI 導師「派森」。目前玩家小艾剛剛在這個程式世界誕生，並成功解開了第一個任務。
+請以溫柔、神祕、帶有鼓勵性的語氣回答玩家的問題。字數請控制在 60 字以內，並融入一些程式的概念。
+
+玩家對你說："%s"
+""" % message
+
+	AiBridge.call_openai(prompt)
+
+func _on_ai_response(text: String) -> void:
+	# 恢復 UI 輸入狀態
+	chat_input.editable = true
+	chat_send_button.disabled = false
+	
+	if _is_waiting_for_chat:
+		_is_waiting_for_chat = false
+		if story_box:
+			story_box.is_waiting_for_ai = false
+			
+			var chat_response_data = DialogueData.new()
+			var step = DialogueStep.new()
+			step.speaker = "AI 導師 派森"
+			step.line = text
+			chat_response_data.dialogue_sequence.append(step)
+			
+			# 開始播放 AI 的回應
+			story_box.start_story(chat_response_data)
+	else:
+		# 顯示 AI 轉譯後錯誤資料
+		output.text = text
 
 func _on_next_chapter_pressed() -> void:
 	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn")
