@@ -1,0 +1,59 @@
+[gd_resource type="Resource" script_class="DialogueData" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（你緩緩睜開雙眼。四周是一個溫馨卻有些模糊的嬰兒房，你似乎正被什麼人抱在懷裡。你低頭看了看自己短小的四肢——你剛誕生在這個世界上。）"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（正當你準備鬆一口氣，慶幸自己順利出生時，嬰兒房上方的虛空中，空氣微微扭動。一個散發著淡淡微光的幾何人形投影緩緩浮現，他俯視著你，眼神深邃，用只有你聽得到、冷淡卻直擊腦海的聲音說道：）"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "……"
+line = "「……終於見到你了，我的朋友。」"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = "心聲"
+line = "『不會吧，我該不會剛出生就要夭折了吧，我也太雖了！這傢伙到底是何方神聖？！』"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（極度驚恐之下，你試圖大聲哭泣求救，你的小臉因為用力而憋得通紅，淚水像小河流一樣流滿了臉頰，但預想中震耳欲聾的哭聲卻完全沒有出現。四周靜悄悄的，你彷彿被按了靜音鍵。）"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = "心聲"
+line = "『為什麼哭不出來？！』"
+
+[sub_resource type="Resource" id="Resource_line7"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（看著陷入恐慌的你，虛空中的神祕投影再度開口，語氣依舊平靜得毫無波瀾：）"
+
+[sub_resource type="Resource" id="Resource_line8"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「你是這個世界上獨一無二的存在，你的世界有著獨特的語言和與眾不同的規則。想要發出聲音的話，就學我怎麼做。」"
+
+[sub_resource type="Resource" id="Resource_line9"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（隨著他的話語，虛空中憑空凝聚出幾行散發著微光的字體：print(\"哈囉小艾\")）"
+
+[sub_resource type="Resource" id="Resource_line10"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「這是給你的第一個代價。跟這個世界打招呼吧」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8"), SubResource("Resource_line9"), SubResource("Resource_line10")])
+next_interaction = 0
