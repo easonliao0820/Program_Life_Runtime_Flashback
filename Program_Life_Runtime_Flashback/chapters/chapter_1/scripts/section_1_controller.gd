@@ -49,14 +49,17 @@ func _ready() -> void:
 
 func _on_story_finished() -> void:
 	if not _intro_done:
+		print("1")
 		_intro_done = true
 	elif not _success_done:
+		print("2")
 		_success_done = true
 		chapter_buttons.show_next_chapter()
 		return
 	else:
+		print("3")
 		return
-
+	print("4")
 	print("劇情結束，動態展開版面...")
 
 	right_panel.show()
@@ -66,6 +69,8 @@ func _on_story_finished() -> void:
 	object_area.size_flags_stretch_ratio = 0.01
 	right_panel.modulate.a = 0
 	object_area.modulate.a = 0
+	
+	
 
 	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 	tween.tween_property(right_panel, "size_flags_stretch_ratio", 3.0, 1.5)
@@ -79,14 +84,23 @@ func _on_story_finished() -> void:
 	var teach_data = load("res://chapters/chapter_1/data/ch1_teach_story.tres")
 	story_box.start_story(teach_data)
 
+# 緩衝結果
+var result = "" 
+var can_show_result: bool = false
+var teach_story_done = false
 
 func _on_run_pressed() -> void:
+	
+	
 	var code = code_edit.text
+
+	
 	print("執行程式碼: ", code)
 	
 	# 使用 get_node 確保能抓到單例 (或是直接使用單例名稱)
 	var sm = get_node_or_null("/root/SandboxManager")
-	var result = ""
+	
+	
 	if sm:
 		result = sm.run_code(code)
 	else:
@@ -94,7 +108,17 @@ func _on_run_pressed() -> void:
 	
 	print("執行結果: ", result)
 	
+	# ❌ 不顯示
+	if not can_show_result:
+		output.text = "請先繼續完成劇情閱讀~"
+		return
+
+	# ✔ 可以顯示
+	output.text = result
+	
+	
 	if result.begins_with("❌"):
+		output.text = result
 		#AI轉譯
 		AiBridge.translate_error(result,code)
 	else:
@@ -104,10 +128,12 @@ func _on_run_pressed() -> void:
 			var success_data = load("res://chapters/chapter_1/data/ch1_success_story.tres")
 			story_box.start_story(success_data)
 
+
 func _on_ai_response(text):
 	#顯示AI轉譯後資料
-	output.text = text
-
+	#output.text = text
+	print(text)
+	
 func _on_next_chapter_pressed() -> void:
 	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn")
 

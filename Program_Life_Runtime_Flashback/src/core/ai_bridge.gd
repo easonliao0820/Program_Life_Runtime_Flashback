@@ -43,7 +43,7 @@ func translate_error(error:String, code:String):
 
 func call_openai(prompt:String):
 
-	const  API_KEY="AQ.Ab8RN6KA8tnYVwbBTJi7kw_5l23X28pAnkGJ68aIrX3Dk4lFfA"
+	const  API_KEY="AQ.Ab8RN6LjZQ0nOdiVUqi-HdHzuX8Ufu8gp-jJI-rBE2gyIl5P-g"
 	
 	var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + API_KEY
 
@@ -73,7 +73,7 @@ func _on_http_request_request_completed(
 	print(json)
 	
 	if response_code != 200:
-		emit_signal("ai_response_received", "AI連線失敗：" + json_text)
+		emit_signal("ai_response_received", "AI連線失敗")
 		return
 
 
