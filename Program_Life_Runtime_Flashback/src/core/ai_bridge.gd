@@ -77,7 +77,8 @@ func _on_http_request_request_completed(_result, response_code, _headers, body):
 	print("API 回傳內容: ", json)
 	
 	if response_code != 200:
-		emit_signal("ai_response_received", "AI連線失敗，代碼：" + str(response_code))
+		print("AI連線失敗，代碼：" + str(response_code))
+		#emit_signal("ai_response_received", "AI連線失敗，代碼：" + str(response_code))
 		return
 
 	# 解析 Gemini 回傳的 JSON 安全機制（防範無資料回傳）
@@ -85,7 +86,7 @@ func _on_http_request_request_completed(_result, response_code, _headers, body):
 		var candidate = json["candidates"][0]
 		if candidate.has("content") and candidate["content"].has("parts"):
 			var text = candidate["content"]["parts"][0]["text"]
-			emit_signal("ai_response_received", text)
+			emit_signal("ai_response_received", text) 
 			return
 			
 	emit_signal("ai_response_received", "AI 思考了很久，但沒有說話...")

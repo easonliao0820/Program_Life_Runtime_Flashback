@@ -79,7 +79,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		_advance_dialogue()
 
 func _advance_dialogue() -> void:
-	print("SPACE ADVANCE")
 	if not main_box.visible or is_waiting_for_sandbox or is_waiting_for_ai:
 		return
 	if is_typing:

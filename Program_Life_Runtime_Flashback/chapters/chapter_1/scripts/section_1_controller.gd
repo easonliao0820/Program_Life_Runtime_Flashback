@@ -91,6 +91,7 @@ func _on_story_finished() -> void:
 
 
 func _on_run_pressed() -> void:
+	get_viewport().gui_release_focus() 
 	print("RUN BUTTON PRESSED")
 	# 不顯示
 	if not story_box.is_waiting_for_sandbox:
@@ -107,7 +108,7 @@ func _on_run_pressed() -> void:
 			result = sm.run_code(code)
 		else:
 			result = SandboxManager.run_code(code)
-		print("執行完沙盒了")
+
 		print("執行結果: ", result)
 		
 		# 可以顯示
@@ -116,6 +117,7 @@ func _on_run_pressed() -> void:
 		if result.begins_with("❌"):
 			output.text = result
 			#AI轉譯
+			print("進行AI轉譯")
 			AiBridge.translate_error(result,code)
 		else:
 			output.text = result + "\n\n✨ 系統：成功打招呼！已放聲大哭！"

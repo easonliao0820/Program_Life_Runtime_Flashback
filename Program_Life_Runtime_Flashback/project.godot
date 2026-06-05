@@ -24,6 +24,21 @@ ThemeManager="*res://src/core/theme_manager.gd"
 PauseMenu="*uid://du1kp4ljdikh8"
 AiBridge="*uid://dl5ertv75mjxm"
 
+[input]
+
+Space={
+"deadzone": 0.2,
+"events": []
+}
+space={
+"deadzone": 0.2,
+"events": []
+}
+" "={
+"deadzone": 0.2,
+"events": []
+}
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
