@@ -79,6 +79,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_advance_dialogue()
 
 func _advance_dialogue() -> void:
+	print("SPACE ADVANCE")
 	if not main_box.visible or is_waiting_for_sandbox or is_waiting_for_ai:
 		return
 	if is_typing:
@@ -96,7 +97,7 @@ func check_next_phase() -> void:
 		is_waiting_for_sandbox = true
 		name_box.show()
 		name_label.text = "系統提示"
-		content_label.text = "請在右側【程式編輯區】修改或確認代碼為 [color=#F8D08D]print(\"哈囉小艾\")[/color]，然後點選右下角的 [color=yellow]Run[/color] 按鈕來發出聲音！\n（若不清楚規則，可以點選左下角的 [color=cyan]📖 教材[/color] 查看幫助）"
+		content_label.text = "請在右側【程式編輯區】修改或確認代碼為 [color=#F8D08D]print(\" 哈囉小艾\")[/color]，然後點選右下角的 [color=yellow]Run[/color] 按鈕來發出聲音！\n（若不清楚規則，可以點選左下角的 [color=cyan]📖 教材[/color] 查看幫助）"
 		sandbox_waiting.emit()
 		return
 		
@@ -149,3 +150,6 @@ func end_story() -> void:
 func sandbox_resolved() -> void:
 	if is_waiting_for_sandbox:
 		end_story()
+		
+func can_run_sandbox() -> bool:
+	return is_waiting_for_sandbox

@@ -58,19 +58,15 @@ func _ready() -> void:
 
 func _on_story_finished() -> void:
 	if not _intro_done:
-		print("1")
 		_intro_done = true
 	elif not _success_done:
-		print("2")
 		_success_done = true
 		chapter_buttons.show_next_chapter()
 		# 成功結局播完後，顯示 AI 對話輸入框
 		chat_container.show()
 		return
 	else:
-		print("3")
 		return
-	print("4")
 	print("劇情結束，動態展開版面...")
 
 	right_panel.show()
@@ -95,48 +91,42 @@ func _on_story_finished() -> void:
 	var teach_data = load("res://chapters/chapter_1/data/ch1_teach_story.tres")
 	story_box.start_story(teach_data)
 
-# 緩衝結果
-var result = "" 
-var can_show_result: bool = false
-var teach_story_done = false
 
 func _on_run_pressed() -> void:
-	
-	
-	var code = code_edit.text
-
-	
-	print("執行程式碼: ", code)
-	
-	var sm = get_node_or_null("/root/SandboxManager")
-	
-	
-	if sm:
-		result = sm.run_code(code)
-	else:
-		result = SandboxManager.run_code(code)
-	
-	print("執行結果: ", result)
-	
-	# ❌ 不顯示
-	if not can_show_result:
-		output.text = "請先繼續完成劇情閱讀~"
+	print("RUN BUTTON PRESSED")
+	# 不顯示
+	if not story_box.is_waiting_for_sandbox:
+		output.text = "請先完成劇情閱讀~"
 		return
-
-	# ✔ 可以顯示
-	output.text = result
-	
-	
-	if result.begins_with("❌"):
-		output.text = result
-		#AI轉譯
-		AiBridge.translate_error(result,code)
 	else:
-		output.text = result + "\n\n✨ 系統：成功打招呼！已放聲大哭！"
-		if story_box:
-			story_box.sandbox_resolved()
-			var success_data = load("res://chapters/chapter_1/data/ch1_success_story.tres")
-			story_box.start_story(success_data)
+	
+		var code = code_edit.text
+		print("執行程式碼: ", code)
+		
+		var sm = get_node_or_null("/root/SandboxManager")
+		var result = "" 
+		if sm:
+			result = sm.run_code(code)
+		else:
+			result = SandboxManager.run_code(code)
+		print("執行完沙盒了")
+		print("執行結果: ", result)
+		
+		# 可以顯示
+		output.text = result
+		
+		if result.begins_with("❌"):
+			output.text = result
+			#AI轉譯
+			AiBridge.translate_error(result,code)
+		else:
+			output.text = result + "\n\n✨ 系統：成功打招呼！已放聲大哭！"
+			if story_box:
+				story_box.sandbox_resolved()
+				var success_data = load("res://chapters/chapter_1/data/ch1_success_story.tres")
+				story_box.start_story(success_data)
+
+
 
 func _on_chat_send_pressed() -> void:
 	_send_chat_message(chat_input.text)

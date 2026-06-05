@@ -75,6 +75,7 @@ grow_vertical = 2
 color = Color(0.85098, 0.815686, 0.756863, 1)
 
 [node name="BabyBackground" type="TextureRect" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea" unique_id=370531031]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
