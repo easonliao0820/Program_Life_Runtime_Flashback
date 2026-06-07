@@ -12,3 +12,9 @@ enum InteractionType {
 
 ## 設定此段劇情結束後，觸發沙盒或 AI 的回覆互動
 @export var next_interaction: InteractionType = InteractionType.NONE
+
+## 沙盒等待時顯示的提示訊息（next_interaction = WAIT_FOR_SANDBOX 時使用）
+@export_multiline var sandbox_wait_message: String = ""
+
+## AI 等待時顯示的提示訊息（next_interaction = WAIT_FOR_AI 時使用）
+@export_multiline var ai_wait_message: String = ""
