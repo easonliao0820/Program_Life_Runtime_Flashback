@@ -94,7 +94,7 @@ func translate_error(error: String, code: String):
 
 func call_openai(prompt: String):
 	# 你的新版 AQ 金鑰（權限完全正常）
-	var raw_key = "AQ.Ab8RN6L_6_VC3CVh7tiiijtv1aZWF3nppfCm4maBwQhItRoA8A"
+	var raw_key = "AQ.Ab8RN6Lm8b4jHbPIzE-MH03l5EMUfeNOoreextWlDJsLERzg-Q"
 	var api_key = raw_key.strip_edges()
 	
 	# 固定使用目前最穩定的 2.5-flash，不走會噴 404 的舊路由了

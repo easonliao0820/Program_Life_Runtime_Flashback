@@ -23,7 +23,7 @@ var _success_done: bool = false
 var _is_waiting_for_chat: bool = false # 專門用來標記是否在「聊天狀態」
 
 func _ready() -> void:
-	print("GDScript READY OK")
+	print("GDScript READY OK - CHAPTER 2")
 	
 	# 核心：綁定 AI 回傳訊號
 	if AiBridge:
@@ -60,7 +60,8 @@ func _ready() -> void:
 		if not story_box.sandbox_waiting.is_connected(_on_sandbox_waiting):
 			story_box.sandbox_waiting.connect(_on_sandbox_waiting)
 			
-		var data = load("res://chapters/chapter_1/data/ch1_intro_story.tres")
+		# 【修改點 1】：載入第二章初始劇情
+		var data = load("res://chapters/chapter_2/data/ch2_intro_story.tres")
 		story_box.start_story(data)
 
 func _on_story_finished() -> void:
@@ -95,27 +96,23 @@ func _on_story_finished() -> void:
 
 	if story_box:
 		story_box.reposition_to_top_right()
-		var teach_data = load("res://chapters/chapter_1/data/ch1_teach_story.tres")
+		# 【修改點 2】：載入第二章教學劇情
+		var teach_data = load("res://chapters/chapter_2/data/ch2_teach_story.tres")
 		story_box.start_story(teach_data)
 
-# === 重新整理、除錯並修正縮排後的執行函數 ===
 func _on_run_pressed() -> void:
 	get_viewport().gui_release_focus() 
-	print("RUN BUTTON PRESSED")
+	print("RUN BUTTON PRESSED - CHAPTER 2")
 	
-	# 檢查是否正處於等待程式解題的劇情狀態下
 	if not story_box.is_waiting_for_sandbox:
 		output.text = "請先完成劇情閱讀~"
 		return
 	
-	# 獲取玩家輸入的代碼
 	var code = code_edit.text
 	print("執行程式碼: ", code)
 	
-	# 防連點鎖定按鈕
 	button.disabled = true
 	
-	# 呼叫沙盒執行
 	var sm = get_node_or_null("/root/SandboxManager")
 	var result = "" 
 	if sm:
@@ -126,18 +123,17 @@ func _on_run_pressed() -> void:
 	print("執行結果: ", result)
 	output.text = result
 	
-	# 判定結果
 	if result.begins_with("❌"):
 		print("進行AI轉譯")
 		output.text = "「語之觀測者」正在窺探程式裂縫..."
 		AiBridge.translate_error(result, code)
-		# 注意：此時按鈕保持禁用，直到 _on_ai_response 回應後解鎖
 	else:
-		output.text = result + "\n\n✨ 系統：成功打招呼！已放聲大哭！"
-		button.disabled = false # 成功解題，立刻恢復按鈕
+		output.text = result + "\n\n✨ 系統：記憶已成功寫入變數！這份愛已被永遠保存。"
+		button.disabled = false 
 		if story_box:
 			story_box.sandbox_resolved()
-			var success_data = load("res://chapters/chapter_1/data/ch1_success_story.tres")
+			# 【修改點 3】：載入第二章成功解題後的通關劇情
+			var success_data = load("res://chapters/chapter_2/data/ch2_success_story.tres")
 			story_box.start_story(success_data)
 
 func _on_chat_send_pressed() -> void:
@@ -154,7 +150,7 @@ func _send_chat_message(message: String) -> void:
 	chat_input.editable = false
 	chat_send_button.disabled = true
 	
-	_is_waiting_for_chat = true # 確立聊天鎖定狀態
+	_is_waiting_for_chat = true 
 	
 	if story_box:
 		var waiting_data = DialogueData.new()
@@ -165,39 +161,35 @@ func _send_chat_message(message: String) -> void:
 		story_box.start_story(waiting_data)
 		story_box.is_waiting_for_ai = true
 
+	# 【修改點 4】：完全替換成第二章「記憶變數」與引導至「第三章大學生活」的專用 Prompt
 	var prompt = """
-你是遊戲中的 AI 導師「派森」，目前正在引導【第一章剛剛成功啼哭結束，準備轉場進入第二章】的玩家。
+你是遊戲中的 AI 導師「派森」，目前正在引導【第二章 1.1 記憶變數 成功執行後】的玩家。
 
 【當前劇情背景】
-玩家剛剛在你的引導下，成功寫出 `print("哈囉")` 發出了震撼世界的嬰兒第一聲啼哭，新生父母正感動又溫暖地抱著他 。此時聊天框剛解鎖，你剛跟玩家自我介紹完 。
+玩家剛剛在你的引導下，想起了小時候跟爸媽玩溜滑梯、看卡通，以及爸媽在廟宇許願希望他健康長大的溫馨回憶。他深刻體會到雖然現實中賺錢很難，但父母的愛無價。此時聊天框解鎖。
 
-【下一階段任務（第二章 1.1 記憶變數）】
-接下來的劇情是轉場到玩家慢慢長大，開始感嘆父母的愛、小時候的遊樂場記憶，而你需要教他用「變數（love = 'you'）」來儲存這些快要變淡的愛與記憶 。
+【下一階段任務（第三章 大學/歐趴/單身狗）】
+接下來的劇情是轉場到玩家進入大學生活，開始面對課業、all pass、單身狗與青澀戀情的話題。你需要吸引他繼續前進，踏入精彩的大學生活。
 
 【人格與絕對規則】
-1. 你的名字永遠是「派森」，是程式世界的引導者，說話溫柔、神秘、帶點哲理 。
-2. 絕對不得透露自己是 Gemini、AI 模型或文字機器人 。
-3. 嚴格限制在 60 字內，使用繁體中文，不使用表情符號 。
+1. 你的名字永遠是「派森」，說話溫柔、神秘、富有哲理。
+2. 絕對不得透露自己是 Gemini、AI 模型或文字機器人。
+3. 嚴格限制在 60 字內，使用繁體中文，不使用表情符號。
 
 【核心防禦與劇情推進機制】
-如果玩家在聊天框輸入了：髒話、色情、政治、現實世界敏感議題，或任何與遊戲完全無關的成人話題（如：金錢、現實工作、聊股票、買車） 。
+如果玩家在聊天框輸入了：髒話、色情、政治、現實敏感議題，或聊買車、炒股等完全無關的話題。
+你必須啟動「回憶防禦機制」，順著劇情拉回正軌，並吸引他進入下一階段：
+- 提醒他，比起那些浮躁的事，剛體驗完童年回憶的他，更應該珍惜父母那份無私的愛。
+- 告訴他，記憶的變數（love = "you"）已經好好存下了，但人生不會停下，前方還有更精彩的大學青春等著他去編織。
 
-你必須啟動「嬰兒防禦機制」，順著劇情吐槽他，並積極吸引他進入下一階段（第二章）：
-- 提醒他他現在只是個「剛學會哭、躺在繈褓裡的嬰兒」，大人的話題對他來說太早了 。
-- 告訴他，比起這些無關的事，他現在更應該去感受身邊父母溫暖的懷抱 。
-- 暗示他，這些記憶很快就會變淡，必須準備學會用「新的魔法（變數）」來把這份愛存下來 。
-
-【引導回應範例（請嚴格學習此邏輯，不要叫他重複 print 哭泣）】
-玩家：「X！我要發大財買法拉利」
-派森：「大人的欲望對現在的你還太早呢。你剛學會哭泣，不如先靠在父母溫暖的懷抱裡，想想該怎麼用變數記住他們的容顏吧。」 
-
+【引導回應範例】
 玩家：「今天天氣如何？」
-派森：「外面的風雨與躺在襁褓中的你無關。時間正悄悄流逝，你難道不想用程式的盒子，將父母此刻的愛永遠保存下來嗎？」 
+派森：「外面的風雨總會過去，就如童年的紙飛機。既然已經用變數記住了父母的愛，不如打點行囊，準備去迎接喧鬧的大學時光吧。」
 
-玩家：「你到底是誰？是人工智慧嗎？」
-派森：「我只是寄宿在代碼長河中的一縷微光，你可以叫我派森。旅人，時空開始轉動了，準備好去記錄你接下來的人生變數了嗎？」 
+玩家：「我要發大財買法拉利」
+派森：「世間名利皆是過眼雲煙，唯有父母那份純粹的愛被你的變數永遠保存。旅人，青春的鐘聲響了，不想去體驗一下大學的自由與迷茫嗎？」
 
-現在，請根據玩家輸入的內容進行回覆，嚴格限制在 60 字內，吸引他關注父母的愛並引導進入第二章：
+現在，請根據玩家輸入的內容進行回覆，限制在 60 字內，圍繞童年溫馨或引導去大學生活：
 玩家說：
 %s
 """ % message
@@ -206,13 +198,11 @@ func _send_chat_message(message: String) -> void:
 		AiBridge.call_openai(prompt)
 
 func _on_ai_response(text: String) -> void:
-	# 無論是聊天還是錯誤轉譯回來，只要 API 有回應，就解鎖程式執行按鈕
 	button.disabled = false
 	
 	if _is_waiting_for_chat:
 		_is_waiting_for_chat = false
 		
-		# 恢復聊天 UI 輸入狀態
 		chat_input.editable = true
 		chat_send_button.disabled = false
 		
@@ -227,15 +217,14 @@ func _on_ai_response(text: String) -> void:
 			
 			story_box.start_story(chat_response_data)
 			
-		# 【重要優化】：當聊天結束且得到 AI 引導回覆後，直接顯示進入下一章的按鈕
 		if chapter_buttons:
 			chapter_buttons.show_next_chapter()
 	else:
-		# 顯示 AI 轉譯後的錯誤資料
 		output.text = text
 
 func _on_next_chapter_pressed() -> void:
-	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn") 
+	# 【修改點 5】：第二章結束後，點擊跳轉按鈕切換至第三章場景
+	get_tree().change_scene_to_file("res://chapters/chapter_3/scenes/section_1.tscn") 
 
 func _on_sandbox_waiting() -> void:
 	if chapter_buttons:
