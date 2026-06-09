@@ -137,14 +137,15 @@ func _on_http_request_request_completed(_result, response_code, _headers, body):
 		return
 		
 	if response_code != 200:
-		emit_signal("ai_response_received", "AI連線失敗，代碼：" + str(response_code))
+		print("AI連線失敗，代碼：" + str(response_code))
+		#emit_signal("ai_response_received", "AI連線失敗，代碼：" + str(response_code))
 		return
 
 	if json and json.has("candidates") and json["candidates"].size() > 0:
 		var candidate = json["candidates"][0]
 		if candidate.has("content") and candidate["content"].has("parts"):
 			var text = candidate["content"]["parts"][0]["text"]
-			emit_signal("ai_response_received", text)
+			emit_signal("ai_response_received", text) 
 			return
 			
 	emit_signal("ai_response_received", "AI 思考了很久，但沒有說話...")

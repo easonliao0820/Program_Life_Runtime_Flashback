@@ -32,8 +32,6 @@ func run_code(code: String) -> String:
 func _handle_print(code: String) -> String:
 	var start = code.find("(") + 1
 	var end = code.rfind(")")
-	print(start)
-	print(end )
 	if start > 0 and end > start:
 		var content = code.substr(start, end - start).strip_edges()
 		# 移除最外層的引號 (支援單雙引號)
