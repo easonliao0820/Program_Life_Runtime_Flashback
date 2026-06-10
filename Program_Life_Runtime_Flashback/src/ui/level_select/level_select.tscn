@@ -1,0 +1,181 @@
+[gd_scene format=3 uid="uid://c6xq4udjls5dd"]
+
+[ext_resource type="Script" uid="uid://bdykl1ywdd386" path="res://src/ui/level_select/level_select.gd" id="1_select"]
+[ext_resource type="PackedScene" uid="uid://ddy63xq4udjls" path="res://src/ui/level_select/level_node.tscn" id="2_node"]
+[ext_resource type="Texture2D" uid="uid://bfcuemo3bj5yt" path="res://chapters/chapter_1/images/baby.png" id="3_baby_thumb"]
+
+[node name="LevelSelect" type="Control" unique_id=638942680]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_select")
+
+[node name="Background" type="ColorRect" parent="." unique_id=565869129]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0705882, 0.0862745, 0.101961, 1)
+
+[node name="Header" type="HBoxContainer" parent="." unique_id=1827360675]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 70.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="BackButton" type="Button" parent="Header" unique_id=2056061615]
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 16
+text = "< 返回"
+
+[node name="TitleLabel" type="Label" parent="Header" unique_id=444095318]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 32
+text = "MEMORY LOAD"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ResetButton" type="Button" parent="Header" unique_id=1122134048]
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 16
+text = "重設"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=2000293514]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -540.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+follow_focus = true
+
+[node name="MapContent" type="Control" parent="ScrollContainer" unique_id=1083926777]
+custom_minimum_size = Vector2(1650, 500)
+layout_mode = 2
+
+[node name="Line_Prologue_Ch1" type="Line2D" parent="ScrollContainer/MapContent" unique_id=1279404739]
+points = PackedVector2Array(190, 415, 440, 315)
+width = 6.0
+default_color = Color(0.25098, 0.282353, 0.321569, 0.6)
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="Line_Ch1_Ch2Sec1" type="Line2D" parent="ScrollContainer/MapContent" unique_id=1508830880]
+points = PackedVector2Array(440, 315, 690, 445)
+width = 6.0
+default_color = Color(0.25098, 0.282353, 0.321569, 0.6)
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="Line_Ch2Sec1_Ch2Sec2" type="Line2D" parent="ScrollContainer/MapContent" unique_id=266407794]
+points = PackedVector2Array(690, 445, 940, 245)
+width = 6.0
+default_color = Color(0.25098, 0.282353, 0.321569, 0.6)
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="Line_Ch2Sec1_Ch2Sec2_Curve" type="Line2D" parent="ScrollContainer/MapContent" unique_id=1216160607]
+visible = false
+width = 6.0
+default_color = Color(0.25098, 0.282353, 0.321569, 0.6)
+
+[node name="Line_Ch2Sec2_Ch2Sec3" type="Line2D" parent="ScrollContainer/MapContent" unique_id=323759276]
+points = PackedVector2Array(940, 245, 1190, 415)
+width = 6.0
+default_color = Color(0.25098, 0.282353, 0.321569, 0.6)
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="Line_Ch2Sec3_Ch3" type="Line2D" parent="ScrollContainer/MapContent" unique_id=1638097659]
+points = PackedVector2Array(1190, 415, 1440, 315)
+width = 6.0
+default_color = Color(0.25098, 0.282353, 0.321569, 0.6)
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="Prologue" parent="ScrollContainer/MapContent" unique_id=369119628 instance=ExtResource("2_node")]
+layout_mode = 1
+offset_left = 100.0
+offset_top = 350.0
+offset_right = 280.0
+offset_bottom = 480.0
+level_id = "prologue"
+level_name = "前言"
+scene_to_load = "res://chapters/prologue/prologue.tscn"
+
+[node name="Ch1_Sec1" parent="ScrollContainer/MapContent" unique_id=1096238990 instance=ExtResource("2_node")]
+layout_mode = 1
+offset_left = 350.0
+offset_top = 250.0
+offset_right = 530.0
+offset_bottom = 380.0
+level_id = "ch1_sec1"
+level_name = "第一章：輸出放聲大哭"
+scene_to_load = "res://chapters/chapter_1/scenes/section_1.tscn"
+thumbnail_texture = ExtResource("3_baby_thumb")
+
+[node name="Ch2_Sec1" parent="ScrollContainer/MapContent" unique_id=1582013176 instance=ExtResource("2_node")]
+layout_mode = 1
+offset_left = 600.0
+offset_top = 380.0
+offset_right = 780.0
+offset_bottom = 510.0
+level_id = "ch2_sec1"
+level_name = "第二章 2.1：記憶變數"
+scene_to_load = "res://chapters/chapter_2/scenes/section_1.tscn"
+
+[node name="Ch2_Sec2" parent="ScrollContainer/MapContent" unique_id=1796786724 instance=ExtResource("2_node")]
+layout_mode = 1
+offset_left = 850.0
+offset_top = 180.0
+offset_right = 1030.0
+offset_bottom = 310.0
+level_id = "ch2_sec2"
+level_name = "第二章 2.2：跑腿計算"
+scene_to_load = "res://chapters/chapter_2/scenes/section_2.tscn"
+
+[node name="Ch2_Sec3" parent="ScrollContainer/MapContent" unique_id=284481006 instance=ExtResource("2_node")]
+layout_mode = 1
+offset_left = 1100.0
+offset_top = 350.0
+offset_right = 1280.0
+offset_bottom = 480.0
+level_id = "ch2_sec3"
+level_name = "第二章 2.3：便利商店"
+scene_to_load = "res://chapters/chapter_2/scenes/section_3.tscn"
+
+[node name="Ch3_Sec1" parent="ScrollContainer/MapContent" unique_id=2035210369 instance=ExtResource("2_node")]
+layout_mode = 1
+offset_left = 1350.0
+offset_top = 250.0
+offset_right = 1530.0
+offset_bottom = 380.0
+level_id = "ch3_sec1"
+level_name = "第三章 3.1：捷運"
+scene_to_load = "res://chapters/chapter_3/scenes/section_1.tscn"

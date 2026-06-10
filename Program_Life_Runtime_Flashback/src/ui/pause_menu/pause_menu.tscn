@@ -5,6 +5,7 @@
 
 [node name="PauseMenu" type="CanvasLayer" unique_id=711843813]
 process_mode = 2
+layer = 99
 script = ExtResource("1_fsbbv")
 
 [node name="Control" type="Control" parent="." unique_id=320532538]
@@ -57,6 +58,10 @@ text = "繼續遊戲"
 [node name="SettingsButton" type="Button" parent="Control/VBoxContainer/MainMenuButtons" unique_id=248723815]
 layout_mode = 2
 text = "設定選項"
+
+[node name="ReturnMapButton" type="Button" parent="Control/VBoxContainer/MainMenuButtons" unique_id=33669988]
+layout_mode = 2
+text = "返回關卡地圖"
 
 [node name="ExitButton" type="Button" parent="Control/VBoxContainer/MainMenuButtons" unique_id=999614075]
 layout_mode = 2

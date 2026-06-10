@@ -23,6 +23,23 @@ func _ready() -> void:
 	
 	# 連接音量滑條訊號
 	volume_slider.value_changed.connect(_on_volume_slider_changed)
+	
+	# 連接返回地圖按鈕訊號
+	var return_map_btn = get_node_or_null("Control/VBoxContainer/MainMenuButtons/ReturnMapButton")
+	if return_map_btn:
+		return_map_btn.pressed.connect(_on_return_map_button_pressed)
+
+func _process(_delta: float) -> void:
+	# 自動偵測當前場景，若是選單、登入或前言則隱藏齒輪設定按鈕
+	var current_scene = get_tree().current_scene
+	if current_scene:
+		var scene_path = current_scene.scene_file_path
+		var is_menu = (
+			scene_path.contains("login_screen") or 
+			scene_path.contains("prologue") or 
+			scene_path.contains("level_select")
+		)
+		$GearButton.visible = not is_menu
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -65,6 +82,10 @@ func _on_settings_button_pressed() -> void:
 func _on_back_button_pressed() -> void:
 	# 恢復原狀
 	reset_menu_view()
+
+func _on_return_map_button_pressed() -> void:
+	toggle_pause()
+	get_tree().change_scene_to_file("res://src/ui/level_select/level_select.tscn")
 
 func _on_volume_slider_changed(value: float) -> void:
 	var bus_index = AudioServer.get_bus_index(BUS_MASTER)
