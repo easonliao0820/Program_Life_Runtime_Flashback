@@ -15,6 +15,8 @@ const UNLOCK_RELATION = {
 # 玩家進度資料
 var unlocked_levels: Array = ["prologue", "ch1_sec1"]  # 初始解鎖前言與第一章
 var completed_levels: Array = []                      # 已通關關卡
+# 用來記錄玩家是否是從「關卡地圖」進入關卡的
+var coming_from_map: bool = false
 
 func _ready() -> void:
 	load_progress()

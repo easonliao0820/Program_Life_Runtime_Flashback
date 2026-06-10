@@ -55,14 +55,17 @@ func _ready() -> void:
 		textbook_mask.gui_input.connect(_on_textbook_mask_gui_input)
 	
 	if story_box:
-		if not story_box.story_finished.is_connected(_on_story_finished):
-			story_box.story_finished.connect(_on_story_finished)
-		if not story_box.sandbox_waiting.is_connected(_on_sandbox_waiting):
-			story_box.sandbox_waiting.connect(_on_sandbox_waiting)
-			
-		var data = load("res://chapters/chapter_1/data/ch1_intro_story.tres")
-		story_box.start_story(data)
-
+		story_box.story_finished.connect(_on_story_finished)
+		story_box.sandbox_waiting.connect(_on_sandbox_waiting)
+		
+		# 🟢 修改：如果是從關卡目錄點進來的，就跳過開場直接進入教學
+		if ProgressManager and ProgressManager.coming_from_map:
+			ProgressManager.coming_from_map = false # 重設標記，避免下次非目錄進入也被跳過
+			_skip_to_teach_phase()
+		else:
+			# 正常流程：播放誕生與哭泣劇情
+			var data = load("res://chapters/chapter_1/data/ch1_intro_story.tres")
+			story_box.start_story(data)
 func _on_story_finished() -> void:
 	if not _intro_done:
 		_intro_done = true
@@ -252,3 +255,22 @@ func _on_textbook_close_pressed() -> void:
 func _on_textbook_mask_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_on_textbook_close_pressed()
+		
+# 直接跳到教學階段並展開版面
+func _skip_to_teach_phase() -> void:
+	_intro_done = true
+	
+	# 1. 直接顯示左右面板（跳過動畫）
+	right_panel.show()
+	object_area.show()
+	chapter_buttons.hide_textbook()
+	
+	# 2. 直接設定為展開後的最終拉伸比例與不透明度
+	right_panel.size_flags_stretch_ratio = 3.0
+	object_area.size_flags_stretch_ratio = 1.0
+	right_panel.modulate.a = 1.0
+	object_area.modulate.a = 1.0
+	# 3. 調整對話框位置至右上角，並直接播放教學劇本（即「看到右邊的區域了嗎？那是屬於你的聲帶」）
+	story_box.reposition_to_top_right()
+	var teach_data = load("res://chapters/chapter_1/data/ch1_teach_story.tres")
+	story_box.start_story(teach_data)		

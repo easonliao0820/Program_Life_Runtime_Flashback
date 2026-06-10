@@ -57,6 +57,9 @@ func _on_pressed() -> void:
 		
 	if scene_to_load != "":
 		print("🚀 載入關卡：", level_name, " (", scene_to_load, ")")
+		# 🟢 新增：在載入新場景前，將全域標記設為 true
+		if ProgressManager:
+			ProgressManager.coming_from_map = true
 		get_tree().change_scene_to_file(scene_to_load)
 
 # 懸停縮放動畫
