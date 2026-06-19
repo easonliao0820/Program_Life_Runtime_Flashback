@@ -2,7 +2,7 @@ extends Node2D
 
 @onready var code_edit: CodeEdit = $CanvasLayer/MainLayout/RightPanel/CodingArea/CodeEdit
 @onready var output: Label = $CanvasLayer/MainLayout/RightPanel/FeedbackArea/OutputLabel
-@onready var button: Button = $CanvasLayer/MainLayout/RightPanel/FeedbackArea/RunButton
+@onready var button: TextureButton = $CanvasLayer/MainLayout/RightPanel/FeedbackArea/RunButton
 @onready var story_box = $CanvasLayer/StoryBox
 
 @onready var left_panel = $CanvasLayer/MainLayout/LeftPanel
@@ -45,6 +45,8 @@ func _ready() -> void:
 	chat_container.hide()
 
 	button.pressed.connect(_on_run_pressed)
+	button.mouse_entered.connect(_on_run_hover_in)
+	button.mouse_exited.connect(_on_run_hover_out)
 	code_edit.text_changed.connect(_on_code_typed)
 	chat_send_button.pressed.connect(_on_chat_send_pressed)
 	chat_input.text_submitted.connect(_on_chat_text_submitted)
@@ -245,6 +247,18 @@ func _on_ai_response(text: String) -> void:
 
 func _on_next_chapter_pressed() -> void:
 	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn") 
+
+func _on_run_hover_in() -> void:
+	button.pivot_offset = button.size / 2
+	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(button, "scale", Vector2(1.05, 1.05), 0.15)
+	tween.tween_property(button, "modulate", Color(1.3, 1.3, 1.3, 1.0), 0.15)
+
+func _on_run_hover_out() -> void:
+	button.pivot_offset = button.size / 2
+	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(button, "scale", Vector2(1.0, 1.0), 0.12)
+	tween.tween_property(button, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.12)
 
 func _on_code_typed() -> void:
 	var caret_pos = code_edit.get_caret_draw_pos()
