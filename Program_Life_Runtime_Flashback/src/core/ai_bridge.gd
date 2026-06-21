@@ -6,7 +6,14 @@ signal ai_response_received(text)
 # === 最頂層變數宣告區 ===
 var http: HTTPRequest 
 
+# 從 .env 讀出來的設定變數
+var api_key: String = ""
+var api_url: String = ""
+
 func _ready():
+	# 1. 優先讀取 .env 檔案
+	load_env_file()
+	
 	# 用程式碼主動檢查並建立，100% 安全
 	if not has_node("HTTPRequest"):
 		http = HTTPRequest.new()
@@ -17,6 +24,40 @@ func _ready():
 	http.request_completed.connect(
 		_on_http_request_request_completed
 	)
+
+# === 專門用來讀取 .env 檔案的函式（已校正 Godot 4 語法與縮排） ===
+func load_env_file():
+	var file_path = "res://.env"
+	if FileAccess.file_exists(file_path):
+		var file = FileAccess.open(file_path, FileAccess.READ)
+		
+		while not file.eof_reached():
+			var line = file.get_line().strip_edges()
+			# 略過空白行或註解
+			if line == "" or line.begins_with("#"):
+				continue
+			
+			# 用等號拆開左邊的 Key 和右邊的 Value
+			var parts = line.split("=", true, 1)
+			if parts.size() == 2:
+				var key = parts[0].strip_edges()
+				var value = parts[1].strip_edges()
+				
+				# 去除可能不小心加上的雙引號 ""
+				if value.begins_with("\"") and value.ends_with("\""):
+					value = value.substr(1, value.length() - 2)
+				
+				# 根據 .env 的名字存進變數
+				if key == "API_KEY":
+					api_key = value
+				elif key == "API_URL":
+					api_url = value
+		file.close()
+		print("=== [.env 讀取成功] ===")
+		print("網址: ", api_url)
+		print("金鑰前段: ", api_key.left(10), "...")
+	else:
+		print("⚠️ 找不到 .env 檔案，請確認它放在專案根目錄下！")
 
 func translate_error(error: String, code: String):
 	var prompt = """
@@ -93,12 +134,14 @@ func translate_error(error: String, code: String):
 	call_openai(prompt)
 
 func call_openai(prompt: String):
-	# 你的新版 AQ 金鑰（權限完全正常）
-	var raw_key = "AQ.Ab8RN6Lm8b4jHbPIzE-MH03l5EMUfeNOoreextWlDJsLERzg-Q"
-	var api_key = raw_key.strip_edges()
-	
-	# 固定使用目前最穩定的 2.5-flash，不走會噴 404 的舊路由了
-	var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + api_key
+	# 防呆：如果沒讀到變數，發出警告
+	if api_url == "" or api_key == "":
+		print("❌ 錯誤：未成功讀取 .env 設定，無法發送請求！")
+		emit_signal("ai_response_received", "「語之觀測者」陷入了沉睡，似乎少了某些啟動的契機……")
+		return
+
+	# 動態組合 URL
+	var url = api_url + api_key
 
 	var headers = PackedStringArray([
 		"Content-Type: application/json"
@@ -138,7 +181,6 @@ func _on_http_request_request_completed(_result, response_code, _headers, body):
 		
 	if response_code != 200:
 		print("AI連線失敗，代碼：" + str(response_code))
-		#emit_signal("ai_response_received", "AI連線失敗，代碼：" + str(response_code))
 		return
 
 	if json and json.has("candidates") and json["candidates"].size() > 0:
