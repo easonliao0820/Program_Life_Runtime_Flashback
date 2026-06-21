@@ -107,6 +107,22 @@ grow_vertical = 2
 texture = ExtResource("2_baby")
 expand_mode = 1
 
+[node name="NextChapterButton" type="Button" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea" unique_id=701236001]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -20.0
+offset_right = 80.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+text = "▶ 下一章節"
+
 [node name="ObjectArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel" unique_id=367580763]
 layout_mode = 2
 size_flags_vertical = 3
@@ -133,26 +149,29 @@ expand_mode = 1
 
 [node name="ChapterButtons" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=550974535 instance=ExtResource("4_chapter_buttons")]
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=721401284]
+[node name="HBoxContainer" type="VBoxContainer" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=721401284]
 layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -86.0
-offset_right = -20.0
-offset_bottom = -46.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -110.0
+offset_top = -50.0
+offset_right = 110.0
+offset_bottom = 50.0
 grow_horizontal = 2
-grow_vertical = 0
+grow_vertical = 2
+theme_override_constants/separation = 12
 
 [node name="LineEdit" type="LineEdit" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer" unique_id=1601905354]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Button" type="Button" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer" unique_id=990292865]
-custom_minimum_size = Vector2(80, 40)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "送出"
 
 [node name="LockOverlay" type="Control" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=701234003]
