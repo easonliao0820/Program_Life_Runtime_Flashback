@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bfcuemo3bj5yt" path="res://chapters/chapter_1/images/baby.png" id="2_baby"]
 [ext_resource type="Texture2D" path="res://chapters/chapter_1/images/code_bg.png" id="5_codebg"]
 [ext_resource type="Texture2D" path="res://chapters/chapter_1/images/codeoutput_bg.png" id="6_codeoutputbg"]
+[ext_resource type="Texture2D" path="res://chapters/chapter_1/images/lock.png" id="7_lock"]
 [ext_resource type="PackedScene" uid="uid://c8nu0iskb8prj" path="res://src/ui/story_box/story_box.tscn" id="3_story"]
 [ext_resource type="PackedScene" path="res://src/ui/chapter_buttons/chapter_buttons.tscn" id="4_chapter_buttons"]
 
@@ -139,6 +140,40 @@ custom_minimum_size = Vector2(80, 40)
 layout_mode = 2
 text = "送出"
 
+[node name="LockOverlay" type="Control" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=701234003]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Mask" type="ColorRect" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea/LockOverlay" unique_id=701234013]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="LockIcon" type="TextureRect" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea/LockOverlay" unique_id=701234023]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_lock")
+expand_mode = 3
+
 [node name="RightPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout" unique_id=1707972256]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -182,6 +217,40 @@ offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "print(\"你的名稱\")"
+
+[node name="LockOverlay" type="Control" parent="CanvasLayer/MainLayout/RightPanel/CodingArea" unique_id=701234001]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Mask" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/CodingArea/LockOverlay" unique_id=701234011]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="LockIcon" type="TextureRect" parent="CanvasLayer/MainLayout/RightPanel/CodingArea/LockOverlay" unique_id=701234021]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_lock")
+expand_mode = 3
 
 [node name="FeedbackArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel" unique_id=1882770461]
 layout_mode = 2
@@ -235,7 +304,57 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "Run"
 
+[node name="LockOverlay" type="Control" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea" unique_id=701234002]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Mask" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea/LockOverlay" unique_id=701234012]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="LockIcon" type="TextureRect" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea/LockOverlay" unique_id=701234022]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_lock")
+expand_mode = 3
+
 [node name="StoryBox" parent="CanvasLayer" unique_id=1009178172 instance=ExtResource("3_story")]
+
+[node name="TypingParticles" type="CPUParticles2D" parent="CanvasLayer" unique_id=701235001]
+emitting = false
+amount = 10
+lifetime = 0.45
+one_shot = true
+explosiveness = 0.95
+emission_shape = 0
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, 300.0)
+initial_velocity_min = 50.0
+initial_velocity_max = 120.0
+scale_amount_min = 2.0
+scale_amount_max = 5.0
+color = Color(0.972549, 0.815686, 0.552941, 1)
 
 [node name="TextbookLayer" type="CanvasLayer" parent="." unique_id=2082825747]
 layer = 10

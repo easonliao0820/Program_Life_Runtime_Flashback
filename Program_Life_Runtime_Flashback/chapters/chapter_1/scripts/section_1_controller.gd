@@ -14,6 +14,11 @@ extends Node2D
 @onready var chat_send_button: Button = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer/Button
 @onready var chat_container: HBoxContainer = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer
 
+@onready var lock_coding: Control = $CanvasLayer/MainLayout/RightPanel/CodingArea/LockOverlay
+@onready var lock_feedback: Control = $CanvasLayer/MainLayout/RightPanel/FeedbackArea/LockOverlay
+@onready var lock_object: Control = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/LockOverlay
+@onready var typing_particles: CPUParticles2D = $CanvasLayer/TypingParticles
+
 var chapter_buttons = null
 var textbook_panel: Control = null
 var textbook_close_button: Button = null
@@ -40,6 +45,7 @@ func _ready() -> void:
 	chat_container.hide()
 
 	button.pressed.connect(_on_run_pressed)
+	code_edit.text_changed.connect(_on_code_typed)
 	chat_send_button.pressed.connect(_on_chat_send_pressed)
 	chat_input.text_submitted.connect(_on_chat_text_submitted)
 
@@ -240,7 +246,20 @@ func _on_ai_response(text: String) -> void:
 func _on_next_chapter_pressed() -> void:
 	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn") 
 
+func _on_code_typed() -> void:
+	var caret_pos = code_edit.get_caret_draw_pos()
+	typing_particles.global_position = code_edit.global_position + caret_pos
+	typing_particles.restart()
+
 func _on_sandbox_waiting() -> void:
+	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.tween_property(lock_coding, "modulate:a", 0.0, 0.8)
+	tween.tween_property(lock_feedback, "modulate:a", 0.0, 0.8)
+	tween.tween_property(lock_object, "modulate:a", 0.0, 0.8)
+	await tween.finished
+	lock_coding.hide()
+	lock_feedback.hide()
+	lock_object.hide()
 	if chapter_buttons:
 		chapter_buttons.show_textbook()
 
