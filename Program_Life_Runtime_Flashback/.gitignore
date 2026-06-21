@@ -2,3 +2,6 @@
 addons/
 .godot/
 /android/
+# environment variables
+.env
+.env.*

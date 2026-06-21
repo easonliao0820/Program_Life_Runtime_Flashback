@@ -154,6 +154,7 @@ func sandbox_resolved() -> void:
 func can_run_sandbox() -> bool:
 	return is_waiting_for_sandbox
 	
+# ai錯誤轉譯後的內容顯示
 func show_ai_message(speaker:String, message:String):
 
 	main_box.show()
@@ -167,9 +168,3 @@ func show_ai_message(speaker:String, message:String):
 	is_typing = true
 	type_timer.start()
 	
-func ai_finished(text:String):
-
-	is_waiting_for_ai = false
-
-	name_label.text = "派森"
-	content_label.text = text
