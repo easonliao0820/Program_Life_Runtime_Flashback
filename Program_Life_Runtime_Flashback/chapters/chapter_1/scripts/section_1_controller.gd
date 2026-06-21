@@ -2,7 +2,7 @@ extends Node2D
 
 @onready var code_edit: CodeEdit = $CanvasLayer/MainLayout/RightPanel/CodingArea/CodeEdit
 @onready var output: Label = $CanvasLayer/MainLayout/RightPanel/FeedbackArea/OutputLabel
-@onready var button: Button = $CanvasLayer/MainLayout/RightPanel/FeedbackArea/RunButton
+@onready var button: TextureButton = $CanvasLayer/MainLayout/RightPanel/FeedbackArea/RunButton
 @onready var story_box = $CanvasLayer/StoryBox
 
 @onready var left_panel = $CanvasLayer/MainLayout/LeftPanel
@@ -12,13 +12,14 @@ extends Node2D
 # 聊天對話 UI 節點
 @onready var chat_input: LineEdit = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer/LineEdit
 @onready var chat_send_button: Button = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer/Button
-@onready var chat_container: HBoxContainer = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer
+@onready var chat_container: VBoxContainer = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer
 
 @onready var lock_coding: Control = $CanvasLayer/MainLayout/RightPanel/CodingArea/LockOverlay
 @onready var lock_feedback: Control = $CanvasLayer/MainLayout/RightPanel/FeedbackArea/LockOverlay
 @onready var lock_object: Control = $CanvasLayer/MainLayout/LeftPanel/ObjectArea/LockOverlay
 @onready var typing_particles: CPUParticles2D = $CanvasLayer/TypingParticles
 
+@onready var next_chapter_button: Button = $CanvasLayer/MainLayout/LeftPanel/StoryArea/NextChapterButton
 var chapter_buttons = null
 var textbook_panel: Control = null
 var textbook_close_button: Button = null
@@ -45,13 +46,15 @@ func _ready() -> void:
 	chat_container.hide()
 
 	button.pressed.connect(_on_run_pressed)
+	button.mouse_entered.connect(_on_run_hover_in)
+	button.mouse_exited.connect(_on_run_hover_out)
 	code_edit.text_changed.connect(_on_code_typed)
 	chat_send_button.pressed.connect(_on_chat_send_pressed)
 	chat_input.text_submitted.connect(_on_chat_text_submitted)
 
+	next_chapter_button.pressed.connect(_on_next_chapter_pressed)
+
 	if chapter_buttons:
-		if not chapter_buttons.next_chapter_pressed.is_connected(_on_next_chapter_pressed):
-			chapter_buttons.next_chapter_pressed.connect(_on_next_chapter_pressed)
 		if not chapter_buttons.textbook_pressed.is_connected(_on_textbook_pressed):
 			chapter_buttons.textbook_pressed.connect(_on_textbook_pressed)
 			
@@ -77,8 +80,7 @@ func _on_story_finished() -> void:
 		_intro_done = true
 	elif not _success_done:
 		_success_done = true
-		if chapter_buttons:
-			chapter_buttons.show_next_chapter()
+		next_chapter_button.show()
 		chat_container.show()
 		return
 	else:
@@ -237,14 +239,25 @@ func _on_ai_response(text: String) -> void:
 			story_box.start_story(chat_response_data)
 			
 		# 【重要優化】：當聊天結束且得到 AI 引導回覆後，直接顯示進入下一章的按鈕
-		if chapter_buttons:
-			chapter_buttons.show_next_chapter()
+		next_chapter_button.show()
 	else:
 		# 顯示 AI 轉譯後的錯誤資料
 		output.text = text
 
 func _on_next_chapter_pressed() -> void:
 	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn") 
+
+func _on_run_hover_in() -> void:
+	button.pivot_offset = button.size / 2
+	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(button, "scale", Vector2(1.05, 1.05), 0.15)
+	tween.tween_property(button, "modulate", Color(1.3, 1.3, 1.3, 1.0), 0.15)
+
+func _on_run_hover_out() -> void:
+	button.pivot_offset = button.size / 2
+	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(button, "scale", Vector2(1.0, 1.0), 0.12)
+	tween.tween_property(button, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.12)
 
 func _on_code_typed() -> void:
 	var caret_pos = code_edit.get_caret_draw_pos()

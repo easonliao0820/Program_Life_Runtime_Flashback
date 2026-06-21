@@ -5,8 +5,27 @@
 [ext_resource type="Texture2D" path="res://chapters/chapter_1/images/code_bg.png" id="5_codebg"]
 [ext_resource type="Texture2D" path="res://chapters/chapter_1/images/codeoutput_bg.png" id="6_codeoutputbg"]
 [ext_resource type="Texture2D" path="res://chapters/chapter_1/images/lock.png" id="7_lock"]
+[ext_resource type="Texture2D" path="res://chapters/chapter_1/images/actionBg.png" id="8_actionbg"]
+[ext_resource type="Texture2D" path="res://chapters/chapter_1/images/playbutton.png" id="9_playbutton"]
 [ext_resource type="PackedScene" uid="uid://c8nu0iskb8prj" path="res://src/ui/story_box/story_box.tscn" id="3_story"]
 [ext_resource type="PackedScene" path="res://src/ui/chapter_buttons/chapter_buttons.tscn" id="4_chapter_buttons"]
+
+[sub_resource type="Shader" id="Shader_runbtn"]
+code = "shader_type canvas_item;
+uniform float radius_px : hint_range(0, 100) = 10.0;
+void fragment() {
+	vec2 size = 1.0 / TEXTURE_PIXEL_SIZE;
+	vec2 pixel_pos = UV * size;
+	vec2 corner = abs(pixel_pos - size * 0.5) - (size * 0.5 - radius_px);
+	float d = length(max(corner, vec2(0.0))) - radius_px;
+	float alpha = 1.0 - smoothstep(radius_px - 1.0, radius_px + 1.0, d);
+	COLOR = texture(TEXTURE, UV);
+	COLOR.a *= alpha;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_runbtn"]
+shader = SubResource("Shader_runbtn")
+shader_parameter/radius_px = 10.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_textbook"]
 bg_color = Color(0.117647, 0.164706, 0.219608, 0.95)
@@ -88,6 +107,22 @@ grow_vertical = 2
 texture = ExtResource("2_baby")
 expand_mode = 1
 
+[node name="NextChapterButton" type="Button" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea" unique_id=701236001]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -20.0
+offset_right = 80.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+text = "▶ 下一章節"
+
 [node name="ObjectArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel" unique_id=367580763]
 layout_mode = 2
 size_flags_vertical = 3
@@ -101,43 +136,42 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.572549, 0.52549, 0.47451, 1)
 
-[node name="Label" type="Label" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=1454667453]
+[node name="BGImage" type="TextureRect" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=601234783]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8_actionbg")
+expand_mode = 1
+
+[node name="ChapterButtons" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=550974535 instance=ExtResource("4_chapter_buttons")]
+
+[node name="HBoxContainer" type="VBoxContainer" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=721401284]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -36.0
-offset_top = -11.5
-offset_right = 36.0
-offset_bottom = 11.5
+offset_left = -110.0
+offset_top = -50.0
+offset_right = 110.0
+offset_bottom = 50.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "物件區域"
-
-[node name="ChapterButtons" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=550974535 instance=ExtResource("4_chapter_buttons")]
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=721401284]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -86.0
-offset_right = -20.0
-offset_bottom = -46.0
-grow_horizontal = 2
-grow_vertical = 0
+theme_override_constants/separation = 12
 
 [node name="LineEdit" type="LineEdit" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer" unique_id=1601905354]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Button" type="Button" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer" unique_id=990292865]
-custom_minimum_size = Vector2(80, 40)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "送出"
 
 [node name="LockOverlay" type="Control" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" unique_id=701234003]
@@ -289,7 +323,7 @@ grow_horizontal = 2
 grow_vertical = 2
 autowrap_mode = 3
 
-[node name="RunButton" type="Button" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea" unique_id=237602836]
+[node name="RunButton" type="TextureButton" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea" unique_id=237602836]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -297,12 +331,15 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -80.0
-offset_top = -50.0
+offset_top = -80.0
 offset_right = -10.0
 offset_bottom = -10.0
 grow_horizontal = 0
 grow_vertical = 0
-text = "Run"
+material = SubResource("ShaderMaterial_runbtn")
+ignore_texture_size = true
+texture_normal = ExtResource("9_playbutton")
+stretch_mode = 5
 
 [node name="LockOverlay" type="Control" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea" unique_id=701234002]
 layout_mode = 1
