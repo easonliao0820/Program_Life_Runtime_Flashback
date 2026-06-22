@@ -153,3 +153,23 @@ func sandbox_resolved() -> void:
 		
 func can_run_sandbox() -> bool:
 	return is_waiting_for_sandbox
+	
+func show_ai_message(speaker:String, message:String):
+
+	main_box.show()
+	name_box.show()
+
+	name_label.text = speaker
+
+	content_label.text = message
+	content_label.visible_characters = 0
+
+	is_typing = true
+	type_timer.start()
+	
+func ai_finished(text:String):
+
+	is_waiting_for_ai = false
+
+	name_label.text = "派森"
+	content_label.text = text

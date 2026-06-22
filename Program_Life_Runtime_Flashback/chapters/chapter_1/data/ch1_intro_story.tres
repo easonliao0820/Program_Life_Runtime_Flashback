@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="DialogueData" load_steps=13 format=3]
+[gd_resource type="Resource" script_class="DialogueData" format=3 uid="uid://c4ert5bbeo7q"]
 
-[ext_resource type="Script" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
-[ext_resource type="Script" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
 
 [sub_resource type="Resource" id="Resource_line1"]
 script = ExtResource("1_step")
@@ -56,4 +56,3 @@ line = "「這是給你的第一個代價。跟這個世界打招呼吧」"
 [resource]
 script = ExtResource("2_data")
 dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8"), SubResource("Resource_line9"), SubResource("Resource_line10")])
-next_interaction = 0

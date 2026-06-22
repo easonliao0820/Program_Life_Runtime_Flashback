@@ -135,12 +135,16 @@ func _on_run_pressed() -> void:
 		result = SandboxManager.run_code(code)
 
 	print("執行結果: ", result)
-	output.text = result
+	#output.text = result
 	
 	# 判定結果
 	if result.begins_with("❌"):
 		print("進行AI轉譯")
-		output.text = "「語之觀測者」正在窺探程式裂縫..."
+		#output.text = "「語之觀測者」正在窺探程式裂縫..."
+		story_box.show_ai_message(
+			"派森",
+			"「語之觀測者」正在窺探程式裂縫..."
+		)
 		AiBridge.translate_error(result, code)
 		# 注意：此時按鈕保持禁用，直到 _on_ai_response 回應後解鎖
 	else:
@@ -242,7 +246,13 @@ func _on_ai_response(text: String) -> void:
 		next_chapter_button.show()
 	else:
 		# 顯示 AI 轉譯後的錯誤資料
-		output.text = text
+		#output.text = text
+		story_box.show_ai_message(
+			"派森",
+			text
+		)
+		print("AI回覆："+text)
+		#story_box.ai_finished(text)
 
 func _on_next_chapter_pressed() -> void:
 	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn") 
