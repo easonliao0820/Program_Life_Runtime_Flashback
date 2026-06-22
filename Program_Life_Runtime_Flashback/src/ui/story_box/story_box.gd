@@ -116,7 +116,7 @@ func check_next_phase() -> void:
 ## 將對話框移至左上角（四象限版面展開後使用）
 ## width_ratio: MainBox 佔螢幕寬度的比例（0.0 ~ 1.0）
 ## box_height:  MainBox 的高度（px）
-func reposition_to_top_right(width_ratio: float = 0.6, box_height: float = 25.0) -> void:
+func reposition_to_top_right(width_ratio: float = 0.6, box_height: float = 65.0) -> void:
 	main_box.custom_minimum_size = Vector2(0, box_height)
 
 	main_box.anchor_left   = 0.0
