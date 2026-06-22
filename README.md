@@ -30,6 +30,9 @@ AI 整合：Google Gemini API (NLP 語意理解)
 上傳原則
 開fork->拉麵->PUSH自己家->做事情->COMMIT->拉麵->PUSH自己家->推到MAIN
 
+API
+打開Google AI Studio API Key 複製建立的KEY 回到專題資料夾後打開.env->修改API_KEY
+
 Setup
 下載 Python for Godot (py4godot)
 開啟 Godot 專案
