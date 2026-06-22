@@ -255,7 +255,7 @@ func _on_ai_response(text: String) -> void:
 		#story_box.ai_finished(text)
 
 func _on_next_chapter_pressed() -> void:
-	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/section_1.tscn") 
+	get_tree().change_scene_to_file("res://chapters/chapter_2/scenes/ch2_prologue.tscn")
 
 func _on_run_hover_in() -> void:
 	button.pivot_offset = button.size / 2
