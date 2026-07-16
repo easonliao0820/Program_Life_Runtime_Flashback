@@ -1,0 +1,112 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://chapters/chapter_2/scripts/ch2_prologue.gd" id="1_script"]
+
+[node name="Ch2Prologue" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="NarrativeContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -150.0
+offset_right = 400.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="ChineseAct" type="VBoxContainer" parent="NarrativeContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Body" type="Label" parent="NarrativeContainer/ChineseAct"]
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "程式必須為了讓人閱讀而寫，
+讓機器執行，只是順帶的事。"
+autowrap_mode = 3
+
+[node name="Source" type="Label" parent="NarrativeContainer/ChineseAct"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.784314, 0.784314, 0.784314, 1)
+theme_override_font_sizes/font_size = 18
+text = "——哈洛德・阿伯森"
+horizontal_alignment = 2
+
+[node name="EnglishAct" type="VBoxContainer" parent="NarrativeContainer"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Body" type="Label" parent="NarrativeContainer/EnglishAct"]
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "\"Programs must be written for people to read,
+and only incidentally for machines to execute.\""
+autowrap_mode = 3
+
+[node name="Source" type="Label" parent="NarrativeContainer/EnglishAct"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.784314, 0.784314, 0.784314, 1)
+theme_override_font_sizes/font_size = 14
+text = "— Harold Abelson, \"Structure and Interpretation of Computer Programs\""
+horizontal_alignment = 2
+
+[node name="StartHint" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -20.0
+offset_right = 200.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_font_sizes/font_size = 18
+text = "請按空白鍵開始"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ContinueHint" type="Label" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -100.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.705882, 0.705882, 0.705882, 1)
+theme_override_font_sizes/font_size = 18
+text = "{ 按下空白鍵繼續 }"
+horizontal_alignment = 1
+vertical_alignment = 1
