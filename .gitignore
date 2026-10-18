@@ -7,3 +7,6 @@ Program_Life_Runtime_Flashback/addons/
 # 排除 Python 編譯檔
 __pycache__/
 *.py[cod]
+
+# 排除環境變數檔（含 API key）
+.env
