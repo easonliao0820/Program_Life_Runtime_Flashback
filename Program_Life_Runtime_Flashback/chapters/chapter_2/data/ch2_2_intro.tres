@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「你長高了呢，真可愛。」"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「你在捉弄我嗎？……也是，從嬰兒變成幼兒，本來就會有個成長期嘛。」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（派森笑而不語，提到每個人或多或少，都會有爸媽帶著自己認識世界的經歷。）"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = "媽媽"
+line = "「小孩，你長大了，就快要去上學了呢。所以媽媽今天要讓你練習去買早餐。」"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「好～」"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（媽媽牽著你的手，帶著你走。跟著那高大的背影，你覺得漸漸長大其實也不錯——跟著爸媽，或許可以體驗到比家裡更大的世界。）"
+
+[sub_resource type="Resource" id="Resource_line7"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（來到家裡附近的早餐店。）"
+
+[sub_resource type="Resource" id="Resource_line8"]
+script = ExtResource("1_step")
+speaker = "媽媽"
+line = "「你去跟早餐店阿姨點你喜歡吃的吧。」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8")])
+next_interaction = 0

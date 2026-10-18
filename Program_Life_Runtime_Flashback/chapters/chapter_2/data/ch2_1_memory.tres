@@ -1,0 +1,55 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「小時候的記憶總是美好的。我還記得在遊樂場跟爸媽玩溜滑梯、在電視前面跟他們一起看卡通、還有去廟裡的時候，明明兩個那麼想賺大錢的人，許願時卻只為我許下身體健康、開心長大。」"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「錢明明那麼難賺，他們還是願意為了我買下我喜歡的玩具。明明他們做了這麼多，但為什麼我的第一印象，想到的卻都是他們兇我、生氣時的反應呢。」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「這跟人的天性有關係。人在幾百萬年前，遇到害怕的事情就很有可能會死亡，比如老虎、蛇、蜜蜂——如果人們不記錄下這些恐懼，很有可能下一個死的就是你。」"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「所以漸漸的，人只要遇到害怕的事情，有的僵直、有的咆哮、有的逃避，但永遠不會忘記。」"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「但我真的好想儲存下爸媽現在的愛。之後會遇到的事情會越來越多，記憶只會變得越來越淡。派森，求你教我怎麼記下他們的樣子吧。」"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「那你很適合把愛存在變數裡面呢。」"
+
+[sub_resource type="Resource" id="Resource_line7"]
+script = ExtResource("1_step")
+speaker = "系統"
+line = "變數，是一個盒子，讓你把想要存放的東西放進去。"
+
+[sub_resource type="Resource" id="Resource_line8"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「例如 love = \"you\"，代表的是我把一個叫 love 的盒子，放入了 \"you\" 這串字。」"
+
+[sub_resource type="Resource" id="Resource_line9"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「換你了。建立一個 love 變數，放進去你想記住的東西，再用 print() 把它說出來。」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8"), SubResource("Resource_line9")])
+next_interaction = 1
+sandbox_wait_message = "先寫 love = \"你想記住的東西\"，再寫 print(\"我愛我的\" + love)，點擊 [color=yellow]▶ Run[/color] 執行。"

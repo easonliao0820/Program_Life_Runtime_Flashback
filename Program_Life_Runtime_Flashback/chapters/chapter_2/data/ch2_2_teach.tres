@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = "媽媽"
+line = "「原來你喜歡吃這個啊，來，媽媽先示範怎麼算吧。」"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "媽媽"
+line = "「這個培根蛋吐司加中冰奶，可以這樣計算——」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（媽媽在你面前寫下：培根蛋 = 35　中冰奶 = 25　print(培根蛋 + 中冰奶)）"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = "媽媽"
+line = "「換你試試看吧，寶貝。」"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「在日常生活中，只要寫得出算式，程式就能幫你算出答案。」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5")])
+next_interaction = 1
+sandbox_wait_message = "把你點的早餐項目分別存成變數並相加，例如 item1 = 35，item2 = 25，再 print(item1 + item2) 算出總價。"

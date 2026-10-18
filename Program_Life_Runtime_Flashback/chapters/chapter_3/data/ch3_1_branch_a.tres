@@ -1,0 +1,69 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（bag 裡裝著要送倖芳的禮物。你到了捷運站，發現車站裡沒有倖芳的影子。你快速穿梭在人群之中，想盡快找到她——上車的提示聲催促著，你心裡很清楚，如果不上這班車，肯定會遲到。在關門前一刻，你抱著不甘的心情上了車。）"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「天啊，怎麼今天睡過頭！好不容易約到她一起上學的……」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「命運是個神奇的東西。有時候你千辛萬苦，只為了見她一面；但有時候不刻意，她也會出現在你面前——或許這就是命運好玩的地方呢。」"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「你是什麼哲學老師嗎，不要在這種時候講人生大道理好嗎，我已經夠難過的了……」"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（你感覺到有隻小手搭在你的肩上。）"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = "……"
+line = "「我終於擠過來了。」"
+
+[sub_resource type="Resource" id="Resource_line7"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「倖芳！你怎麼在這裡，我以為你早就去上學了！」"
+
+[sub_resource type="Resource" id="Resource_line8"]
+script = ExtResource("1_step")
+speaker = "倖芳"
+line = "「我原本以為你遲到了，沒想到我在車廂裡看到窗外一個很像你的人跑到隔壁車廂，我就往隔壁車廂去了——好險沒認錯呢。」"
+
+[sub_resource type="Resource" id="Resource_line9"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「車廂那麼擠，你不會很麻煩嗎？」"
+
+[sub_resource type="Resource" id="Resource_line10"]
+script = ExtResource("1_step")
+speaker = "倖芳"
+line = "「我想說你都跑得滿頭大汗了，我走到隔壁車廂還好吧。」"
+
+[sub_resource type="Resource" id="Resource_line11"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（心裡頓時充滿溫暖的感覺，你拿出了不算貴重、但充滿感情的禮物，遞給了倖芳。那天雖然因為忘記帶東西出門，被老師罵得狗血淋頭，但你相信倖芳臉上洋溢的笑容是值得的——那個明明擁擠的車廂上，卻感覺只有你們兩個人。）"
+
+[sub_resource type="Resource" id="Resource_line12"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「這個世界可能真的有命運，也有可能，是你的努力才讓期望成真了。」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8"), SubResource("Resource_line9"), SubResource("Resource_line10"), SubResource("Resource_line11"), SubResource("Resource_line12")])
+next_interaction = 0

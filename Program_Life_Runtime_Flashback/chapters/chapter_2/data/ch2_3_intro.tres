@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「時間過得真快，不知不覺你也國中了。」"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「很快嗎？我怎麼覺得時間過得很慢呢。感覺一整天都在等待——早上等爸媽送我到學校，等下課可以跟朋友聊天，等放學後的補習班，聽課時想著下課要買什麼點心，也等待會考那天到來。」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「人生總是在等待，並期待著——在不自由中期待著自由。話說，今天爸媽怎麼沒有送你上學、買早餐？」"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「媽媽說我也長大了，有些事情可以自己來，所以給我零用錢，讓我自己去便利商店買東西吃。而且學校離家裡也不遠。」"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「他很放心你喔。」"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「可能是在家長會上，發現其他同學的家長已經開始給零用錢了吧，所以才放手讓我試試看。」"
+
+[sub_resource type="Resource" id="Resource_line7"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「那你可以學習怎麼用程式快速跟店員溝通、怎麼判斷是非了。」"
+
+[sub_resource type="Resource" id="Resource_line8"]
+script = ExtResource("1_step")
+speaker = "系統"
+line = "布林值（Boolean）只有兩種答案：True（是）或 False（不是）。搭配 if／else，程式就能替你做判斷。"
+
+[sub_resource type="Resource" id="Resource_line9"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「關於小數點後的進位，這個小工具會很有幫助——round()，可以幫你四捨五入。」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8"), SubResource("Resource_line9")])
+next_interaction = 0

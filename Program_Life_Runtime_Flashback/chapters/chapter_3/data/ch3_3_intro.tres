@@ -1,0 +1,64 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（不知不覺，時間來到了考試前 25 天。你感覺到頭暈目眩、全身發熱，怎麼樣都讀不下書，但想著不管怎樣都要把這一回的考古題寫完——下一刻，你感覺全身失重，眼睛也不爭氣地閉上了。）"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「我是死了嗎？」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「或許沒有。畢竟，這是你第一次離我那麼近。」"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（你稍微看了一下附近，驚覺你在一個廟裡面。）"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「我在哪裡？？」"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「這是家裡附近文昌帝君的廟。你昏倒後，爸媽急急忙忙送你去醫院，但我發現你並不在裡面。當我在想你會去哪裡時，發現你那位平時除了菜市場就是在家看劇的奶奶，背著側背包出門了——我也好奇地跟了上來，就發現你也在這裡。」"
+
+[sub_resource type="Resource" id="Resource_line7"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「我奶奶呢？」"
+
+[sub_resource type="Resource" id="Resource_line8"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「在那裡啊。」"
+
+[sub_resource type="Resource" id="Resource_line9"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（你發現一個留著小捲髮、穿著花襯衫的長輩跪在拜墊上，虔誠地拜向文昌帝君，嘴裡默念著什麼。）"
+
+[sub_resource type="Resource" id="Resource_line10"]
+script = ExtResource("1_step")
+speaker = "奶奶"
+line = "「請文昌帝君保佑我們家孩子，可以身體健康，讀到他想要的學校。請文昌帝君保佑他，拜託拜託——如果可以，請給個聖杯。」"
+
+[sub_resource type="Resource" id="Resource_line11"]
+script = ExtResource("1_step")
+speaker = "系統"
+line = "擲筊會出現三種結果：聖杯（允杯）、笑杯、陰杯。連續擲出三次聖杯，代表神明答應了。程式的世界裡，這叫 random 加上 while 迴圈——不知道要重複幾次，就用 while，一直做到條件成立為止。"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8"), SubResource("Resource_line9"), SubResource("Resource_line10"), SubResource("Resource_line11")])
+next_interaction = 0

@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = "媽媽"
+line = "「真棒啊寶貝！以後買東西都要自己先算過一遍喔，這樣當別人算錯的時候，你才不會多付錢。」"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（你接過阿姨遞來的早餐，一口一口吃著，為自己的成長感到開心，臉上露出幸福的表情。）"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "媽媽"
+line = "「你喜歡吃這個嗎？以後媽媽都幫你買這個，可以嗎？」"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（吃得津津有味的你，聽到以後都可以吃到像今天一樣的美味，開心地點了點頭。）"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「真是幸福。希望你在未來的某一天，還會想起呢。」"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = "系統"
+line = "🏆 成就解鎖：第一次算數"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6")])
+next_interaction = 0

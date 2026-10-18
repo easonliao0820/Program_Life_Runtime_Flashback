@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（你檢查了一下背包，發現簡章要求的五個物品都帶齊了！）"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「出發！」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（一陣白光。你感覺到晃動。）"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = "翊丞"
+line = "「欸兄弟，起床了，這堂課教授會點名啊！」"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（是你的大學同學，在叫你起床上課。）"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「啊，怎麼鬧鐘沒叫啊！」"
+
+[sub_resource type="Resource" id="Resource_line7"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「誰叫你昨天打遊戲打到半夜，上床就直接睡了。」"
+
+[sub_resource type="Resource" id="Resource_line8"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（大學了。離開爸媽後，你開始試著過自己想過的生活——打工、買自己想買的東西。或許帶來了一點孤單和不知所措，但你相信，一切都會好起來。）"
+
+[sub_resource type="Resource" id="Resource_line9"]
+script = ExtResource("1_step")
+speaker = "教授"
+line = "「今天期末考，相信大家都有好好背我上課畫的重點。」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8"), SubResource("Resource_line9")])
+next_interaction = 0

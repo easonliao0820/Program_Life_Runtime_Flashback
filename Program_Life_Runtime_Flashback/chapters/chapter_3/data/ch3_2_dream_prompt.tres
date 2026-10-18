@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（手機傳來震動的聲音，你拿起手機查閱了一下是誰傳來的訊息。）"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "倖芳"
+line = "「最後 100 天了，你準備的還好嗎？」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「我快撐不住了 QQ」"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = "倖芳"
+line = "「我有個小方法，每次當我快撐不住的時候，就會想想自己的夢想——比如說，我想去一個舒服的湖邊定居，看著日升日落悠閒地度過。你呢？你的夢想是什麼？」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4")])
+next_interaction = 2
+ai_wait_message = "在下方輸入你的夢想，回覆倖芳。"

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（bag 裡沒有裝上要送倖芳的禮物——在家裡沒找到，出門前也就沒帶。你到了捷運站，發現沒有她的身影。心想，或許這就是命運：今天東西都帶齊了，要上課完全沒問題，但或許，這就是那些差點遲到的學生，能獲得的結局。）"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「命運是個神奇的東西。有時候你千辛萬苦，只為了見她一面；但有時候不刻意，她也會出現在你面前——或許這就是命運殘酷的地方呢。」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2")])
+next_interaction = 0

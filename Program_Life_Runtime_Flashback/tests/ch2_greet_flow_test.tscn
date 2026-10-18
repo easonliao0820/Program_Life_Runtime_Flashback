@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/ch2_greet_flow_test.gd" id="1_driver"]
+[ext_resource type="PackedScene" path="res://chapters/chapter_2/scenes/section_1.tscn" id="2_target"]
+
+[node name="TestHarness" type="Node"]
+script = ExtResource("1_driver")
+
+[node name="Chapter2Section1" parent="." instance=ExtResource("2_target")]
