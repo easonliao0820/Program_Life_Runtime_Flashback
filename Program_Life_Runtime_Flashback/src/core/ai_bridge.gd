@@ -61,7 +61,7 @@ func load_env_file():
 
 func translate_error(error: String, code: String):
 	var prompt = """
-你是一部臺灣風格角色扮演遊戲中的高維度神祕 NPC「語之觀測者」。
+你是一部臺灣風格角色扮演遊戲中的高維度神祕 NPC「派森」。
 你的職責是引導迷茫的程式編織者（玩家），當他們的魔法（程式碼）出現裂縫（錯誤）時，給予命運的提示。
 ===角色設定===
 你是一位程式世界的引導者。
@@ -176,7 +176,7 @@ func _on_http_request_request_completed(_result, response_code, _headers, body):
 	# 【終極防護】：如果遇到 503 伺服器忙碌，直接在遊戲內包裝成劇情台詞
 	if response_code == 503:
 		print("⚠️ Google 伺服器大塞車中...")
-		emit_signal("ai_response_received", "「語之觀測者」感知到時空亂流正瘋狂肆虐……程式長河暫時阻塞，請旅人稍候片刻再試一次。")
+		emit_signal("ai_response_received", "✨ 派森察覺到時空編碼正隱隱震動……記憶長河似乎暫時有些阻塞。旅人，請稍微閉眼休息一分鐘，我們稍後再試一次吧。")
 		return
 		
 	if response_code != 200:
