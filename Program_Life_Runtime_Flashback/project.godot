@@ -24,6 +24,18 @@ ThemeManager="*res://src/core/theme_manager.gd"
 PauseMenu="*uid://du1kp4ljdikh8"
 AiBridge="*uid://dl5ertv75mjxm"
 ProgressManager="*uid://bqw1uc7gvc0ny"
+GameState="*res://src/game/core/game_state.gd"
+GameFlow="*res://src/game/core/game_flow.gd"
+PythonRunner="*res://src/game/core/python_runner.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [input]
 

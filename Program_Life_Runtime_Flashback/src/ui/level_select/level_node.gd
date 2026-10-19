@@ -4,6 +4,10 @@ extends TextureButton
 @export var level_name: String = ""
 @export var scene_to_load: String = ""
 @export var thumbnail_texture: Texture2D
+## 新架構：對應 ChapterRegistry 的小節 id。有設定時改用 GameState 的進度，點下去由 GameFlow 從該節開始。
+@export var section_id: String = ""
+## 開發用：記憶地圖打開「全部解鎖」時為 true
+var force_unlocked: bool = false
 
 @onready var title_label: Label = $TitleLabel
 @onready var thumbnail_rect: TextureRect = $MarginContainer/ThumbnailRect
@@ -31,16 +35,19 @@ func _ready() -> void:
 
 # 根據 ProgressManager 更新關卡節點狀態
 func update_status() -> void:
-	if not ProgressManager:
+	var is_completed := false
+	if section_id != "":
+		is_locked = not (force_unlocked or GameState.is_section_unlocked(section_id))
+		is_completed = GameState.is_section_completed(section_id)
+	elif ProgressManager:
+		is_locked = not ProgressManager.is_level_unlocked(level_id)
+		is_completed = ProgressManager.is_level_completed(level_id)
+	else:
 		return
-		
-	# 檢查解鎖狀態
-	is_locked = not ProgressManager.is_level_unlocked(level_id)
 	self.disabled = is_locked
 	locked_overlay.visible = is_locked
 	
 	# 檢查通關狀態
-	var is_completed = ProgressManager.is_level_completed(level_id)
 	completed_indicator.visible = is_completed
 	
 	# 根據狀態調整透明度與外觀
@@ -54,7 +61,12 @@ func update_status() -> void:
 func _on_pressed() -> void:
 	if is_locked:
 		return
-		
+
+	if section_id != "":
+		print("🚀 從記憶地圖進入：", level_name, " (", section_id, ")")
+		GameFlow.play_from_map(section_id)
+		return
+
 	if scene_to_load != "":
 		print("🚀 載入關卡：", level_name, " (", scene_to_load, ")")
 		# 🟢 新增：在載入新場景前，將全域標記設為 true

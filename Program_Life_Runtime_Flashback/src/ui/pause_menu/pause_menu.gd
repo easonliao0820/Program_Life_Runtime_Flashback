@@ -37,7 +37,8 @@ func _process(_delta: float) -> void:
 		var is_menu = (
 			scene_path.contains("login_screen") or 
 			scene_path.contains("prologue") or 
-			scene_path.contains("level_select")
+			scene_path.contains("level_select") or
+			scene_path.contains("res://src/game/")
 		)
 		$GearButton.visible = not is_menu
 
