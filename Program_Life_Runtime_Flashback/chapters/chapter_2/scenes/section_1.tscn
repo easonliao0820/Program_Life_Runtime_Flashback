@@ -1,21 +1,330 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://chapters/chapter_2/scripts/section_2_controller.gd" id="1_gds"]
+[ext_resource type="PackedScene" uid="uid://c8nu0iskb8prj" path="res://src/ui/story_box/story_box.tscn" id="2_story"]
+[ext_resource type="PackedScene" path="res://src/ui/chapter_buttons/chapter_buttons.tscn" id="3_chapter_buttons"]
+[ext_resource type="Texture2D" uid="uid://co62eqq1gyeax" path="res://chapters/chapter_1/images/actionBg.png" id="4_actionbg"]
+[ext_resource type="Texture2D" uid="uid://c5nld50ie522h" path="res://chapters/chapter_1/images/code_bg.png" id="5_codebg"]
+[ext_resource type="Texture2D" uid="uid://dwoas5vyat8ec" path="res://chapters/chapter_1/images/codeoutput_bg.png" id="6_codeoutputbg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_textbook"]
+bg_color = Color(0.117647, 0.164706, 0.219608, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.972549, 0.815686, 0.552941, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(4, 4)
+
 [node name="Chapter2Section1" type="Node2D"]
+script = ExtResource("1_gds")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Label" type="Label" parent="CanvasLayer"]
-layout_mode = 3
+[node name="MainLayout" type="HBoxContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="LeftPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 7.0
+theme_override_constants/separation = 0
+
+[node name="StoryArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/LeftPanel/StoryArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.94902, 0.831373, 0.611765, 1)
+
+[node name="ObjectArea" type="Control" parent="CanvasLayer/MainLayout/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.635294, 0.560784, 0.4, 1)
+
+[node name="BGImage" type="TextureRect" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_actionbg")
+expand_mode = 1
+
+[node name="ChapterButtons" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea" instance=ExtResource("3_chapter_buttons")]
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea"]
+visible = false
+layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -20.0
-offset_right = 100.0
-offset_bottom = 20.0
+offset_left = -110.0
+offset_top = -50.0
+offset_right = 110.0
+offset_bottom = 50.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "第二章 Coming Soon..."
-horizontal_alignment = 1
+theme_override_constants/separation = 12
+
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "跟派森說點什麼..."
+
+[node name="Button" type="Button" parent="CanvasLayer/MainLayout/LeftPanel/ObjectArea/HBoxContainer"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "送出"
+
+[node name="RightPanel" type="VBoxContainer" parent="CanvasLayer/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+theme_override_constants/separation = 0
+
+[node name="CodingArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/CodingArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.333333, 0.407843, 0.466667, 1)
+
+[node name="BGImage" type="TextureRect" parent="CanvasLayer/MainLayout/RightPanel/CodingArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_codebg")
+expand_mode = 1
+
+[node name="CodeEdit" type="CodeEdit" parent="CanvasLayer/MainLayout/RightPanel/CodingArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "print(\"我的感想\")"
+
+[node name="FeedbackArea" type="Control" parent="CanvasLayer/MainLayout/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BG" type="ColorRect" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.176471, 0.321569, 0.619608, 1)
+
+[node name="BGImage" type="TextureRect" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_codeoutputbg")
+expand_mode = 1
+
+[node name="OutputLabel" type="Label" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+autowrap_mode = 3
+
+[node name="RunButton" type="Button" parent="CanvasLayer/MainLayout/RightPanel/FeedbackArea"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -40.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "▶ Run"
+
+[node name="StoryBox" parent="CanvasLayer" instance=ExtResource("2_story")]
+
+[node name="TextbookLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="TextbookPanel" type="Control" parent="TextbookLayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BackgroundMask" type="ColorRect" parent="TextbookLayer/TextbookPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.588235)
+
+[node name="WindowContainer" type="PanelContainer" parent="TextbookLayer/TextbookPanel"]
+custom_minimum_size = Vector2(850, 480)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -425.0
+offset_top = -240.0
+offset_right = 425.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_textbook")
+
+[node name="MarginContainer" type="MarginContainer" parent="TextbookLayer/TextbookPanel/WindowContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 25
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Header" type="HBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
+theme_override_font_sizes/font_size = 22
+text = "📖 學習教材 - 第二章：幼兒到國中"
+
+[node name="CloseButton" type="Button" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Header"]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 18
+text = "X"
+
+[node name="HSeparator" type="HSeparator" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="Body" type="HBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 25
+
+[node name="LeftCol" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="SectionTitle" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
+theme_override_font_sizes/font_size = 18
+text = "🎬 章節介紹"
+
+[node name="StoryText" type="RichTextLabel" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/LeftCol"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.901961, 0.901961, 0.901961, 1)
+theme_override_font_sizes/normal_font_size = 15
+bbcode_enabled = true
+text = "從嬰兒長成幼兒、再到國中，你會學會把重要的回憶存進[color=#F8D08D]變數[/color]、
+在早餐店學會用程式[color=#F8D08D]計算金額[/color]，
+在便利商店學會用 [color=#F8D08D]if / else[/color] 判斷店員算得對不對。"
+
+[node name="VSeparator" type="VSeparator" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
+layout_mode = 2
+
+[node name="RightCol" type="VBoxContainer" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="SectionTitle" type="Label" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.972549, 0.815686, 0.552941, 1)
+theme_override_font_sizes/font_size = 18
+text = "💻 程式概念：變數、運算、判斷"
+
+[node name="ProgText" type="RichTextLabel" parent="TextbookLayer/TextbookPanel/WindowContainer/MarginContainer/VBox/Body/RightCol"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.901961, 0.901961, 0.901961, 1)
+theme_override_font_sizes/normal_font_size = 15
+bbcode_enabled = true
+text = "[b]1. 變數 (Variable)[/b]
+用 [code]=[/code] 把值放進一個有名字的盒子裡：[code]love = \"you\"[/code]
+
+[b]2. 運算 (+)[/b]
+變數可以直接相加：[code]print(item1 + item2)[/code]
+
+[b]3. 布林與 if / else[/b]
+[code]round()[/code] 四捨五入，[code]if 條件: ... else: ...[/code] 依條件走不同分支。"

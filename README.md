@@ -16,6 +16,11 @@
 確認右上角顯示為 Compatibility (相容性) 模式。
 (繪算器:相容性)
 
+🧭 整體遊戲架構
+劇情依《專題劇情_完整版》與《畫面設定書》寫成 .story 劇本（Program_Life_Runtime_Flashback/chapters/*/story/），
+畫面模式、劇本語法、素材放置位置、測試方式見 Program_Life_Runtime_Flashback/docs/GAME_STRUCTURE.md。
+改完劇本請跑：godot --headless --path Program_Life_Runtime_Flashback res://tests/full_playthrough_test.tscn
+
 🛠️ 技術架構
 遊戲引擎：Godot 4.x (Compatibility Mode for Web)
 

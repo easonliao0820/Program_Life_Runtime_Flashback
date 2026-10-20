@@ -85,8 +85,8 @@ func _input(event):
 	elif is_animating:
 		skip_animation()
 	elif hint.modulate.a >= 0.9:
-		print("前言結束，進入第一章...")
-		get_tree().change_scene_to_file("res://chapters/chapter_1/scenes/section_1.tscn")
+		print("前言結束，進入名字輸入...")
+		GameFlow.start_game()
 
 func skip_animation():
 	if main_tween:

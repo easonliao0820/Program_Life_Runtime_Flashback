@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（光影流轉，你已經不再是那個只會哭的嬰兒了。虛空中那道熟悉的投影，再次浮現在你眼前。）"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「你來到這裡也有一段時間了吧？還習慣嗎？」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「用 print() 告訴我，你現在的感想吧。」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3")])
+next_interaction = 1
+sandbox_wait_message = "用 print(\"你的感想\") 告訴派森你現在的心情，點擊 [color=yellow]▶ Run[/color] 執行。"

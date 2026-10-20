@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「接下來的日子，會在學校、圖書館、家裡、咖啡廳之間來回不停。與其一天一天熬，不如讓我幫你把時間加速吧。」"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（locations = [\"學校\", \"圖書館\", \"家裡\", \"咖啡廳\"]　for day in range(100, 0, -1):　current_location = locations[day % len(locations)]　print(f\"倒數 第{day}天 你在 {current_location} 瘋狂刷題中...\")）"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（畫面快速閃過一張張日曆，你在學校、圖書館、家裡、咖啡廳之間不斷輪轉，唯一沒變的，是攤在桌上越來越厚的考卷。）"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3")])
+next_interaction = 0

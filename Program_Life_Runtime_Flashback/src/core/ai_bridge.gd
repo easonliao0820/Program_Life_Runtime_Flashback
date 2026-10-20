@@ -191,3 +191,42 @@ func _on_http_request_request_completed(_result, response_code, _headers, body):
 			return
 			
 	emit_signal("ai_response_received", "AI 思考了很久，但沒有說話...")
+
+# ==================================================================
+# 新架構用：一次一問、一定會回傳的 ask()
+# ------------------------------------------------------------------
+# 劇本裡每一處「AI 回應」都附有【備用台詞】：AI 關閉、沒設定金鑰、
+# 連線失敗或逾時，都直接回傳 fallback，確保遊戲不會卡住。
+# 每次呼叫用自己的 HTTPRequest，不會跟上面的 ai_response_received 訊號互相干擾。
+# 用法：var line = await AiBridge.ask(prompt, "備用台詞")
+# ==================================================================
+func ask(prompt: String, fallback: String, timeout_sec: float = 10.0) -> String:
+	var game_state = get_node_or_null("/root/GameState")
+	if game_state and not game_state.settings.get("ai_enabled", true):
+		return fallback
+	if api_url == "" or api_key == "":
+		return fallback
+
+	var req := HTTPRequest.new()
+	req.timeout = timeout_sec
+	add_child(req)
+	var body := {"contents": [{"parts": [{"text": prompt}]}]}
+	var err := req.request(api_url + api_key, PackedStringArray(["Content-Type: application/json"]),
+		HTTPClient.METHOD_POST, JSON.stringify(body))
+	if err != OK:
+		req.queue_free()
+		return fallback
+
+	var res: Array = await req.request_completed
+	req.queue_free()
+	var response_code: int = res[1]
+	if response_code != 200:
+		return fallback
+	var json = JSON.parse_string((res[3] as PackedByteArray).get_string_from_utf8())
+	if json is Dictionary and json.has("candidates") and json["candidates"].size() > 0:
+		var candidate = json["candidates"][0]
+		if candidate.has("content") and candidate["content"].has("parts"):
+			var text := str(candidate["content"]["parts"][0].get("text", "")).strip_edges()
+			if text != "":
+				return text
+	return fallback

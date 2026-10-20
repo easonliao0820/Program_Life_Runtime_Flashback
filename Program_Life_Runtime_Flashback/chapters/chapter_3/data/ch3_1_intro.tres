@@ -1,0 +1,55 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「快啊快啊快遲到了！」"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「怎麼了，一大早的……」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「今天跟『倖芳』約在捷運站一起上課的！」"
+
+[sub_resource type="Resource" id="Resource_line4"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「高中的上學時刻，總是特別精彩呢。」"
+
+[sub_resource type="Resource" id="Resource_line5"]
+script = ExtResource("1_step")
+speaker = "你"
+line = "「啊，今天上課要帶什麼啊，太晚起床了，腦子很亂……」"
+
+[sub_resource type="Resource" id="Resource_line6"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「別慌。在這種混亂的時候，比起一個一個去記，你更需要一個清單。」"
+
+[sub_resource type="Resource" id="Resource_line7"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「我們可以建立一個 List，就像你的書包一樣，可以裝進各種不同的東西——用 bag.append() 放進去，用 bag.remove() 拿出來。」"
+
+[sub_resource type="Resource" id="Resource_line8"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（派森示範：bag = [\"phone\", \"wallet\"]　item = \"key\"　bag.append(item)　print(bag)）"
+
+[sub_resource type="Resource" id="Resource_line9"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「去書桌上看看，把你今天想帶的東西都放進書包裡吧——但書包裝得下的東西有限，帶太多，小心趕不上車。」"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3"), SubResource("Resource_line4"), SubResource("Resource_line5"), SubResource("Resource_line6"), SubResource("Resource_line7"), SubResource("Resource_line8"), SubResource("Resource_line9")])
+next_interaction = 1
+sandbox_wait_message = "建立 bag = [] 並用 bag.append(\"物品\") 放入你想帶的東西，點擊 [color=yellow]▶ Run[/color] 出發。"

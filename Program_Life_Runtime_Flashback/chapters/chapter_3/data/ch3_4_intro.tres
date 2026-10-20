@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" uid="uid://kdh4sgu4rltq" path="res://src/ui/story_box/dialogue_step.gd" id="1_step"]
+[ext_resource type="Script" uid="uid://dvl6rcw46qrdx" path="res://src/ui/story_box/dialogue_data.gd" id="2_data"]
+
+[sub_resource type="Resource" id="Resource_line1"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（倒數繼續。終於，來到了學測當天早上，你正在做出門前最後的檢查。）"
+
+[sub_resource type="Resource" id="Resource_line2"]
+script = ExtResource("1_step")
+speaker = "派森"
+line = "「簡章上要求的東西，一項都不能少。用程式幫你做最後的檢查吧——去房間裡找找看，把要帶的五樣物品都放進背包裡。」"
+
+[sub_resource type="Resource" id="Resource_line3"]
+script = ExtResource("1_step")
+speaker = ""
+line = "（required = [\"准考證\", \"身分證\", \"筆\", \"橡皮擦\", \"2B鉛筆\"]　my_bag = 你放進背包的東西　用兩層 for 迴圈，一樣一樣核對：對到一項，count 加一。）"
+
+[resource]
+script = ExtResource("2_data")
+dialogue_sequence = Array[ExtResource("1_step")]([SubResource("Resource_line1"), SubResource("Resource_line2"), SubResource("Resource_line3")])
+next_interaction = 0

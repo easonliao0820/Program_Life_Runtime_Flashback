@@ -1,13 +1,16 @@
 extends Control
 
 signal textbook_pressed
+signal next_chapter_pressed
 
 @onready var textbook_button: TextureButton = $TextbookButton
+@onready var next_chapter_button: Button = $NextChapterButton
 
 func _ready() -> void:
 	textbook_button.pressed.connect(func(): textbook_pressed.emit())
 	textbook_button.mouse_entered.connect(_on_textbook_hover_in)
 	textbook_button.mouse_exited.connect(_on_textbook_hover_out)
+	next_chapter_button.pressed.connect(func(): next_chapter_pressed.emit())
 
 func _on_textbook_hover_in() -> void:
 	textbook_button.pivot_offset = textbook_button.size / 2
@@ -26,3 +29,9 @@ func show_textbook() -> void:
 
 func hide_textbook() -> void:
 	textbook_button.hide()
+
+func show_next_chapter() -> void:
+	next_chapter_button.show()
+
+func hide_next_chapter() -> void:
+	next_chapter_button.hide()
