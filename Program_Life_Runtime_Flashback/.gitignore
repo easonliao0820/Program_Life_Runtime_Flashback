@@ -5,3 +5,5 @@ addons/
 # environment variables
 .env
 .env.*
+!.env.example
+backend/.venv/
