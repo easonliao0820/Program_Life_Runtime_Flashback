@@ -68,7 +68,7 @@ func _ready() -> void:
 	_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_box.add_child(_sub)
 
-	_hint = UIKit.label("{ 按下空白鍵繼續 }", 26, Color(0.7, 0.7, 0.7))
+	_hint = UIKit.label(UIKit.CONTINUE_HINT, 26, Color(0.7, 0.7, 0.7))
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint.position = Vector2(0, 960)
 	_hint.custom_minimum_size = Vector2(1920, 0)

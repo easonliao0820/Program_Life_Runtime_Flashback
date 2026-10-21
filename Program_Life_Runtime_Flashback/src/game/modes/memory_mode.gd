@@ -26,7 +26,7 @@ func _ready() -> void:
 	add_child(_sky)
 	_orb = preload("res://src/game/components/pyson_orb.gd").new()
 	add_child(_orb)
-	_orb.place(Vector2(960, 420))
+	_orb.place(Vector2(960, 420), 0.8)
 	_orb.set_mood("fading")
 	_title = UIKit.label("", 34, Color("#ffe9a8"))
 	_title.position = Vector2(60, 40)

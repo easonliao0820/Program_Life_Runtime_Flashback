@@ -21,6 +21,13 @@ const TEXT_LIGHT := Color("#f2f5f8")
 const STAMP_RED := Color("#c0392b")
 
 const PY_BLUE := Color("#3d7fd6")
+
+## 全遊戲統一的「繼續」：空白鍵，等待時都顯示這句提示
+const CONTINUE_HINT := "▼ 按空白鍵繼續"
+
+
+static func is_continue_key(event: InputEvent) -> bool:
+	return event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_SPACE, KEY_ENTER, KEY_KP_ENTER]
 const PY_YELLOW := Color("#ffd75e")
 const INK := Color("#1e2a38")
 const PAPER := Color(1, 1, 1, 0.86)

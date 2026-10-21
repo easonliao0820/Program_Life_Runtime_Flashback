@@ -43,6 +43,14 @@ var settings: Dictionary = {
 
 func _ready() -> void:
 	_load_settings_only()
+	apply_volume()
+
+
+## 主音量（設定面板與原本齒輪選單共用）
+func apply_volume() -> void:
+	var bus := AudioServer.get_bus_index("Master")
+	if bus != -1:
+		AudioServer.set_bus_volume_db(bus, linear_to_db(maxf(float(settings.get("master_volume", 0.8)), 0.0001)))
 
 
 # ------------------------------------------------------------------

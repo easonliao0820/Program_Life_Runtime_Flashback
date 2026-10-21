@@ -22,7 +22,9 @@ func _ready() -> void:
 		volume_slider.value = db_to_linear(AudioServer.get_bus_volume_db(bus_index))
 	
 	# 連接音量滑條訊號
-	volume_slider.value_changed.connect(_on_volume_slider_changed)
+	# 場景檔裡已經連過一次，避免重複連接
+	if not volume_slider.value_changed.is_connected(_on_volume_slider_changed):
+		volume_slider.value_changed.connect(_on_volume_slider_changed)
 	
 	# 連接返回地圖按鈕訊號
 	var return_map_btn = get_node_or_null("Control/VBoxContainer/MainMenuButtons/ReturnMapButton")
@@ -44,6 +46,12 @@ func _process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
+		# 新架構的遊戲畫面有合併後的「設定」（含原本齒輪的功能），ESC 交給它
+		var scene := get_tree().current_scene
+		if scene and scene.has_method("toggle_settings"):
+			get_viewport().set_input_as_handled()
+			scene.toggle_settings()
+			return
 		toggle_pause()
 
 # 切換暫停與恢復遊戲

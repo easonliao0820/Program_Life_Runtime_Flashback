@@ -61,6 +61,13 @@ login_screen（登入）
   - 任務卡上的數字用便利商店價格牌。
 - 共用的顏色與版面位置都在 `src/game/ui/ui_kit.gd`（`NAVY`、`GOLD`、`MRT_BLUE`、`SPLIT_*`）。
 
+## 操作
+
+- 「繼續」一律是**空白鍵**（Enter 也可以）：對話、手機訊息、章節轉場、關卡過關後、探索完出發。
+- 等待玩家繼續時，畫面都會顯示「▼ 按空白鍵繼續」（文字在 `UIKit.CONTINUE_HINT`）。
+- 需要玩家「選擇」的地方（選項、輸入名字、點回憶碎片、點房間裡的物品）才用滑鼠。
+- **ESC**：打開／關閉右上角的「設定」（遊戲會暫停）。設定已合併原本左上角齒輪的功能：繼續遊戲、主音量、返回關卡地圖（記憶地圖）、中離遊戲。
+
 ## 畫面模式對照（畫面設定書 第二節）
 
 | 設定書 | 劇本寫法 | 實作 |
@@ -110,7 +117,7 @@ login_screen（登入）
 | `@bg 背景鍵 [色調]` | 換背景（鍵見 `ChapterRegistry.BACKGROUNDS`） |
 | `@cg 名稱 說明` | 顯示 CG；圖片放在 `assets/cg/名稱.png`，沒有圖時顯示說明文字 |
 | `@show 角色 [left/right/center] [表情]`、`@hide 角色/all` | 立繪 |
-| `@orb mood happy/wise/worried/sad/fading`、`@orb fade 0.3`、`@orb pos x y` | 派森光球 |
+| `@orb mood happy/wise/worried/sad/fading`、`@orb fade 0.3`、`@orb pos x y`、`@orb blur 10` | 派森（blur：模糊程度，0 = 清楚；每一節開頭自動恢復清楚） |
 | `@flash white/gold/blue`、`@shake 秒`、`@wait 秒` | 效果 |
 | `@eyes_close`、`@eyes_open`、`@focus` | 序章：先閉眼（全黑）→ 換背景 → 慢慢睜眼、對焦。要先 `@eyes_close` 再 `@bg`，才不會先看到圖又變黑 |
 | `@saturation 0.2` | 降低彩度（3.3 靈魂狀態），`1` 恢復 |
@@ -226,6 +233,7 @@ cg: 第一片完成後顯示的說明
 | 背景 | `assets/backgrounds/<背景鍵>.png` | 鍵見 `ChapterRegistry.BACKGROUNDS`，例如 `breakfast_shop.png`；已經在別的資料夾的舊素材可以在 `ChapterRegistry.ART` 對應（目前：產房＝`baby.png`、出生 CG＝`parentsfull.png`） |
 | CG | `assets/cg/<名稱>.png` | 名稱是劇本 `@cg` 的第一個字，例如 `birth.png` |
 | 立繪 | `assets/characters/<角色>.png` 或 `<角色>_<表情>.png` | 例如 `倖芳_微笑.png` |
+| 派森動圖 | `src/actors/npc/paisen_float_sparkle_sheet.png` | 一列 24 格、每秒 12 格循環播放（格數與速度在 `pyson_orb.gd` 的 `SHEET_FRAMES`、`SHEET_FPS`）；沒有這張圖時退回程式畫的光球 |
 | 音效／音樂 | `assets/audio/<名稱>.ogg` | 例如 `heartbeat.ogg`、`baby_cry.ogg` |
 | 字型 | `assets/fonts/NotoSansTC-Regular.ttf`、`JetBrainsMono-Regular.ttf` | **網頁版一定要放中文字型**，不然中文會變方塊 |
 
@@ -234,7 +242,8 @@ cg: 第一片完成後顯示的說明
 - **桌面版**：使用系統的 Python 3。可以在 `.env` 加上 `PYTHON_PATH=/路徑/python3` 指定。
 - **網頁版**：自動從 CDN 載入 Pyodide（第一次大約要等 5–10 秒）。
 - **都沒有**：退回舊的 `SandboxManager`，只支援單行 `print`。
-- 玩家程式的限制：只能 `import random`、`math`，執行步數有上限（防無限迴圈）；`input()` 從關卡的 `stdin:` 讀取。
+- 玩家的程式**沒有沙盒限制**：任何模組都能 import、所有內建函式都能用、不限步數與輸出量；`input()` 從關卡的 `stdin:` 讀取。
+- 防止遊戲卡住：桌面版每次執行是獨立的 Python 程序，超過 `RUN_TIMEOUT_SEC`（預設 10 秒）就結束它；設成 0 就不限時間。網頁版（Pyodide）沒辦法中途停止，無限迴圈會讓分頁卡住。
 
 ## 匯出注意
 

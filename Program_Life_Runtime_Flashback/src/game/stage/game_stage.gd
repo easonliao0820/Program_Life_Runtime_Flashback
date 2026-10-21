@@ -27,8 +27,11 @@ const ExploreMode := preload("res://src/game/modes/explore_mode.gd")
 const MemoryMode := preload("res://src/game/modes/memory_mode.gd")
 
 const AUDIO_DIR := "res://assets/audio/"
-const ORB_FULL := Vector2(260, 230)
-const ORB_SPLIT := Vector2(720, 110)
+## 派森的位置與大小：劇情模式在左上；四象限時縮小站在劇情區右上角（不擋到對話框）
+const ORB_FULL := Vector2(240, 240)
+const ORB_SPLIT := Vector2(730, 150)
+const ORB_FULL_SCALE := 0.7
+const ORB_SPLIT_SCALE := 0.42
 
 ## 角色給 AI 的人設（依《專題劇情》角色表與《畫面設定書》第三節）。
 ## 劇本裡「AI 回應」的地方、以及主角用輸入框跟角色聊天時都會用到。
@@ -100,7 +103,7 @@ func _ready() -> void:
 	portraits = _add(PortraitLayer.new())
 	orb = PysonOrb.new()
 	add_child(orb)
-	orb.place(ORB_FULL)
+	orb.place(ORB_FULL, ORB_FULL_SCALE)
 	code_card = _add(CodeCard.new())
 	memory_mode = _add(MemoryMode.new())
 	explore_mode = _add(ExploreMode.new())
@@ -206,6 +209,7 @@ func _reset_view() -> void:
 	bg.set_saturation(1.0)
 	orb.visible = true
 	orb.set_fade(1.0)
+	orb.set_blur(0.0)
 	orb.set_mood("idle")
 	for c in _montage_layer.get_children():
 		c.queue_free()
@@ -395,7 +399,7 @@ func show_frame(on: bool) -> void:
 	bg.show_frame(on)
 
 
-## @orb mood happy｜@orb fade 0.4｜@orb hide｜@orb show｜@orb pos 960 300
+## @orb mood happy｜@orb fade 0.4｜@orb hide｜@orb show｜@orb pos 960 300｜@orb blur 10
 func orb_command(args: Array) -> void:
 	if args.is_empty():
 		return
@@ -405,10 +409,17 @@ func orb_command(args: Array) -> void:
 		"fade":
 			var target := float(args[1]) if args.size() > 1 else 0.0
 			create_tween().tween_method(orb.set_fade, orb.fade, target, 1.5)
+		"blur":
+			orb.set_blur(float(args[1]) if args.size() > 1 else 10.0)
 		"hide":
 			orb.visible = false
 		"show":
-			orb.visible = true
+			# 慢慢浮現，不要突然跳出來
+			if not orb.visible:
+				var target: float = orb.fade
+				orb.set_fade(0.0)
+				orb.visible = true
+				create_tween().tween_method(orb.set_fade, 0.0, target, 1.2)
 		"pos":
 			if args.size() > 2:
 				orb.place(Vector2(float(args[1]), float(args[2])))
@@ -531,7 +542,7 @@ func enter_split() -> void:
 	dialogue.set_compact(UIKit.SPLIT_DIALOGUE)
 	chat.set_split(true)
 	_refresh_chat()
-	orb.place(ORB_SPLIT)
+	orb.place(ORB_SPLIT, ORB_SPLIT_SCALE)
 	# 劇情不中斷：把最後一句話留在劇情區
 	if not _last_story.is_empty():
 		dialogue.show_status(_last_story["speaker"], _last_story["text"], _last_story["kind"])
@@ -547,7 +558,7 @@ func exit_split() -> void:
 	chat.set_split(false)
 	_refresh_chat()
 	chat.hide_bubble()
-	orb.place(ORB_FULL)
+	orb.place(ORB_FULL, ORB_FULL_SCALE)
 	var t := create_tween()
 	t.tween_property(_split_backdrop, "modulate:a", 0.0, 0.5)
 	await bg.set_view_rect(Rect2(Vector2.ZERO, size), 0.8)
@@ -606,6 +617,11 @@ func _chat_context() -> String:
 	elif explore_mode.visible:
 		lines.append("主角正在房間裡找東西（探索模式），點到的東西會變成 list 的程式。")
 	return "\n".join(lines)
+
+
+## ESC（由 PauseMenu 轉過來）：打開／關閉合併後的設定面板
+func toggle_settings() -> void:
+	system_menu.toggle_settings()
 
 
 func is_split() -> bool:

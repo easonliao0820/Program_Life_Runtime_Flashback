@@ -61,8 +61,9 @@ func _on_run_button_pressed() -> void:
 	# C. 進程執行與攔截
 	execute_py_file()
 
+## 沙盒限制已取消：不再攔截任何指令（保留函式讓舊的呼叫點不用改）
 func check_code_safety(code: String) -> bool:
-	var forbidden_keywords = ["import os", "import sys", "import pathlib", "shutil", "eval("]
+	var forbidden_keywords: Array = []
 	for keyword in forbidden_keywords:
 		if keyword in code:
 			output_label.text = "【安全性攔截】偵測到禁用指令：%s" % keyword

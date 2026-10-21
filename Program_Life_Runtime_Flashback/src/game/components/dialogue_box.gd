@@ -59,7 +59,7 @@ func _ready() -> void:
 	_name_plate.add_child(_name_label)
 	add_child(_name_plate)
 
-	_next_mark = UIKit.label("▼", 22, UIKit.GOLD)
+	_next_mark = UIKit.label(UIKit.CONTINUE_HINT, 20, UIKit.GOLD)
 	add_child(_next_mark)
 
 	_toggles = HBoxContainer.new()
@@ -109,7 +109,7 @@ func _apply_layout() -> void:
 	_text.add_theme_font_size_override("italics_font_size", font_size)
 	_name_label.add_theme_font_size_override("font_size", 24 if _compact else 28)
 	_name_plate.position = _rect.position + Vector2(24 if _compact else 40, -26 if _compact else -30)
-	_next_mark.position = _rect.end - Vector2(48, 44)
+	_next_mark.position = _rect.end - Vector2(200 if not _compact else 180, 40)
 	_toggles.position = Vector2(_rect.end.x - 230, _rect.position.y - 54)
 	_toggles.visible = not _compact and _panel.visible
 

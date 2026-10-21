@@ -92,7 +92,7 @@ func play(def: Dictionary) -> Dictionary:
 	_code_lines = []
 	_found = {}
 	_room_title.text = GameState.format_text(str(def.get("title", "")))
-	_confirm.text = str(def.get("confirm", "確認"))
+	_confirm.text = "%s（空白鍵）" % str(def.get("confirm", "確認"))
 	_note.text = ""
 	_say(GameState.format_text(str(def.get("goal", ""))))
 	_time_left = float(def.get("timer", 0))
@@ -237,6 +237,13 @@ func _process(delta: float) -> void:
 	if _time_left <= 0.0:
 		_say("捷運進站了！")
 		_done.emit()
+
+
+## 探索完按空白鍵（或 Enter）＝按確認
+func _unhandled_input(event: InputEvent) -> void:
+	if visible and _running and not _confirm.disabled and UIKit.is_continue_key(event):
+		get_viewport().set_input_as_handled()
+		_on_confirm()
 
 
 func _on_confirm() -> void:

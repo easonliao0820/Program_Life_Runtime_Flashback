@@ -20,6 +20,7 @@ var _counter: Label
 var _send: Button
 var _max_len: int = 0
 var _waiting_click: bool = false
+var _hint: Label
 
 
 func _ready() -> void:
@@ -85,6 +86,11 @@ func _ready() -> void:
 	_send.pressed.connect(_on_send)
 	_input_row.add_child(_send)
 	input_pad.visible = false
+
+	_hint = UIKit.label(UIKit.CONTINUE_HINT, 20, Color("#8a939c"))
+	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint.visible = false
+	v.add_child(_hint)
 	visible = false
 
 
@@ -177,7 +183,9 @@ func _wait_click() -> void:
 		await get_tree().create_timer(0.05).timeout
 		return
 	_waiting_click = true
+	_hint.visible = true
 	await _clicked
+	_hint.visible = false
 
 
 func _unhandled_input(event: InputEvent) -> void:

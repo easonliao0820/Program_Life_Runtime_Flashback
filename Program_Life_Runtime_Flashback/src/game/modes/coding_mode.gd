@@ -116,7 +116,7 @@ func _ready() -> void:
 	_hint_btn = UIKit.button("提示", UIKit.HINT_YELLOW, UIKit.INK)
 	_reset_btn = UIKit.button("重置", UIKit.RESET_GRAY)
 	_skip_btn = UIKit.button("略過（開發用）", Color(0.3, 0.3, 0.35), Color.WHITE, UIKit.SMALL_SIZE)
-	_next_btn = UIKit.button("繼續 ▶", UIKit.MRT_BLUE)
+	_next_btn = UIKit.button("按空白鍵繼續 ▶", UIKit.MRT_BLUE)
 	for b in [_run_btn, _hint_btn, _reset_btn]:
 		b.custom_minimum_size = Vector2(140, 56)
 		buttons.add_child(b)
@@ -124,7 +124,7 @@ func _ready() -> void:
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	buttons.add_child(sp)
 	buttons.add_child(_skip_btn)
-	_next_btn.custom_minimum_size = Vector2(170, 56)
+	_next_btn.custom_minimum_size = Vector2(230, 56)
 	buttons.add_child(_next_btn)
 	_run_btn.pressed.connect(_on_run)
 	_hint_btn.pressed.connect(_on_hint)
@@ -173,6 +173,7 @@ func play_level(level: Dictionary, ctx: Dictionary) -> Dictionary:
 		_tags.add_child(_make_tag(GameState.format_text(str(tag))))
 
 	_starter = fill_code(str(level.get("starter", "")))
+	_editor.editable = true
 	_editor.text = _starter
 	_output.text = "[color=#a89c86]按「執行」看看結果。[/color]"
 	var intro := GameState.format_text(str(level.get("intro", "")))
@@ -206,6 +207,13 @@ func current_info() -> Dictionary:
 		return {}
 	return {"title": GameState.format_text(str(_level.get("title", ""))),
 		"goal": GameState.format_text(str(_level.get("goal", ""))), "code": _editor.text, "passed": _passed}
+
+
+## 過關後按空白鍵（或 Enter）繼續
+func _unhandled_input(event: InputEvent) -> void:
+	if visible and _passed and _next_btn.visible and UIKit.is_continue_key(event):
+		get_viewport().set_input_as_handled()
+		_continue_pressed.emit()
 
 
 ## 程式碼樣板：{userName} 換成名字、<<變數>> 換成劇本變數（例如探索模式產生的程式碼）。
@@ -307,6 +315,10 @@ func _on_run() -> void:
 	_reset_btn.disabled = true
 	_skip_btn.visible = false
 	_next_btn.visible = true
+	# 過關後鎖住編輯器並移開焦點，空白鍵就是「繼續」，不會打進程式裡
+	_editor.editable = false
+	_editor.release_focus()
+	get_viewport().gui_release_focus()
 
 
 func _on_hint() -> void:

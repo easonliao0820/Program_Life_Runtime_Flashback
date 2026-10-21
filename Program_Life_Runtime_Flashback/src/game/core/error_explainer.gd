@@ -67,9 +67,10 @@ static func explain(error: Dictionary, code: String) -> String:
 		"ZeroDivisionError":
 			return "%s除以 0 了。什麼數字都不能除以 0 喔。" % where
 		"TimeoutError":
-			return "程式一直跑停不下來，可能是迴圈的條件永遠成立。檢查 while 的條件會不會改變。"
+			return "程式跑了很久都停不下來（%s），可能是迴圈的條件永遠成立。檢查 while 的條件會不會改變。" % msg
 		"ImportError", "ModuleNotFoundError":
-			return "這裡只能 import random 或 math 兩個工具箱。"
+			var mod := _quoted(msg)
+			return "找不到「%s」這個工具箱（模組），檢查一下名字有沒有拼錯。" % mod if mod != "" else "%s的 import 失敗了，檢查一下模組的名字。" % where
 		"EOFError":
 			return "程式在等你輸入，但已經沒有準備好的輸入了。"
 		"RuntimeError":

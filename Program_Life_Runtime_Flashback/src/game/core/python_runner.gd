@@ -7,8 +7,11 @@ extends Node
 ##   - 網頁版：透過 JavaScriptBridge 載入 Pyodide（瀏覽器裡的 Python）
 ##   - 都沒有：退回舊的 SandboxManager，只支援單行 print()
 ##
-## 兩種後端共用同一段 HARNESS：限制可 import 的模組、限制執行步數（防無限迴圈）、
-## 把 input() 換成關卡預先準備的輸入，再執行關卡的 check（assert 寫法）。
+## 兩種後端共用同一段 HARNESS：玩家的程式用完整的 Python 執行（沒有沙盒限制：
+## 任何模組都能 import、所有內建函式都能用、不限步數與輸出量），
+## 只把 input() 換成關卡預先準備的輸入，再執行關卡的 check（assert 寫法）。
+## 防止整個遊戲卡住：桌面版每次執行是獨立的 Python 程序，超過 RUN_TIMEOUT_SEC 秒就結束它
+## （這不限制程式能做什麼，只是避免無限迴圈讓遊戲當掉；設成 0 就不限時間）。
 ##
 ## 回傳格式：
 ##   {"ok": bool, "stdout": String, "error": {type, message, line, text} 或 null,
@@ -19,25 +22,15 @@ enum Backend { UNKNOWN, DESKTOP, WEB, FALLBACK }
 const PYODIDE_URL := "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
 const HARNESS_PATH := "user://plrf_harness.py"
 const REQUEST_PATH := "user://plrf_request.json"
+const RESULT_PATH := "user://plrf_result.json"
+## 一次執行最多幾秒（桌面版）；0 = 不限時間
+const RUN_TIMEOUT_SEC := 10.0
 
 var backend: Backend = Backend.UNKNOWN
 var python_cmd: String = ""
 
 const HARNESS := r'''
-import sys, io, json, builtins, traceback
-
-MAX_STEPS = 300000
-MAX_OUTPUT = 20000
-ALLOWED_MODULES = {"random", "math"}
-SAFE_NAMES = [
-    "abs", "all", "any", "bool", "dict", "enumerate", "filter", "float", "int", "isinstance", "len",
-    "list", "map", "max", "min", "range", "reversed", "round", "set", "sorted", "str", "sum", "tuple",
-    "type", "zip", "chr", "ord", "divmod", "pow", "object", "super", "property", "staticmethod",
-    "classmethod", "hasattr", "getattr", "setattr", "repr", "format", "iter", "next", "__build_class__",
-    "Exception", "ValueError", "TypeError", "KeyError", "IndexError", "ZeroDivisionError", "NameError",
-    "AttributeError", "RuntimeError", "StopIteration", "AssertionError", "EOFError", "ImportError",
-    "True", "False", "None",
-]
+import sys, io, json, builtins, traceback, contextlib
 
 
 def _error_info(e):
@@ -61,11 +54,7 @@ def run_request(req):
     out = io.StringIO()
     result = {"ok": True, "stdout": "", "error": None, "passed": None, "message": "", "flags": {}}
 
-    def _print(*args, sep=" ", end="\n", file=None, flush=False):
-        out.write(sep.join(str(a) for a in args) + end)
-        if out.tell() > MAX_OUTPUT:
-            raise RuntimeError("印出來的東西太多了")
-
+    # input() 讀關卡準備好的輸入，並把輸入的內容也印出來（像真的在終端機打字）
     def _input(prompt=""):
         out.write(str(prompt))
         if not stdin_lines:
@@ -74,27 +63,10 @@ def run_request(req):
         out.write(value + "\n")
         return value
 
-    def _import(name, globals=None, locals=None, fromlist=(), level=0):
-        if name.split(".")[0] not in ALLOWED_MODULES:
-            raise ImportError("這裡只能 import random 或 math，不能 import " + name)
-        return builtins.__import__(name, globals, locals, fromlist, level)
-
-    safe = {n: getattr(builtins, n) for n in SAFE_NAMES if hasattr(builtins, n)}
-    safe["print"] = _print
-    safe["input"] = _input
-    safe["__import__"] = _import
-    env = {"__builtins__": safe, "__name__": "__main__"}
-
-    steps = [0]
-
-    def tracer(frame, event, arg):
-        if frame.f_code.co_filename != "<player>":
-            return None
-        if event == "line":
-            steps[0] += 1
-            if steps[0] > MAX_STEPS:
-                raise TimeoutError("程式跑太久了，可能是無限迴圈")
-        return tracer
+    # 完整的內建函式（沒有白名單），只換掉 input
+    player_builtins = dict(vars(builtins))
+    player_builtins["input"] = _input
+    env = {"__builtins__": player_builtins, "__name__": "__main__"}
 
     try:
         compiled = compile(code, "<player>", "exec")
@@ -103,15 +75,14 @@ def run_request(req):
         result["error"] = _error_info(e)
         return result
 
-    old_trace = sys.gettrace()
-    sys.settrace(tracer)
-    try:
-        exec(compiled, env)
-    except BaseException as e:
-        result["ok"] = False
-        result["error"] = _error_info(e)
-    finally:
-        sys.settrace(old_trace)
+    with contextlib.redirect_stdout(out):
+        try:
+            exec(compiled, env)
+        except SystemExit:
+            pass  # 玩家呼叫 exit()／sys.exit()：當成正常結束
+        except BaseException as e:
+            result["ok"] = False
+            result["error"] = _error_info(e)
     result["stdout"] = out.getvalue()
 
     if not result["ok"]:
@@ -127,19 +98,17 @@ def run_request(req):
     cenv["lines"] = [l for l in result["stdout"].splitlines()]
     cenv["code"] = code
     cenv["set_flag"] = lambda k, v: flags.__setitem__(k, v)
-    cenv["print"] = lambda *a, **k: None  # check 裡的 print 不能印到 stdout（會破壞回傳的 JSON）
-    sys.settrace(tracer)
-    try:
-        exec(compile(check, "<check>", "exec"), cenv)
-        result["passed"] = True
-    except AssertionError as e:
-        result["passed"] = False
-        result["message"] = str(e) or "結果還不太對，再看一次任務卡吧。"
-    except BaseException as e:
-        result["passed"] = False
-        result["message"] = "（檢查時發生問題：%s: %s）" % (type(e).__name__, e)
-    finally:
-        sys.settrace(old_trace)
+    # check 執行時（包括它呼叫玩家的函式）印出的東西都丟掉，不能混進回傳結果
+    with contextlib.redirect_stdout(io.StringIO()):
+        try:
+            exec(compile(check, "<check>", "exec"), cenv)
+            result["passed"] = True
+        except AssertionError as e:
+            result["passed"] = False
+            result["message"] = str(e) or "結果還不太對，再看一次任務卡吧。"
+        except BaseException as e:
+            result["passed"] = False
+            result["message"] = "（檢查時發生問題：%s: %s）" % (type(e).__name__, e)
     result["flags"] = flags
     return result
 
@@ -149,8 +118,11 @@ def run_request_json(text):
 
 
 if __name__ == "__main__":
+    # 用法：python harness.py 請求.json 結果.json
     with open(sys.argv[1], encoding="utf-8") as f:
-        sys.stdout.write(run_request_json(f.read()))
+        answer = run_request_json(f.read())
+    with open(sys.argv[2], "w", encoding="utf-8") as f:
+        f.write(answer)
 '''
 
 const WEB_BOOT := '''
@@ -273,22 +245,28 @@ func _run_desktop(req: Dictionary) -> Dictionary:
 		return _internal_error("無法寫入暫存檔")
 	f.store_string(JSON.stringify(req))
 	f.close()
+	var result_abs := ProjectSettings.globalize_path(RESULT_PATH)
+	if FileAccess.file_exists(RESULT_PATH):
+		DirAccess.remove_absolute(result_abs)
 
-	var thread := Thread.new()
-	thread.start(_exec_python.bind(ProjectSettings.globalize_path(HARNESS_PATH), ProjectSettings.globalize_path(REQUEST_PATH)))
-	while thread.is_alive():
-		await get_tree().process_frame
-	var output: String = thread.wait_to_finish()
-	return _parse_output(output)
-
-
-func _exec_python(harness: String, request: String) -> String:
-	var out: Array = []
-	var args: Array = [harness, request]
+	# 獨立的 Python 程序：遊戲不會被卡住，超過時間就結束它
+	var args: Array = [ProjectSettings.globalize_path(HARNESS_PATH), ProjectSettings.globalize_path(REQUEST_PATH), result_abs]
 	if python_cmd == "py":
 		args.push_front("-3")
-	OS.execute(python_cmd, PackedStringArray(args), out, true)
-	return str(out[0]) if out.size() > 0 else ""
+	var pid := OS.create_process(python_cmd, PackedStringArray(args))
+	if pid <= 0:
+		return _internal_error("無法啟動 Python（%s）" % python_cmd)
+	var started := Time.get_ticks_msec()
+	while OS.is_process_running(pid):
+		await get_tree().process_frame
+		if RUN_TIMEOUT_SEC > 0.0 and Time.get_ticks_msec() - started > RUN_TIMEOUT_SEC * 1000.0:
+			OS.kill(pid)
+			return {"ok": false, "stdout": "", "passed": false, "message": "", "flags": {},
+				"error": {"type": "TimeoutError", "message": "超過 %d 秒還沒跑完" % int(RUN_TIMEOUT_SEC), "line": 0, "text": ""}}
+
+	if not FileAccess.file_exists(RESULT_PATH):
+		return _internal_error("Python 沒有傳回結果")
+	return _parse_output(FileAccess.get_file_as_string(RESULT_PATH))
 
 
 # ------------------------------------------------------------------

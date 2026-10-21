@@ -3,6 +3,8 @@ extends Control
 ## 系統選單（畫面設定書 2.1）：右上角固定四顆按鈕：回顧、存檔、成就、設定。
 ## 回顧：這次遊玩看過的對話紀錄；存檔：記錄目前所在的小節（讀檔時從該小節開頭開始）；
 ## 成就：已解鎖／未解鎖列表；設定：文字速度、自動速度、AI、音量、記憶地圖（章節選擇）、回標題。
+## 「設定」合併了原本左上角齒輪（PauseMenu）的功能：打開時遊戲暫停、繼續遊戲、主音量、
+## 返回關卡地圖（記憶地圖）、中離遊戲；按 ESC 也會打開／關閉這個面板。
 
 signal toast_requested(text: String)
 signal panel_opened
@@ -15,9 +17,14 @@ var _content: VBoxContainer
 var _title: Label
 
 
+const GEAR_ICON := "res://assets/images/gear.png"
+
+
 func _ready() -> void:
 	UIKit.full_rect(self)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# 面板打開時遊戲會暫停，選單本身要能繼續運作
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 	var row := HBoxContainer.new()
 	row.anchor_left = 1.0
@@ -33,6 +40,11 @@ func _ready() -> void:
 		var b := UIKit.button(spec[0], UIKit.NAVY, Color.WHITE, UIKit.SMALL_SIZE)
 		b.custom_minimum_size = Vector2(110, 52)
 		b.pressed.connect(spec[1])
+		# 「設定」就是原本的齒輪：沿用齒輪圖示
+		if spec[0] == "設定" and ResourceLoader.exists(GEAR_ICON):
+			b.icon = load(GEAR_ICON)
+			b.expand_icon = true
+			b.custom_minimum_size = Vector2(130, 52)
 		row.add_child(b)
 
 	_overlay = Control.new()
@@ -84,14 +96,25 @@ func is_panel_open() -> bool:
 
 func close_panel() -> void:
 	_overlay.visible = false
+	get_tree().paused = false
 	panel_closed.emit()
 
 
+## ESC：打開／關閉設定（取代原本齒輪的暫停選單）
+func toggle_settings() -> void:
+	if _overlay.visible:
+		close_panel()
+	else:
+		_open_settings()
+
+
+## 打開任何面板時遊戲暫停（打字、自動模式、動畫都停住），關閉後繼續
 func _open(title: String) -> void:
 	_title.text = title
 	for c in _content.get_children():
 		c.queue_free()
 	_overlay.visible = true
+	get_tree().paused = true
 	panel_opened.emit()
 
 
@@ -129,16 +152,23 @@ func _open_achievements() -> void:
 
 
 func _open_settings() -> void:
-	_open("設定")
+	_open("設定（遊戲暫停中）")
+	var resume := UIKit.button("繼續遊戲", UIKit.RUN_GREEN)
+	resume.custom_minimum_size = Vector2(0, 64)
+	resume.pressed.connect(close_panel)
+	_content.add_child(resume)
+	_content.add_child(HSeparator.new())
 	_add_slider("文字速度", 10, 120, GameState.settings["text_speed"], func(v: float): GameState.settings["text_speed"] = v)
 	_add_slider("自動模式每句停留（秒）", 0.5, 4.0, GameState.settings["auto_delay"], func(v: float): GameState.settings["auto_delay"] = v)
-	_add_slider("音量", 0.0, 1.0, GameState.settings["master_volume"], func(v: float):
+	_add_slider("主音量", 0.0, 1.0, GameState.settings["master_volume"], func(v: float):
 		GameState.settings["master_volume"] = v
-		AudioServer.set_bus_volume_db(0, linear_to_db(maxf(v, 0.0001))))
+		GameState.apply_volume())
 	var ai := CheckButton.new()
 	ai.text = "使用 AI 即時回應（關閉時一律使用備用台詞）"
 	ai.add_theme_font_override("font", UIKit.body_font())
 	ai.add_theme_font_size_override("font_size", 24)
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
+		ai.add_theme_color_override(state, UIKit.INK)
 	ai.button_pressed = GameState.settings["ai_enabled"]
 	ai.toggled.connect(func(on: bool): GameState.settings["ai_enabled"] = on)
 	_content.add_child(ai)
@@ -146,7 +176,7 @@ func _open_settings() -> void:
 
 	_content.add_child(HSeparator.new())
 	_content.add_child(UIKit.label("章節", 28))
-	var map_btn := UIKit.button("開啟記憶地圖（MEMORY LOAD）", UIKit.MRT_BLUE)
+	var map_btn := UIKit.button("返回關卡地圖（記憶地圖 MEMORY LOAD）", UIKit.MRT_BLUE)
 	map_btn.custom_minimum_size = Vector2(0, 64)
 	map_btn.pressed.connect(func():
 		close_panel()
@@ -160,6 +190,14 @@ func _open_settings() -> void:
 		close_panel()
 		GameFlow.back_to_title())
 	_content.add_child(back)
+	# 中離遊戲：先存檔再關閉（網頁版沒有「關閉程式」，不顯示）
+	if not OS.has_feature("web"):
+		var quit := UIKit.button("中離遊戲（存檔後關閉）", Color("#7a2a2a"))
+		quit.pressed.connect(func():
+			GameState.save_game()
+			get_tree().paused = false
+			get_tree().quit())
+		_content.add_child(quit)
 
 
 func _add_slider(label_text: String, min_v: float, max_v: float, value: float, on_change: Callable) -> void:
