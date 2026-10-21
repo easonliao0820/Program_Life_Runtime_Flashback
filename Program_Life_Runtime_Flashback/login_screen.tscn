@@ -1,11 +1,12 @@
 [gd_scene format=3 uid="uid://cik3wl46ws6nq"]
 
 [ext_resource type="VideoStream" uid="uid://bmswp45uooo50" path="res://src/ui/login/MRT.ogv" id="1_7xvqn"]
-[ext_resource type="Script" uid="uid://bwkhp4x7eb77e" path="res://src/ui/login/google_login_button.gd" id="1_wplbs"]
 [ext_resource type="Script" uid="uid://dt3h77mqmg6m2" path="res://src/ui/login/login_screen.gd" id="2_m4u1u"]
 [ext_resource type="Texture2D" uid="uid://1nufnbe7pu4h" path="res://src/ui/login/google-logo.png" id="4_v7w4v"]
 [ext_resource type="Texture2D" uid="uid://dy5chklj5a3is" path="res://src/ui/login/text-logo.png" id="5_8xvqn"]
+[ext_resource type="Script" uid="uid://dgdyl504o6l1" path="res://src/ui/login/google_login.gd" id="5_pajja"]
 [ext_resource type="Script" uid="uid://clmdlgf414ar3" path="res://src/ui/login/guest_login_button.gd" id="6_guest"]
+[ext_resource type="Script" uid="uid://di7qb66l7jfqd" path="res://src/ui/login/google_auth.gd" id="7_pajja"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
 bg_color = Color(1, 1, 1, 1)
@@ -95,59 +96,6 @@ texture = ExtResource("5_8xvqn")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="GoogleLoginButton" type="Button" parent="." unique_id=1535640810]
-modulate = Color(1, 1, 1, 0.77254903)
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 0.65
-anchor_right = 0.5
-anchor_bottom = 0.65
-offset_left = -140.0
-offset_top = -25.0
-offset_right = 140.0
-offset_bottom = 25.0
-grow_horizontal = 2
-grow_vertical = 2
-pivot_offset = Vector2(140, 25)
-theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
-script = ExtResource("1_wplbs")
-
-[node name="Content" type="HBoxContainer" parent="GoogleLoginButton" unique_id=482110317]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="PaddingLeft" type="Control" parent="GoogleLoginButton/Content" unique_id=1892156270]
-custom_minimum_size = Vector2(5, 0)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Logo" type="TextureRect" parent="GoogleLoginButton/Content" unique_id=1728327190]
-custom_minimum_size = Vector2(22, 22)
-layout_mode = 2
-size_flags_vertical = 4
-mouse_filter = 2
-texture = ExtResource("4_v7w4v")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="GoogleLoginButton/Content" unique_id=1870679463]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.156863, 0.156863, 0.156863, 1)
-theme_override_font_sizes/font_size = 18
-text = "使用 Google 帳號登入"
-vertical_alignment = 1
-
 [node name="GuestLoginButton" type="Button" parent="." unique_id=999888777]
 layout_mode = 1
 anchors_preset = -1
@@ -173,5 +121,70 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "訪客登入 (暫時)"
 script = ExtResource("6_guest")
+
+[node name="GoogleLogin" type="Control" parent="." unique_id=1660782732]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("5_pajja")
+
+[node name="GoogleLoginButton" type="Button" parent="GoogleLogin" unique_id=1535640810]
+modulate = Color(1, 1, 1, 0.77254903)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.65
+anchor_right = 0.5
+anchor_bottom = 0.65
+offset_left = 800.0
+offset_top = 651.0
+offset_right = 1080.0
+offset_bottom = 701.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(140, 25)
+theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
+
+[node name="Content" type="HBoxContainer" parent="GoogleLogin/GoogleLoginButton" unique_id=482110317]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PaddingLeft" type="Control" parent="GoogleLogin/GoogleLoginButton/Content" unique_id=1892156270]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Logo" type="TextureRect" parent="GoogleLogin/GoogleLoginButton/Content" unique_id=1728327190]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_v7w4v")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="GoogleLogin/GoogleLoginButton/Content" unique_id=1870679463]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.156863, 0.156863, 0.156863, 1)
+theme_override_font_sizes/font_size = 18
+text = "使用 Google 帳號登入"
+vertical_alignment = 1
+
+[node name="GoogleAuth" type="Node" parent="GoogleLogin" unique_id=2044350092]
+script = ExtResource("7_pajja")
+
+[node name="TokenRequest" type="HTTPRequest" parent="GoogleLogin/GoogleAuth" unique_id=1353404570]
+
+[node name="AuthVerifyRequest" type="HTTPRequest" parent="GoogleLogin" unique_id=1263988000]
 
 [connection signal="finished" from="VideoStreamPlayer" to="." method="_on_video_stream_player_finished"]
