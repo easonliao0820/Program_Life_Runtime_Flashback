@@ -286,8 +286,8 @@ func set_saturation(value: float, blur: float = 0.0) -> void:
 	mat.set_shader_parameter("blur", blur)
 
 
-## 序章：上下兩條黑邊慢慢打開，像眼睛睜開；畫面先模糊再對焦
-func eyes_open(duration: float = 5.0) -> void:
+## 閉上眼睛：上下兩條黑邊瞬間蓋住整個畫面（之後換背景，玩家也看不到）
+func close_eyes() -> void:
 	var h := size.y
 	_eyelid_top.position = Vector2.ZERO
 	_eyelid_top.size = Vector2(size.x, h / 2.0)
@@ -296,6 +296,18 @@ func eyes_open(duration: float = 5.0) -> void:
 	_eyelid_top.visible = true
 	_eyelid_bottom.visible = true
 	set_saturation(1.0, 6.0)
+
+
+func eyes_closed() -> bool:
+	return _eyelid_top.visible
+
+
+## 序章：上下兩條黑邊慢慢打開，像眼睛睜開；畫面先模糊再對焦
+## 劇本要先 @eyes_close 再換背景，才不會先看到圖、又突然變黑再睜眼
+func eyes_open(duration: float = 2.5) -> void:
+	var h := size.y
+	if not eyes_closed():
+		close_eyes()
 	var t := create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	t.tween_property(_eyelid_top, "position:y", -h / 2.0, duration)
 	t.tween_property(_eyelid_bottom, "position:y", h, duration)

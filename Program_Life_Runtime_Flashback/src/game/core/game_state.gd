@@ -250,6 +250,8 @@ func format_text(text: String) -> String:
 
 
 func _display(v: Variant) -> String:
+	if v is float and is_equal_approx(v, roundf(v)):
+		return str(int(roundf(v)))
 	if v is bool:
 		return "True" if v else "False"
 	if v is Array:

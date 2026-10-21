@@ -1,4 +1,4 @@
-# 3.3 隨機保佑　｜　高中　｜　import random、while
+# 3.3 隨機保佑　｜　18 歲（高三）　｜　import random、while
 # 場景：文昌帝君廟。主角是靈魂狀態，整個畫面降低彩度、邊緣微微發光；只有奶奶是彩色的。
 # 擲筊時筊杯掉落的動畫要放慢，聖杯時發金光。
 
@@ -68,7 +68,7 @@ while consecutive_holy < 3:
         consecutive_holy = 0
 print(f"奶奶一共擲了 {total_attempts} 次，終於連續三個聖杯！")
 ```
-success: 聖杯、聖杯、聖杯！
+success: 聖杯、聖杯、聖杯！奶奶一共擲了 {divination_attempts} 次，while 一直等到連續三個聖杯才停下來。
 @end
 
 # 【設計】每次執行的結果都不一樣。平均大約要擲 14 次，才會出現連續三個聖杯。

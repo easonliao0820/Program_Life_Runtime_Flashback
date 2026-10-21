@@ -293,7 +293,11 @@ func _on_run() -> void:
 	_flash_success()
 	var flags: Dictionary = result.get("flags", {})
 	for k in flags:
-		GameState.set_value(k, flags[k])
+		var v = flags[k]
+		# Python 傳回來的整數經過 JSON 會變成 float（3 → 3.0），整數就轉回 int
+		if v is float and is_equal_approx(v, roundf(v)):
+			v = int(roundf(v))
+		GameState.set_value(k, v)
 	GameState.set_value("last_output", str(result.get("stdout", "")).strip_edges())
 	GameState.set_value("last_code", code)
 	var success_text := GameState.format_text(str(_level.get("success", "")))
@@ -338,7 +342,7 @@ func _autopilot() -> void:
 	_editor.text = fill_code(str(_level.get("solution", "")))
 	await _on_run()
 	if _passed:
-		print("[autopilot] ✔ ", _level.get("id", ""))
+		print("[autopilot] ✔ ", _level.get("id", ""), "　", _last_said)
 		_continue_pressed.emit()
 	else:
 		push_error("[autopilot] ✘ %s：%s" % [_level.get("id", ""), _last_said])

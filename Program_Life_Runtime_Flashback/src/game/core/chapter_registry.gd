@@ -2,6 +2,7 @@ class_name ChapterRegistry
 extends RefCounted
 
 ## 全遊戲的「目錄」：依《專題劇情_完整版》與《畫面設定書》整理。
+## 年齡照劇本的「時間軸」表：章節轉場、小節頂端的小字都顯示這裡的年齡。
 ## GameFlow 照 SECTIONS 的順序一節一節往下播；每一節對應一個 .story 劇本檔。
 ## 要新增／調整章節，只要改這張表跟對應的 .story 檔即可。
 
@@ -16,32 +17,36 @@ const SECTIONS: Array = [
 	{"id": "ch2_3", "chapter": "第二章　童年", "title": "2.3 便利商店", "stage": "國中", "age": 13,
 		"concepts": "Boolean、if / else、round()", "tone": "mart", "story": "res://chapters/chapter_2/story/ch2_3.story"},
 
-	{"id": "ch3_1", "chapter": "第三章　高中", "title": "3.1 捷運", "stage": "高中", "age": 16,
+	{"id": "ch3_1", "chapter": "第三章　高中", "title": "3.1 捷運", "stage": "高二", "age": 17,
 		"concepts": "list、append() / remove()、len()、in", "tone": "highschool", "story": "res://chapters/chapter_3/story/ch3_1.story"},
-	{"id": "ch3_2", "chapter": "第三章　高中", "title": "3.2 學測 100 天", "stage": "高中", "age": 17,
+	{"id": "ch3_2", "chapter": "第三章　高中", "title": "3.2 學測 100 天", "stage": "高三", "age": 18,
 		"concepts": "索引、for、range()、% 取餘數", "tone": "highschool", "story": "res://chapters/chapter_3/story/ch3_2.story"},
-	{"id": "ch3_3", "chapter": "第三章　高中", "title": "3.3 隨機保佑", "stage": "高中", "age": 17,
+	{"id": "ch3_3", "chapter": "第三章　高中", "title": "3.3 隨機保佑", "stage": "高三", "age": 18,
 		"concepts": "import random、while", "tone": "temple", "story": "res://chapters/chapter_3/story/ch3_3.story"},
-	{"id": "ch3_4", "chapter": "第三章　高中", "title": "3.4 學測當天", "stage": "高中", "age": 18,
+	{"id": "ch3_4", "chapter": "第三章　高中", "title": "3.4 學測當天", "stage": "高三", "age": 18,
 		"concepts": "雙層 for 迴圈、break、not in", "tone": "highschool", "story": "res://chapters/chapter_3/story/ch3_4.story"},
+	{"id": "ch3_5", "chapter": "第三章　高中", "title": "3.5 放榜與離家", "stage": "高中畢業的暑假", "age": 18,
+		"concepts": "", "tone": "highschool", "story": "res://chapters/chapter_3/story/ch3_5.story"},
 
-	{"id": "ch4_1", "chapter": "第四章　大學", "title": "4.1 期末考", "stage": "大學", "age": 19,
+	{"id": "ch4_1", "chapter": "第四章　大學", "title": "4.1 期末考", "stage": "大二", "age": 20,
 		"concepts": "dict 字典、.items()、更新字典", "tone": "university", "story": "res://chapters/chapter_4/story/ch4_1.story"},
-	{"id": "ch4_2", "chapter": "第四章　大學", "title": "4.2 慶功宴", "stage": "大學", "age": 19,
+	{"id": "ch4_2", "chapter": "第四章　大學", "title": "4.2 慶功宴", "stage": "大二", "age": 20,
 		"concepts": "", "tone": "university", "story": "res://chapters/chapter_4/story/ch4_2.story"},
-	{"id": "ch4_3", "chapter": "第四章　大學", "title": "4.3 一則訊息", "stage": "大學", "age": 19,
+	{"id": "ch4_3", "chapter": "第四章　大學", "title": "4.3 一則訊息", "stage": "大二", "age": 20,
 		"concepts": "字串方法 strip() / replace() / len()", "tone": "university_night", "story": "res://chapters/chapter_4/story/ch4_3.story"},
+	{"id": "ch4_4", "chapter": "第四章　大學", "title": "4.4 畢業", "stage": "大學畢業", "age": 22,
+		"concepts": "", "tone": "university", "story": "res://chapters/chapter_4/story/ch4_4.story"},
 
-	{"id": "ch5_1", "chapter": "第五章　出社會", "title": "5.1 第一份薪水", "stage": "出社會", "age": 23,
+	{"id": "ch5_1", "chapter": "第五章　出社會", "title": "5.1 第一份薪水", "stage": "出社會", "age": 22,
 		"concepts": "def 函式、參數、return", "tone": "work", "story": "res://chapters/chapter_5/story/ch5_1.story"},
-	{"id": "ch5_2", "chapter": "第五章　出社會", "title": "5.2 Cindy 的報表", "stage": "出社會", "age": 24,
+	{"id": "ch5_2", "chapter": "第五章　出社會", "title": "5.2 Cindy 的報表", "stage": "出社會", "age": 23,
 		"concepts": "函式＋字典＋迴圈、sum()、不把數字寫死", "tone": "work", "story": "res://chapters/chapter_5/story/ch5_2.story"},
 	{"id": "ch5_3", "chapter": "第五章　出社會", "title": "5.3 爸媽的血壓", "stage": "出社會", "age": 30,
 		"concepts": "input()、int()、try / except", "tone": "work_home", "story": "res://chapters/chapter_5/story/ch5_3.story"},
-	{"id": "ch5_4", "chapter": "第五章　出社會", "title": "5.4 回憶相簿", "stage": "中年", "age": 50,
+	{"id": "ch5_4", "chapter": "第五章　出社會", "title": "5.4 回憶相簿", "stage": "三十歲到退休", "age": 30,
 		"concepts": "class 類別、物件", "tone": "work_home", "story": "res://chapters/chapter_5/story/ch5_4.story"},
 
-	{"id": "ch6", "chapter": "第六章　告別", "title": "結局判定", "stage": "晚年", "age": 80,
+	{"id": "ch6", "chapter": "第六章　告別", "title": "最後的早晨", "stage": "晚年", "age": 80,
 		"concepts": "綜合複習", "tone": "farewell", "story": "res://chapters/chapter_6/story/ch6.story"},
 	{"id": "ch6_end1", "chapter": "第六章　告別", "title": "結局一：天下沒有不散的宴席", "stage": "晚年", "age": 80,
 		"concepts": "綜合複習（由簡單到困難）", "tone": "farewell", "story": "res://chapters/chapter_6/story/ch6_end1.story", "ending": true},
@@ -108,6 +113,8 @@ const CHARACTERS: Dictionary = {
 	"Claire": {"color": Color("#6cc4a8")},    # 薄荷綠
 	"教授": {"color": Color("#8a8a8a")},
 	"店員": {"color": Color("#8a8a8a")},
+	"面試官": {"color": Color("#8a2a3c")},    # 其實是 Cindy（酒紅）
+	"老闆娘": {"color": Color("#c9925e")},
 	"早餐店阿姨": {"color": Color("#8a8a8a")},
 	"系統": {"color": Color("#2d529e")},
 	"……": {"color": Color("#9aa3ad")},
@@ -135,6 +142,9 @@ const TONES: Dictionary = {
 ## 背景（畫面設定書 第五節素材清單）。正式美術放到 assets/backgrounds/<key>.png 就會自動取代佔位圖。
 const BACKGROUNDS: Dictionary = {
 	"delivery_room": {"name": "醫院產房", "tone": "birth"},
+	"temple_day": {"name": "文昌帝君廟・白天", "tone": "childhood"},
+	"graduation": {"name": "大學畢業典禮", "tone": "university"},
+	"interview": {"name": "面試會議室", "tone": "work"},
 	"living_room": {"name": "家裡客廳・午後", "tone": "childhood"},
 	"breakfast_shop": {"name": "巷口早餐店・早晨", "tone": "childhood"},
 	"alley": {"name": "家附近的巷子", "tone": "childhood"},

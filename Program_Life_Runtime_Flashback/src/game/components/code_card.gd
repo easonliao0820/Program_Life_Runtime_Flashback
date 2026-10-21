@@ -51,6 +51,14 @@ func show_code(code: String, runnable: bool) -> void:
 	UIKit.fade(self, 1.0, 0.25)
 
 
+## 解說模式：把第 line 行（從 1 開始）亮起來，其他行恢復；line <= 0 全部恢復
+func highlight_line(line: int) -> void:
+	for i in _editor.get_line_count():
+		_editor.set_line_background_color(i, Color(0, 0, 0, 0))
+	if line >= 1 and line <= _editor.get_line_count():
+		_editor.set_line_background_color(line - 1, Color(UIKit.PY_YELLOW, 0.22))
+
+
 func hide_card() -> void:
 	if visible:
 		visible = false

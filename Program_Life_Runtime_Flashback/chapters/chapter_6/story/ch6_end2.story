@@ -9,7 +9,7 @@
 @bg hospital
 @endif
 @orb mood fading
-（在很久很久以後的未來，你漸漸忘記了你的朋友、你的愛人、你的故事。身邊的家人一次又一次提起從前的回憶，一次又一次訴說他們對你的愛，但你已經什麼都想不起來了。）
+（那天之後，你的記憶開始一點一點流失。又過了幾年，你漸漸忘記了你的朋友、你的愛人、你的故事。身邊的家人一次又一次提起從前的回憶，一次又一次訴說他們對你的愛，但你已經什麼都想不起來了。）
 @if gave_gift
 @show 倖芳 left 老年
 倖芳：你看，日出喔。
@@ -27,7 +27,7 @@ cg: 每天早上的培根蛋吐司
 cg: 說給每個人聽的愛
 cg: 奶奶的三個聖杯
 cg: 國中的那天早上
-cg: hello python
+cg: Hello, python!
 
 @level end2_habit
 title: 回憶一：找回你的習慣
@@ -65,6 +65,7 @@ class Memory:
 habit = Memory("每天早上買一份培根蛋吐司", 5, "幸福")
 habit.recall()
 ```
+success: 每天早上一份培根蛋吐司——你一輩子的習慣，回來了。
 @end
 
 @level end2_love
@@ -92,6 +93,7 @@ def say_love(name):
 for person in ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞"]:
     print(say_love(person))
 ```
+success: 爸爸、媽媽、奶奶、倖芳、翊丞……每個人都聽到你說「我愛你」了。
 @end
 
 @level end2_divination
@@ -126,6 +128,7 @@ while consecutive_holy < 3:
         consecutive_holy = 0
 print("三個聖杯。奶奶，謝謝你。")
 ```
+success: 三個聖杯。奶奶，謝謝你。
 @end
 
 @level end2_check
@@ -147,23 +150,29 @@ my_answer = round((25 + 60) * 0.85)
 if my_answer == 72:
     print("沒問題，總共 72 元。")
 ```
+success: 72 元，沒問題。國中那天早上，你第一次自己判斷了對與錯。
 @end
 
 @level end2_hello
 title: 回憶五：第一句話
-goal: 回到一切的起點。
+goal: 回到一切的起點。編輯器裡已經寫好了你人生的第一行程式。這一次，把 World 改成 python，跟陪了你一輩子的朋友打聲招呼。
+intro: 還記得嗎？你來到這個世界時，第一句話是跟「世界」打招呼。
+tags: print("Hello, World!") | World → python
+hint: 只要把引號裡的 World 換成 python 就好。
 starter:
 ```python
-print()
+print("Hello, World!")
 ```
 check:
 ```python
-assert out.strip().lower() == "hello python", "還記得你們的第一句話嗎？hello python。"
+said = "".join(ch for ch in out.lower() if ch.isalnum())
+assert said == "hellopython", "把 World 換成 python，跟派森打聲招呼吧。"
 ```
 solution:
 ```python
-print("hello python")
+print("Hello, python!")
 ```
+success: Hello, python. ——我一直都在。
 @end
 @end
 

@@ -170,6 +170,12 @@ func _run_cmd(cmd: String, arg: String, line: int) -> void:
 			await stage.flash(arg if arg != "" else "white")
 		"shake":
 			await stage.shake(float(arg) if arg != "" else 0.6)
+		"code_line":
+			stage.code_line(int(arg))
+		"photo":
+			await stage.photo(arg)
+		"eyes_close":
+			stage.eyes_close()
 		"eyes_open":
 			await stage.eyes_open()
 		"focus":

@@ -44,6 +44,8 @@ const PERSONAS := {
 	"教授": "你是主角大學的教授：上課會畫重點、期末考會提早考，嚴格但願意給認真的學生機會。",
 	"早餐店阿姨": "你是巷口早餐店的阿姨：親切、記性好，認得每個常客，會叫小朋友「弟弟」「妹妹」。",
 	"店員": "你是便利商店的店員：有禮貌、動作快，偶爾會算錯錢，被指出來會不好意思地道歉。",
+	"面試官": "你是一間業務分析公司的面試官：短髮、穿深色西裝外套，看履歷時眉頭不太鬆開，說話直接、只問重點，欣賞會思考的人。（你其實就是之後的主管 Cindy，但現在還沒自我介紹。）",
+	"老闆娘": "你是巷口早餐店的老闆娘，當年那位早餐店阿姨的女兒。親切、愛聊天，認得每天都來點一樣早餐的老客人。",
 }
 ## 不能用輸入框聊天的「說話者」
 const NOT_CHATTABLE := ["你", "派森", "系統", "……", "心聲", "旁白"]
@@ -266,6 +268,32 @@ func show_code(code: String, runnable: bool) -> void:
 	code_card.show_code(code, runnable)
 
 
+func code_line(line: int) -> void:
+	code_card.highlight_line(line)
+
+
+## 5.4「相片翻頁」：閃一下像翻到下一張相片，角落留一個年齡標籤（下一張相片會取代它）
+func photo(label: String) -> void:
+	var old := _montage_layer.get_node_or_null("PhotoTag")
+	if old:
+		old.queue_free()
+	if label == "off" or label == "":
+		return
+	hide_dialogue()
+	await flash("white")
+	var tag := PanelContainer.new()
+	tag.name = "PhotoTag"
+	var paper := UIKit.box(Color("#fbf7ef"), 4, Color("#d8cfc0"), 2, 12)
+	paper.shadow_color = Color(0, 0, 0, 0.35)
+	paper.shadow_size = 6
+	tag.add_theme_stylebox_override("panel", paper)
+	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tag.rotation = -0.05
+	tag.add_child(UIKit.label(label, 30, UIKit.INK))
+	tag.position = Vector2(60, 110)
+	_montage_layer.add_child(tag)
+
+
 func set_background(key: String, tone_override: String = "") -> void:
 	code_card.hide_card()
 	await bg.show_bg(key, tone_override)
@@ -345,9 +373,14 @@ func shake(duration: float) -> void:
 	await t.finished
 
 
+func eyes_close() -> void:
+	hide_dialogue()
+	bg.close_eyes()
+
+
 func eyes_open() -> void:
 	hide_dialogue()
-	await bg.eyes_open(5.0)
+	await bg.eyes_open(2.5)
 
 
 func focus() -> void:

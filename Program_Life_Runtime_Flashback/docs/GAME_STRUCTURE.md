@@ -9,11 +9,13 @@ login_screen（登入）
   → chapters/prologue/prologue.tscn（前言動畫，按空白鍵）
   → 名字輸入（有存檔時可選「繼續旅程」）
   → GameStage：依 ChapterRegistry 一節一節播放
-       第一章（含序章）→ 2.1 → 2.2 → 2.3 → 3.1 → … → 5.4 → 第六章（結局判定）
+       第一章（含序章）→ 2.1 → 2.2 → 2.3 → 3.1 → … → 3.5 → 4.1 → … → 4.4 → 5.1 → … → 5.4 → 第六章（最後的早晨＋結局判定）
                                                          ├→ 結局一（完成度 < 0.8）
                                                          └→ 結局二（完成度 ≥ 0.8）
   → hello python ＋ 工作人員名單 → 回到登入畫面
 ```
+
+每一節的年齡照劇本的「時間軸」表，寫在 `ChapterRegistry.SECTIONS` 的 `age`。
 
 完成度 = 第一次就通過的關卡數 ÷ 關卡總數。「第一次就通過」指沒出錯、也沒按提示。門檻寫在 `ChapterRegistry.ENDING_THRESHOLD`。
 
@@ -110,10 +112,12 @@ login_screen（登入）
 | `@show 角色 [left/right/center] [表情]`、`@hide 角色/all` | 立繪 |
 | `@orb mood happy/wise/worried/sad/fading`、`@orb fade 0.3`、`@orb pos x y` | 派森光球 |
 | `@flash white/gold/blue`、`@shake 秒`、`@wait 秒` | 效果 |
-| `@eyes_open`、`@focus` | 序章睜眼、對焦 |
+| `@eyes_close`、`@eyes_open`、`@focus` | 序章：先閉眼（全黑）→ 換背景 → 慢慢睜眼、對焦。要先 `@eyes_close` 再 `@bg`，才不會先看到圖又變黑 |
 | `@saturation 0.2` | 降低彩度（3.3 靈魂狀態），`1` 恢復 |
 | `@frame on/off` | 相片邊框 |
 | `@bgm 名稱`、`@sfx 名稱` | 播放 `assets/audio/名稱.ogg`（沒有檔案就略過） |
+| `@code_line N` | 程式碼卡片的第 N 行亮起（解說模式，例如 3.1 車廂裡派森逐行解說）；`@code_line 0` 全部恢復 |
+| `@photo 32 歲` | 「相片翻頁」：閃一下像翻到下一張相片，角落留一個年齡標籤（5.4 用）；`@photo off` 收起來 |
 | `@credits` | hello python ＋ 工作人員名單 |
 
 ### 流程指令

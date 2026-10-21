@@ -4,6 +4,7 @@
 
 @bg lake_sunset
 @orb mood fading
+（那天傍晚。）
 （坐在湖邊長椅上的老人，聽著湖畔與樹林帶來的協奏曲。或許他在思考些什麼，又或許在回憶些什麼。這一生犯過許多錯，但生死有命，人終有悲歡離合。）
 @if gave_gift
 @show 倖芳 left 老年
@@ -40,6 +41,7 @@ solution:
 ```python
 print("別走，派森")
 ```
+success: 「別走，派森」——你的聲音，派森聽見了。
 @end
 
 @level end1_love
@@ -60,6 +62,7 @@ solution:
 love = "爸爸媽媽"
 print(f"我愛我的{love}")
 ```
+success: 愛的盒子找回來了：{last_output}
 @end
 
 @level end1_friends
@@ -83,6 +86,7 @@ friends = ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞", "Cindy", "Claire"]
 friends.append("派森")
 print(f"我的朋友有 {len(friends)} 個：{friends}")
 ```
+success: 朋友清單又是 8 個人了，派森也在裡面。
 @end
 
 @level end1_days
@@ -105,6 +109,7 @@ for day in range(100, 0, -1):
     if day % 25 == 0:
         print(f"倒數第 {day} 天，我還在。")
 ```
+success: 倒數 100、75、50、25 天——那 100 天，你一直都在。
 @end
 
 @level end1_places
@@ -127,6 +132,7 @@ places = {"出生": "醫院", "第一次算數": "早餐店", "遇見倖芳": "�
 for event, place in places.items():
     print(f"{event} → {place}")
 ```
+success: 從醫院、早餐店、捷運站，一路到 Cindy 的會議室，人生地圖接起來了。
 @end
 @end
 
