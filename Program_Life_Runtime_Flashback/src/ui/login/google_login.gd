@@ -5,7 +5,10 @@ extends Control
 @onready var google_auth: Node = $GoogleAuth
 @onready var auth_verify_request: HTTPRequest = $AuthVerifyRequest
 
-const BACKEND_URL = "http://127.0.0.1:8000"
+const BACKEND_URL = "https://oj3wxp63b5ttx6sfklndqcrccq0nnxwq.lambda-url.ap-southeast-2.on.aws"
+const PROLOGUE_SCENE := "res://chapters/prologue/prologue.tscn"
+
+var _entering_game := false
 
 func _ready() -> void:
 	google_login_button.pressed.connect(
@@ -79,14 +82,30 @@ func _on_token_received(data: Dictionary) -> void:
 	if error != OK:
 		print("無法送出身分驗證請求")
 
+
 func _on_auth_verify_completed(
 	result: int,
 	response_code: int,
 	_headers: PackedStringArray,
 	body: PackedByteArray
 ) -> void:
+	if _entering_game:
+		return
+
 	if result != HTTPRequest.RESULT_SUCCESS:
-		print("無法連接 FastAPI 後端")
+		print("無法連接 AWS FastAPI 後端")
+		return
+
+	if response_code == 403:
+		print("AWS 拒絕存取：請檢查 Lambda Function URL 權限")
+		return
+
+	if response_code == 401:
+		print("Google ID Token 無效或已過期")
+		return
+
+	if response_code != 200:
+		print("後端驗證失敗，HTTP 狀態碼：", response_code)
 		return
 
 	var data = JSON.parse_string(body.get_string_from_utf8())
@@ -95,15 +114,14 @@ func _on_auth_verify_completed(
 		print("後端回傳格式錯誤")
 		return
 
-	if response_code != 200:
-		print("Google 身分驗證失敗")
-		print("HTTP 狀態碼：", response_code)
+	if not data.get("success", false):
+		print("後端未確認登入成功")
 		return
 
 	var player: Dictionary = data.get("player", {})
 
-	if player.is_empty():
-		print("找不到玩家資料") 
+	if str(player.get("id", "")).is_empty():
+		print("後端未提供有效的玩家 ID")
 		return
 
 	PlayerSession.set_verified_player(
@@ -112,4 +130,17 @@ func _on_auth_verify_completed(
 		str(player.get("email", "")),
 		str(player.get("avatar_url", ""))
 	)
-	print("登入成功！歡迎 "+ PlayerSession.player_name)
+
+	print("登入成功！歡迎 " + PlayerSession.player_name)
+	_entering_game = true
+	google_login_button.disabled = true
+	# 等 HTTP 回呼結束後再切換，避免在信號處理期間移除登入場景。
+	_enter_game.call_deferred()
+
+
+func _enter_game() -> void:
+	var error := get_tree().change_scene_to_file(PROLOGUE_SCENE)
+	if error != OK:
+		_entering_game = false
+		google_login_button.disabled = false
+		push_error("無法進入遊戲前言：" + error_string(error))

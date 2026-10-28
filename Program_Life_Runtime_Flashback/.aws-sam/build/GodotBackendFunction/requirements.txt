@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+google-auth
+requests
+python-dotenv
+mangum

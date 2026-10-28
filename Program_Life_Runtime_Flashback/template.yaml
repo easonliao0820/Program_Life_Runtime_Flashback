@@ -1,0 +1,40 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Godot FastAPI backend
+
+Parameters:
+  GoogleOAuthClientId:
+    Type: String
+    Description: Google OAuth Client ID
+
+Resources:
+  GodotBackendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: godot-backend-api
+
+      Role: arn:aws:iam::228107396343:role/godot-lambda-execution-role
+
+      CodeUri: backend/
+      Handler: lambda_handler.handler
+
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+
+      MemorySize: 256
+      Timeout: 15
+
+      Environment:
+        Variables:
+          GOOGLE_OAUTH_CLIENT_ID: !Ref GoogleOAuthClientId
+
+      FunctionUrlConfig:
+        AuthType: NONE
+  
+Outputs:
+  BackendUrl:
+    Description: FastAPI HTTPS URL
+    Value: !GetAtt GodotBackendFunctionUrl.FunctionUrl

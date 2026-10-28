@@ -372,7 +372,15 @@ func _on_token_request_completed(
 	if not data.has("id_token"):
 		login_failed.emit("Google 未回傳 ID Token")
 		return
+	
+	var google_id_token := str(data.get("id_token", ""))
 
+	if google_id_token.is_empty():
+		login_failed.emit("Google ID Token 為空")
+		return
+
+	print("Google ID Token 已取得：", true)
+	
 	# 僅表示成功取得 Token，尚未驗證使用者身分
 	login_status_changed.emit("已取得 Token，等待身分驗證")
 
