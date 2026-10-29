@@ -7,3 +7,6 @@ addons/
 .env.*
 !.env.example
 backend/.venv/
+# Python
+__pycache__/
+*.py[cod]
