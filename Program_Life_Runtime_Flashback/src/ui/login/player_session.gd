@@ -1,6 +1,8 @@
 
 extends Node
 
+## 保存「後端已驗證」的玩家顯示資訊，不保存 Token 或 AWS 憑證。
+## player_name 是 Google 姓名，與 GameState.user_name（遊戲角色名）分開。
 signal login_changed(is_logged_in: bool)
 
 var is_logged_in := false
@@ -15,6 +17,7 @@ func set_verified_player(
 	email: String,
 	avatar_url: String
 ) -> void:
+	# id 對應 Google sub；未來資料庫應以後端驗證後的 sub 辨識玩家。
 	player_id = id
 	player_name = name
 	player_email = email
@@ -25,6 +28,8 @@ func set_verified_player(
 
 
 func logout() -> void:
+	# 同時清除憑證與畫面狀態；這裡沒有刪除存檔或呼叫雲端刪除 API。
+	get_node("/root/AuthManager").clear_token()
 	player_id = ""
 	player_name = ""
 	player_email = ""

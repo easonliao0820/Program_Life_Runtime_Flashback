@@ -1,65 +1,17 @@
-# AiBridge.gd (請確保在專案設定 -> Autoload 中將此腳本命名為 AiBridge)
 extends Node
 
+## 全部 AI 請求只送 AWS；Godot 不讀取 Gemini Key，也不強制 Google 登入。
+## 舊場景用 signal，新主線用 await ask()；兩種介面共用同一個 HTTP 合約。
 signal ai_response_received(text)
 
-# === 最頂層變數宣告區 ===
-var http: HTTPRequest 
-
-# 從 .env 讀出來的設定變數
-var api_key: String = ""
-var api_url: String = ""
-
-func _ready():
-	# 1. 優先讀取 .env 檔案
-	load_env_file()
-	
-	# 用程式碼主動檢查並建立，100% 安全
-	if not has_node("HTTPRequest"):
-		http = HTTPRequest.new()
-		add_child(http)
-	else:
-		http = $HTTPRequest
-	
-	http.request_completed.connect(
-		_on_http_request_request_completed
-	)
-
-# === 專門用來讀取 .env 檔案的函式（已校正 Godot 4 語法與縮排） ===
-func load_env_file():
-	var file_path = "res://.env"
-	if FileAccess.file_exists(file_path):
-		var file = FileAccess.open(file_path, FileAccess.READ)
-		
-		while not file.eof_reached():
-			var line = file.get_line().strip_edges()
-			# 略過空白行或註解
-			if line == "" or line.begins_with("#"):
-				continue
-			
-			# 用等號拆開左邊的 Key 和右邊的 Value
-			var parts = line.split("=", true, 1)
-			if parts.size() == 2:
-				var key = parts[0].strip_edges()
-				var value = parts[1].strip_edges()
-				
-				# 去除可能不小心加上的雙引號 ""
-				if value.begins_with("\"") and value.ends_with("\""):
-					value = value.substr(1, value.length() - 2)
-				
-				# 根據 .env 的名字存進變數
-				if key == "API_KEY":
-					api_key = value
-				elif key == "API_URL":
-					api_url = value
-		file.close()
-		print("=== [.env 讀取成功] ===")
-		print("網址: ", api_url)
-		print("金鑰前段: ", api_key.left(10), "...")
-	else:
-		print("⚠️ 找不到 .env 檔案，請確認它放在專案根目錄下！")
+const MAX_PROMPT_CHARS := 4000
+const MAX_IN_FLIGHT := 2
+var api_url: String = "https://oj3wxp63b5ttx6sfklndqcrccq0nnxwq.lambda-url.ap-southeast-2.on.aws/ai/generate"
+var _active_prompts: Dictionary = {}
+var _legacy_busy := false
 
 func translate_error(error: String, code: String):
+	# 舊沙盒提供的是錯誤字串；將程式與錯誤組成 prompt，交由派森轉譯。
 	var prompt = """
 你是一部臺灣風格角色扮演遊戲中的高維度神祕 NPC「派森」。
 你的職責是引導迷茫的程式編織者（玩家），當他們的魔法（程式碼）出現裂縫（錯誤）時，給予命運的提示。
@@ -134,99 +86,50 @@ func translate_error(error: String, code: String):
 	call_openai(prompt)
 
 func call_openai(prompt: String):
-	# 防呆：如果沒讀到變數，發出警告
-	if api_url == "" or api_key == "":
-		print("❌ 錯誤：未成功讀取 .env 設定，無法發送請求！")
-		emit_signal("ai_response_received", "「語之觀測者」陷入了沉睡，似乎少了某些啟動的契機……")
+	# 名稱為舊介面保留，實際走 AWS/Gemini；全域 signal 沒有 request ID。
+	# 因此只接受一個舊式在途請求；忙碌時略過，不另外發回覆。
+	if _legacy_busy:
 		return
+	_legacy_busy = true
+	var answer := await ask(prompt, "派森暫時沒能接收到訊號，請稍後再試。", 12.0)
+	_legacy_busy = false
+	ai_response_received.emit(answer)
 
-	# 動態組合 URL
-	var url = api_url + api_key
 
-	var headers = PackedStringArray([
-		"Content-Type: application/json"
-	])
-
-	var body = {
-		"contents": [
-			{
-				"parts": [
-					{"text": prompt}
-				]
-			}
-		]
-	}
-
-	var error = http.request(
-		url,
-		headers,
-		HTTPClient.METHOD_POST,
-		JSON.stringify(body)
-	)
-	
-	if error != OK:
-		emit_signal("ai_response_received", "發送請求時發生錯誤")
-
-func _on_http_request_request_completed(_result, response_code, _headers, body):
-	var json_text = body.get_string_from_utf8()
-	var json = JSON.parse_string(json_text)
-	
-	print("API 回傳代碼: ", response_code)
-	
-	# 【終極防護】：如果遇到 503 伺服器忙碌，直接在遊戲內包裝成劇情台詞
-	if response_code == 503:
-		print("⚠️ Google 伺服器大塞車中...")
-		emit_signal("ai_response_received", "✨ 派森察覺到時空編碼正隱隱震動……記憶長河似乎暫時有些阻塞。旅人，請稍微閉眼休息一分鐘，我們稍後再試一次吧。")
-		return
-		
-	if response_code != 200:
-		print("AI連線失敗，代碼：" + str(response_code))
-		return
-
-	if json and json.has("candidates") and json["candidates"].size() > 0:
-		var candidate = json["candidates"][0]
-		if candidate.has("content") and candidate["content"].has("parts"):
-			var text = candidate["content"]["parts"][0]["text"]
-			emit_signal("ai_response_received", text) 
-			return
-			
-	emit_signal("ai_response_received", "AI 思考了很久，但沒有說話...")
-
-# ==================================================================
-# 新架構用：一次一問、一定會回傳的 ask()
-# ------------------------------------------------------------------
-# 劇本裡每一處「AI 回應」都附有【備用台詞】：AI 關閉、沒設定金鑰、
-# 連線失敗或逾時，都直接回傳 fallback，確保遊戲不會卡住。
-# 每次呼叫用自己的 HTTPRequest，不會跟上面的 ai_response_received 訊號互相干擾。
-# 用法：var line = await AiBridge.ask(prompt, "備用台詞")
-# ==================================================================
 func ask(prompt: String, fallback: String, timeout_sec: float = 10.0) -> String:
+	# AI 停用、請求失敗或無法生成時，都回備用台詞，讓劇情可以繼續。
 	var game_state = get_node_or_null("/root/GameState")
 	if game_state and not game_state.settings.get("ai_enabled", true):
 		return fallback
-	if api_url == "" or api_key == "":
+	if api_url.is_empty() or prompt.strip_edges().is_empty() or prompt.length() > MAX_PROMPT_CHARS:
 		return fallback
-
+	# 同 prompt 只阻止「在途重複」，不是快取、每日配額或玩家次數限制。
+	var key := prompt.sha256_text()
+	if _active_prompts.has(key) or _active_prompts.size() >= MAX_IN_FLIGHT:
+		return fallback
+	_active_prompts[key] = true
+	# 每次 ask 使用獨立 HTTPRequest，避免多個 await 等待同一條回覆 signal。
 	var req := HTTPRequest.new()
-	req.timeout = timeout_sec
+	req.timeout = clampf(timeout_sec, 0.1, 12.0)
+	req.body_size_limit = 65536
 	add_child(req)
-	var body := {"contents": [{"parts": [{"text": prompt}]}]}
-	var err := req.request(api_url + api_key, PackedStringArray(["Content-Type: application/json"]),
-		HTTPClient.METHOD_POST, JSON.stringify(body))
+	# 只送 prompt，不附 Google Token；私人存檔 API 的驗證應另外實作。
+	var err := req.request(api_url, PackedStringArray(["Content-Type: application/json"]),
+		HTTPClient.METHOD_POST, JSON.stringify({"prompt": prompt}))
 	if err != OK:
+		_active_prompts.erase(key)
 		req.queue_free()
 		return fallback
-
+	# 完成後釋放在途記錄與節點；不自動重試，避免重複成本與無限重送。
 	var res: Array = await req.request_completed
+	_active_prompts.erase(key)
 	req.queue_free()
-	var response_code: int = res[1]
-	if response_code != 200:
+	if res[0] != HTTPRequest.RESULT_SUCCESS or res[1] != 200:
 		return fallback
-	var json = JSON.parse_string((res[3] as PackedByteArray).get_string_from_utf8())
-	if json is Dictionary and json.has("candidates") and json["candidates"].size() > 0:
-		var candidate = json["candidates"][0]
-		if candidate.has("content") and candidate["content"].has("parts"):
-			var text := str(candidate["content"]["parts"][0].get("text", "")).strip_edges()
-			if text != "":
-				return text
+	# 後端合約是 {"text": "..."}，不再解析 Gemini 原始 candidates 格式。
+	var data = JSON.parse_string((res[3] as PackedByteArray).get_string_from_utf8())
+	if data is Dictionary and data.get("text") is String:
+		var answer: String = data["text"].strip_edges()
+		if not answer.is_empty():
+			return answer.left(4000)
 	return fallback

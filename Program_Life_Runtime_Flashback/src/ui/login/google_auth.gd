@@ -1,6 +1,9 @@
 
 extends Node
 
+## Google OAuth 桌面流程：瀏覽器授權 → 本機 TCP 回呼 → 授權碼交換 Token。
+## 這裡只取得憑證，真正的玩家身分由 google_login.gd 送 AWS 驗證。
+## Web 版不能直接使用本機 TCP 監聽，需另接瀏覽器登入流程。
 signal login_status_changed(message: String)
 signal authorization_received(code: String)
 signal login_failed(message: String)
@@ -92,6 +95,7 @@ func start_google_login() -> void:
 	var port := server.get_local_port()
 	redirect_uri = "http://127.0.0.1:%d/" % port
 
+	# state 用來比對回呼是否屬於本次登入；PKCE 將授權碼綁定本次 verifier。
 	oauth_state = generate_random_token(32)
 	code_verifier = generate_random_token(48)
 
@@ -253,12 +257,14 @@ func stop_callback_server() -> void:
 
 
 func _exit_tree() -> void:
+	# 離開登入場景就停止監聽，避免本機回呼服務殘留。
 	stop_callback_server()
 	
 
 func exchange_authorization_code(code: String) -> void:
 	login_status_changed.emit("正在交換 Google Token...")
 
+	# 這是 OAuth Client Secret，與 Gemini API Key 不同；不得隨 Web 資產公開。
 	# 從 .env 讀取 Client Secret
 	var client_secret := read_env_value(
         "GOOGLE_OAUTH_CLIENT_SECRET"

@@ -187,8 +187,8 @@ func _on_send() -> void:
 func _fallback_reason(who: String) -> String:
 	if not GameState.settings.get("ai_enabled", true):
 		return "（%s好像沒聽見。即時回應目前是關閉的，可以在「設定」裡打開「使用 AI 即時回應」。）" % who
-	if AiBridge.api_key == "" or AiBridge.api_url == "":
-		return "（%s好像沒聽見。專案的 .env 還沒有設定 API_KEY，所以角色現在沒辦法即時回答。）" % who
+	if AiBridge.api_url == "":
+		return "（%s好像沒聽見。AI 服務尚未設定，所以角色現在沒辦法即時回答。）" % who
 	return "（%s好像沒聽清楚，訊號有點不穩。等一下再說一次吧。）" % who
 
 
