@@ -2,13 +2,17 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request, Response
+from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.responses import JSONResponse
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from ai_access_policy import authorize_ai
 from ai_service import generate
+from oauth_service import exchange_google_code
 
 # 本機開發才從專案根目錄補讀設定；既有環境變數不會被覆蓋。
 # Lambda 的 Google Client ID 由部署環境提供，不能省略 audience 驗證。
@@ -29,11 +33,25 @@ class AIRequest(BaseModel):
 	# 限制的是完整 prompt（包含角色設定與玩家程式），不是只有玩家輸入。
 	prompt: str = Field(min_length=1, max_length=4000)
 
+class DesktopExchangeRequest(BaseModel):
+	model_config = ConfigDict(extra='forbid')
+	code: str = Field(min_length=1, max_length=4096)
+	code_verifier: str = Field(min_length=43, max_length=128)
+	redirect_uri: str = Field(min_length=1, max_length=128)
+
+# 登入 model 的驗證錯誤不能把原始 code/verifier 作為 input 回傳。
+@app.exception_handler(RequestValidationError)
+async def safe_validation_error(request: Request, exc: RequestValidationError):
+	if request.url.path == '/auth/google/desktop/exchange':
+		return JSONResponse(status_code=422, content={'detail': 'invalid_auth_request'},
+			headers={'Cache-Control': 'no-store'})
+	return await request_validation_exception_handler(request, exc)
+
 # 登入與未來私人資料 API 共用的驗證接點；不受匿名 AI 政策影響。
-def verify_google_token(token: str) -> dict:
+def verify_google_token(token: str, transport=None) -> dict:
 	try:
 		return id_token.verify_oauth2_token(
-			token, google_requests.Request(), GOOGLE_CLIENT_ID
+			token, transport if transport is not None else google_requests.Request(), GOOGLE_CLIENT_ID
 		)
 	except (ValueError, KeyError) as exc:
 		raise HTTPException(status_code=401, detail='Google ID Token 驗證失敗') from exc
@@ -67,3 +85,14 @@ def ai_generate(payload: AIRequest, authorization: str | None = Header(default=N
 		raise HTTPException(status_code=422, detail='Prompt 不可為空白')
 	# Godot 只收到文字；金鑰取得與上游錯誤由 ai_service 處理。
 	return {'text': generate(payload.prompt)}
+
+
+@app.post('/auth/google/desktop/exchange')
+def desktop_exchange(payload: DesktopExchangeRequest, response: Response):
+	response.headers['Cache-Control'] = 'no-store'
+	try:
+		return exchange_google_code(payload.code, payload.code_verifier,
+			payload.redirect_uri, GOOGLE_CLIENT_ID, verify_google_token)
+	except HTTPException as exc:
+		return JSONResponse(status_code=exc.status_code, content={'detail': exc.detail},
+			headers={'Cache-Control': 'no-store'})

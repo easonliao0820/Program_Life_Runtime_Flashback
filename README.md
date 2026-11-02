@@ -58,7 +58,9 @@ GoogleAuth 取得 Token → AWS /auth/google 驗證
      └─ 無進度／小節無法對應：章節選擇
 ```
 
-- [google_auth.gd](Program_Life_Runtime_Flashback/src/ui/login/google_auth.gd)：Google 授權、PKCE、本機 TCP 回呼與 Token 交換。目前為桌面流程，仍會讀取 `.env` 的 `GOOGLE_OAUTH_CLIENT_SECRET`。
+- [google_auth.gd](Program_Life_Runtime_Flashback/src/ui/login/google_auth.gd)：Google 授權、PKCE、本機 TCP 回呼與 Token 交換。Client ID 從 `project.godot` 的 `oauth/google/client_id` 讀取，不讀 `.env`、不附 Client Secret。此設定為公開值，須與 AWS 驗證接受的 Client ID 對應。
+- 無 Secret 交換的實測結果與官方規格差異，見 [Desktop OAuth 調查](Program_Life_Runtime_Flashback/docs/DESKTOP_OAUTH_FINDINGS.md)。Godot 端已移除本機 Secret 依賴，但 Google 是否接受完整交換仍需實際登入確認；若回覆 `client_secret is missing.`，會停止登入，不能視為登入成功。
+- 真實登入仍要求 Secret 後，已準備 `/auth/google/desktop/exchange` 程式；**尚未部署，Godot 預設仍為 direct**。請依 [人工部署與驗收](Program_Life_Runtime_Flashback/docs/DESKTOP_OAUTH_DEPLOY.md) 部署後再將 `oauth/google/exchange_mode` 改為 `lambda`。完整設計見 [安全修正計畫](Program_Life_Runtime_Flashback/docs/DESKTOP_OAUTH_REPAIR_PLAN.md)。
 - [google_login.gd](Program_Life_Runtime_Flashback/src/ui/login/google_login.gd)：呼叫 AWS 驗證，成功後交給 GameFlow 切換畫面。
 - [auth_manager.gd](Program_Life_Runtime_Flashback/src/core/network/auth_manager.gd)：記憶體中的 ID Token 與本機到期管理；尚無自動刷新。
 - [player_session.gd](Program_Life_Runtime_Flashback/src/ui/login/player_session.gd)：驗證後的 Google `sub`、姓名、email、頭像與登入狀態。
@@ -77,7 +79,7 @@ GoogleAuth 取得 Token → AWS /auth/google 驗證
 
 - [AiBridge](Program_Life_Runtime_Flashback/src/core/ai_bridge.gd) 保留 `translate_error()`、`call_openai()`、`ask()` 與 `ai_response_received`。`call_openai` 為歷史介面名稱，實際走 AWS／Gemini。
 - Godot 不讀取 Gemini `API_KEY`，也不需要取得 Google Token 才能使用 AI。
-- [main.py](Program_Life_Runtime_Flashback/backend/main.py) 提供 `GET /health`、`POST /auth/google`、`POST /ai/generate`。
+- [main.py](Program_Life_Runtime_Flashback/backend/main.py) 提供 `GET /health`、`POST /auth/google`、`POST /ai/generate`，並新增待部署的 `POST /auth/google/desktop/exchange`。
 - [ai_service.py](Program_Life_Runtime_Flashback/backend/ai_service.py) 在 Lambda 從既有 SSM Parameter Store `/godot-backend/API_KEY` 取得解密金鑰，不回傳給 Godot。
 - [ai_access_policy.py](Program_Life_Runtime_Flashback/backend/ai_access_policy.py) 將 AI 政策與登入／私人資料驗證分開。
 
@@ -137,12 +139,15 @@ godot --headless --path Program_Life_Runtime_Flashback res://tests/full_playthro
 正式後端來源在 `backend/`，不要直接修改 `.aws-sam/build/`。從內層 Godot 專案目錄手動執行：
 
 ```powershell
-sam validate --template-file template.yaml
-sam build --use-container --template-file template.yaml
-sam deploy --guided --confirm-changeset
+sam validate --template-file template.yaml --region ap-southeast-2
+docker info
+sam build --use-container --template-file template.yaml --region ap-southeast-2
+sam deploy --template-file .aws-sam/build/template.yaml --guided --confirm-changeset --region ap-southeast-2
 ```
 
 使用既有 stack、region（目前為 `ap-southeast-2`）與 Google Client ID。確認 change set 後再部署；若出現非預期的新資源或權限變更，先取消檢查。需要先準備 AWS CLI／SAM、有效部署權限及容器建置環境。
+
+Windows 請先開啟 Docker Desktop 並使用 Linux containers，等 `docker info` 能正常連到 Server 後再 build。若 validate 找不到 region，保留指令中的 `--region ap-southeast-2`；`--confirm-changeset` 後不要加句點。build 失敗時先停止，不要部署舊產物；也不要只為繞過 Docker 錯誤而拿掉 `--use-container`，以免將 Windows 原生依賴打包到 Linux Lambda。
 
 目前 template 引用既有 execution role，沒有宣告 DynamoDB；新增資料庫應另行規劃。Web 上線前也需驗收 OAuth 與 CORS，不能以桌面測試結果代替。
 
