@@ -11,8 +11,10 @@ extends Control
 const BACKEND_URL = "https://oj3wxp63b5ttx6sfklndqcrccq0nnxwq.lambda-url.ap-southeast-2.on.aws"
 
 var _entering_game := false
+var _login_busy := false
 
 func _ready() -> void:
+	google_auth.backend_login_verified.connect(_on_backend_login_verified)
 	# UI、Google 授權與後端驗證各用自己的 signal，避免把取 Token 當登入完成。
 	google_login_button.pressed.connect(
 		_on_google_login_pressed
@@ -40,6 +42,11 @@ func _ready() -> void:
 
 
 func _on_google_login_pressed() -> void:
+	if _login_busy or _entering_game:
+		return
+	_login_busy = true
+	google_login_button.disabled = true
+	PlayerSession.logout()
 	google_auth.start_google_login()
 
 
@@ -55,7 +62,9 @@ func _on_authorization_received(code: String) -> void:
 
 
 func _on_login_failed(message: String) -> void:
-	auth_manager.clear_token()
+	_login_busy = false
+	google_login_button.disabled = false
+	PlayerSession.logout()
 	print("登入失敗：" + message) 
 	
 
@@ -64,7 +73,7 @@ func _on_token_received(data: Dictionary) -> void:
 	var google_id_token := str(data.get("id_token", ""))
 
 	if google_id_token.is_empty():
-		print("未取得 Google ID Token")
+		_on_login_failed("未取得 Google ID Token")
 		return
 
 	# 先暫存以跨場景保留；若後續驗證失敗，下方各錯誤分支都會清除。
@@ -87,8 +96,7 @@ func _on_token_received(data: Dictionary) -> void:
 	)
 
 	if error != OK:
-		auth_manager.clear_token()
-		print("無法送出身分驗證請求")
+		_on_login_failed("無法送出身分驗證請求")
 
 
 func _on_auth_verify_completed(
@@ -103,42 +111,56 @@ func _on_auth_verify_completed(
 
 	# result 是傳輸結果；response_code 才是 HTTP 狀態，兩者都要檢查。
 	if result != HTTPRequest.RESULT_SUCCESS:
-		auth_manager.clear_token()
-		print("無法連接 AWS FastAPI 後端")
+		_on_login_failed("無法連接 AWS FastAPI 後端")
 		return
 
 	if response_code == 403:
-		auth_manager.clear_token()
-		print("AWS 拒絕存取：請檢查 Lambda Function URL 權限")
+		_on_login_failed("AWS 拒絕存取：請檢查 Lambda Function URL 權限")
 		return
 
 	if response_code == 401:
-		auth_manager.clear_token()
-		print("Google ID Token 無效或已過期")
+		_on_login_failed("Google ID Token 無效或已過期")
 		return
 
 	if response_code != 200:
-		auth_manager.clear_token()
-		print("後端驗證失敗，HTTP 狀態碼：", response_code)
+		_on_login_failed("後端驗證失敗，HTTP 狀態碼：%d" % response_code)
 		return
 
 	var data = JSON.parse_string(body.get_string_from_utf8())
 
 	if not data is Dictionary:
-		auth_manager.clear_token()
-		print("後端回傳格式錯誤")
+		_on_login_failed("後端回傳格式錯誤")
 		return
 
 	if not data.get("success", false):
-		auth_manager.clear_token()
-		print("後端未確認登入成功")
+		_on_login_failed("後端未確認登入成功")
 		return
 
-	var player: Dictionary = data.get("player", {})
+	var player = data.get("player", {})
+	if not player is Dictionary:
+		_on_login_failed("後端玩家格式錯誤")
+		return
+	_complete_login(player)
 
+
+func _on_backend_login_verified(data: Dictionary) -> void:
+	if _entering_game:
+		return
+	var player = data.get("player")
+	var expires = data.get("expires_in", 0)
+	if not player is Dictionary or str(data.get("id_token", "")).is_empty():
+		_on_login_failed("AWS 登入回覆不完整")
+		return
+	if not (expires is int or expires is float) or expires <= 0:
+		_on_login_failed("AWS 登入憑證已失效")
+		return
+	auth_manager.set_google_token(data)
+	_complete_login(player)
+
+
+func _complete_login(player: Dictionary) -> void:
 	if str(player.get("id", "")).is_empty():
-		auth_manager.clear_token()
-		print("後端未提供有效的玩家 ID")
+		_on_login_failed("後端未提供有效的玩家 ID")
 		return
 
 	# 只有後端確認成功並提供有效玩家 ID 後，才更新已登入狀態。
@@ -162,5 +184,6 @@ func _enter_game() -> void:
 	var error := GameFlow.start_after_login(PlayerSession.player_name)
 	if error != OK:
 		_entering_game = false
+		_login_busy = false
 		google_login_button.disabled = false
 		push_error("無法進入遊戲：" + error_string(error))

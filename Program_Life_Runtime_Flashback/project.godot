@@ -54,6 +54,12 @@ space={
 "events": []
 }
 
+[oauth]
+
+google/client_id="201834248641-sdq2fk3tburk3hgvhbf41ffrsuhstfbp.apps.googleusercontent.com"
+google/exchange_mode="lambda"
+google/desktop_exchange_url="https://oj3wxp63b5ttx6sfklndqcrccq0nnxwq.lambda-url.ap-southeast-2.on.aws/auth/google/desktop/exchange"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
