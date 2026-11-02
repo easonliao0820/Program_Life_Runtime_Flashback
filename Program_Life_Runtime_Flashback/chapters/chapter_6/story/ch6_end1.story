@@ -35,7 +35,10 @@ print()
 ```
 check:
 ```python
-assert "別走" in out, "對派森說：別走，派森。"
+import ast
+import re
+assert re.fullmatch(r"別走[，,、\s]*派森[！!。．.]*", out.strip()), "請對派森說完整的「別走，派森」，不要加否定或其他語句。"
+assert any(isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id == "print" for n in ast.walk(ast.parse(code))), "請使用 print() 說出這句話。"
 ```
 solution:
 ```python
@@ -76,9 +79,23 @@ print(f"我的朋友有 {len(friends)} 個：{friends}")
 ```
 check:
 ```python
-assert "派森" in friends, "派森還不在朋友清單裡。"
-assert "append" in code, "用 append() 把派森加進去。"
-assert "8 個" in out, "印出來的朋友人數要包含派森。"
+import ast
+from collections import Counter
+expected_friends = ["爸爸","媽媽","奶奶","倖芳","翊丞","Cindy","Claire","派森"]
+assert "friends" in globals() and isinstance(friends,list) and all(isinstance(name,str) for name in friends) and Counter(friends) == Counter(expected_friends), "請保留原本七位朋友並加入派森，不能重複或漏人；順序可以不同。"
+tree = ast.parse(code)
+assert any(isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute)
+           and isinstance(n.func.value,ast.Name) and n.func.value.id == "friends"
+           and n.func.attr == "append" and len(n.args)==1
+
+           for n in ast.walk(tree)), "請使用 friends 的 append 方法加入派森，註解不算。"
+match = out.strip().partition("：")
+assert match[0] == "我的朋友有 8 個" and match[1], "請印出實際人數及完整名單。"
+try:
+    actual_friends = ast.literal_eval(match[2])
+except (ValueError,SyntaxError):
+    raise AssertionError("請沿用原本輸出格式，印出完整朋友清單。")
+assert isinstance(actual_friends, list) and actual_friends == friends, "輸出的朋友名單必須與實際清單一致。"
 ```
 solution:
 ```python
@@ -100,8 +117,11 @@ for day in range(100, 0, -1):
 ```
 check:
 ```python
-got = [l for l in lines if "我還在" in l]
-assert len(got) == 4, "應該要剛好印出 4 天（100、75、50、25）。"
+import ast
+expected = [f"倒數第 {day} 天，我還在。" for day in [100,75,50,25]]
+assert [x.strip() for x in lines if x.strip()] == expected, "請依序只印出第100、75、50、25天，不可重複、漏掉或改成其他日期。"
+tree = ast.parse(code)
+assert any(isinstance(n,ast.For) and any(isinstance(child,ast.If) for child in ast.walk(n)) for n in ast.walk(tree)), "請在 for 迴圈中使用 if 判斷。"
 ```
 solution:
 ```python
@@ -122,9 +142,17 @@ places = {"出生": "醫院", "第一次算數": "早餐店", "遇見倖芳": "�
 ```
 check:
 ```python
-got = [l for l in lines if "→" in l]
-assert len(got) == len(places), "每一段回憶都要印出來。"
-assert "出生 → 醫院" in out, "格式是「事件 → 地點」。"
+import ast
+from collections import Counter
+expected_places = {"出生":"醫院","第一次算數":"早餐店","遇見倖芳":"捷運站","奶奶的祈禱":"文昌帝君廟","第一次被說做得好":"Cindy 的會議室"}
+assert "places" in globals() and isinstance(places,dict) and places == expected_places, "請保留完整的人生地圖，不能刪除或改動地點。"
+expected = [f"{event} → {place}" for event,place in expected_places.items()]
+assert Counter(x.strip() for x in lines if x.strip()) == Counter(expected), "請印出每筆正確事件及地點，不可漏項、重複或印錯地點；順序可以不同。"
+assert any(isinstance(n,ast.For) and any(
+           isinstance(call,ast.Call) and isinstance(call.func,ast.Attribute)
+           and call.func.attr == "items" and isinstance(call.func.value,ast.Name)
+           and call.func.value.id == "places" for call in ast.walk(n.iter))
+           for n in ast.walk(ast.parse(code))), "請用 places.items() 逐筆查出事件與地點。"
 ```
 solution:
 ```python

@@ -309,8 +309,8 @@ func _run_fallback(req: Dictionary) -> Dictionary:
 	result["stdout"] = "\n".join(printed) + ("\n" if printed.size() > 0 else "")
 	if str(req.get("check", "")).strip_edges() != "":
 		# 沒有 Python 沒辦法跑 check，只要有印出東西就先放行
-		result["passed"] = printed.size() > 0
-		result["message"] = "" if result["passed"] else "簡易模式：至少要用 print() 印出一行。"
+		result["passed"] = false
+		result["message"] = "目前為簡易模式，只能預覽輸出，無法驗證答案。請恢復 Python 執行環境後再試。"
 	return result
 
 

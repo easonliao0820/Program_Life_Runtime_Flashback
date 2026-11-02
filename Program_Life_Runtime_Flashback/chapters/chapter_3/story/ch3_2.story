@@ -58,7 +58,7 @@
 
 @level ch3_2_countdown
 title: 快轉 100 天
-goal: 用 for 迴圈從第 100 天倒數到第 1 天，每天用 day % 4 決定你在哪裡讀書；每撐過 25 天，多印出一行「又撐過了一段」。
+goal: 用 for 迴圈從第 100 天倒數到第 1 天，每天用 day % 4 決定你在哪裡讀書；每撐過 25 天，多印出一行「又撐過了一段」。請沿用起始程式的輸出文字；第100、75、50、25天，先印里程碑，再印當天的讀書紀錄。
 tags: locations[0] → "學校" | range(100, 0, -1) | day % len(locations) | day % 25 == 0
 hint: 在 for 迴圈裡面加上：if day % 25 == 0:，底下印出 ===== 倒數第 {day} 天，又撐過了一段！=====
 hint: if 要跟 current_location 那行對齊，if 底下的 print 再往內縮四格。
@@ -73,11 +73,42 @@ for day in range(100, 0, -1):
 ```
 check:
 ```python
-days = [l for l in lines if l.startswith("倒數第")]
-assert len(days) == 100, "要剛好倒數 100 天：從第 100 天數到第 1 天。"
-assert days[0].startswith("倒數第 100 天") and days[-1].startswith("倒數第 1 天"), "要從第 100 天倒數到第 1 天。"
-marks = [l for l in lines if "=====" in l]
-assert len(marks) == 4, "每 25 天要印出一行 =====（第 100、75、50、25 天），現在印了 %d 行。" % len(marks)
+import ast
+
+tree = ast.parse(code)
+
+assert any(isinstance(n, ast.For) for n in ast.walk(tree)), \
+    "請使用 for 迴圈。"
+
+assert any(isinstance(n, ast.If) for n in ast.walk(tree)), \
+    "請使用 if 判斷每25天的里程碑。"
+
+# 用固定標準資料產生答案，不採用玩家修改過的 locations
+expected_locations = ["學校", "圖書館", "家裡", "咖啡廳"]
+expected_lines = []
+
+for expected_day in range(100, 0, -1):
+    if expected_day % 25 == 0:
+        expected_lines.append(
+            f"===== 倒數第 {expected_day} 天，又撐過了一段！====="
+        )
+
+    place = expected_locations[expected_day % 4]
+    expected_lines.append(
+        f"倒數第 {expected_day} 天，你在{place}瘋狂刷題中……"
+    )
+
+# 允許空白行與每行前後空白，其餘依題目格式核對
+actual_lines = [line.strip() for line in lines if line.strip()]
+
+assert len(actual_lines) == len(expected_lines), \
+    "應有100行讀書紀錄與4行里程碑，共104行。"
+
+for index, (actual, expected) in enumerate(
+    zip(actual_lines, expected_lines), start=1
+):
+    assert actual == expected, \
+        f"第{index}行不符合題意，應為：{expected}"
 ```
 solution:
 ```python

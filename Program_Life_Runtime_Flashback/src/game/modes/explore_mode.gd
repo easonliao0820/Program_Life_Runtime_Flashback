@@ -251,6 +251,21 @@ func _on_confirm() -> void:
 	if cap > 0 and _items.size() > cap:
 		_say("（東西太多了，跑不快，會趕不上捷運！先拿掉一樣吧。）")
 		return
+	# 只檢查 3.4 學測當天的探索，不影響其他探索關卡
+	if str(_def.get("id", "")) == "ch3_4_bag":
+		var required_items := [
+			"准考證", "身分證", "2B鉛筆", "橡皮擦", "手錶"
+		]
+		var missing: Array[String] = []
+
+		for item in required_items:
+			if not _items.has(item):
+				missing.append(item)
+
+		if not missing.is_empty():
+			_say("還沒帶齊考場所需的五樣物品，請再檢查一下。")
+			return
+
 	_done.emit()
 
 

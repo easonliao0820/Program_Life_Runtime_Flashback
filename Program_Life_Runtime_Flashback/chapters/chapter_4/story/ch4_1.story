@@ -91,9 +91,11 @@ else:
 ```
 check:
 ```python
-assert scores["物理"] == 60, "物理現在是 %s 分，教授說要改成 60 分。" % scores["物理"]
-assert "All pass" in out, "還沒有 All pass 喔，看看 failed 裡還有什麼。"
-assert 'scores["物理"]' in code or "scores['物理']" in code, "試著用 scores[\"物理\"] = 60 修改字典，而不是直接改上面的數字。"
+import ast
+expected_scores = {"微積分":60,"計算機概論":62,"物理":60,"體育":90,"英文":65,"通識邏輯":70}
+assert "scores" in globals() and isinstance(scores, dict) and scores == expected_scores, "請保留全部科目與原分數，只把物理改成60。"
+assert "failed" in globals() and isinstance(failed, list) and failed == [], "請依成績正確計算 failed，這次應是空清單。"
+assert out.strip() == "翊丞：All pass！明年可以繼續一起打遊戲！", "請保留原本 All pass 的完整結果，不加矛盾訊息。"
 ```
 solution:
 ```python

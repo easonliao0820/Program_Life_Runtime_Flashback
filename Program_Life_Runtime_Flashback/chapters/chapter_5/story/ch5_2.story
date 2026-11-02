@@ -80,12 +80,100 @@ print(f"本季冠軍：{best_region}，總業績 {best_total} 萬")
 ```
 check:
 ```python
-t, a = summarize([88, 102])
-assert a == 95.0, "中區的月平均應該是 (88 + 102) ÷ 2。不要把 3 寫死，讓 len() 去數有幾個月。"
-assert summarize([1, 2, 3, 4])[1] == 2.5, "summarize() 要能處理任何月數的資料。"
-assert "中區：總業績 190 萬，月平均 95.0 萬" in out, "報表上中區的數字還不對。"
-assert best_region == "南區" and best_total == 415, "本季冠軍還沒找對：比較每一區的總業績，留下最高的那一區。"
-assert "南區" in out.splitlines()[-1], "最後一行要印出本季冠軍。"
+import ast
+import contextlib
+import io
+import sys
+
+def _call_checked(fn, *args):
+    capture = io.StringIO()
+    ticks = [0]
+    def guard(frame, event, arg):
+        if event == "line":
+            ticks[0] += 1
+            assert ticks[0] <= 30000, "驗證執行過久，請檢查迴圈是否能停止。"
+        return guard
+    previous = sys.gettrace()
+    try:
+        with contextlib.redirect_stdout(capture):
+            sys.settrace(guard)
+            value = fn(*args)
+    finally:
+        sys.settrace(previous)
+    return value, capture.getvalue()
+
+import copy
+import builtins
+import types
+
+def _rerun(replacements=None, sequence=None):
+    replacements = replacements or {}
+    parsed = ast.parse(code)
+    scope = {"__builtins__": dict(vars(builtins)), "__name__": "__main__"}
+    for key, value in replacements.items():
+        scope["_validation_" + key] = copy.deepcopy(value)
+        found = False
+        for statement in parsed.body:
+            if isinstance(statement, ast.Assign) and any(
+                isinstance(target, ast.Name) and target.id == key
+                for target in statement.targets
+            ):
+                statement.value = ast.Name(id="_validation_" + key, ctx=ast.Load())
+                found = True
+                break
+        assert found, "請保留題目原本的 " + key + " 初始化資料。"
+    draws = []
+    if sequence is not None:
+        def draw(options):
+            assert list(options) == ["聖杯", "聖杯", "笑杯", "陰杯"], "請保留原本的筊杯機率清單。"
+            assert len(draws) < len(sequence), "連續三個聖杯後應停止，不能再擲。"
+            value = sequence[len(draws)]
+            draws.append(value)
+            return value
+        real_import = builtins.__import__
+        def test_import(name, globals=None, locals=None, fromlist=(), level=0):
+            if name == "random":
+                return types.SimpleNamespace(choice=draw)
+            return real_import(name, globals, locals, fromlist, level)
+        scope["__builtins__"]["__import__"] = test_import
+    compiled = compile(ast.fix_missing_locations(parsed), "<validation>", "exec")
+    _, captured = _call_checked(lambda: exec(compiled, scope))
+    return scope, captured, draws
+
+expected_sales = {"北區":[120,98,143],"中區":[88,102],"南區":[130,125,160]}
+assert "sales" in globals() and sales == expected_sales, "請保留題目三區原始業績。"
+assert "summarize" in globals() and callable(summarize), "請保留 summarize(months)。"
+for months in [[88,102],[1,2,3,4],[9],[10,20,30],[0,0],[2,3,8]]:
+    answer, _ = _call_checked(summarize, months.copy())
+    assert isinstance(answer, (tuple,list)) and tuple(answer) == (sum(months), round(sum(months)/len(months),1)), "summarize 必須正確回傳總和與平均，不能寫死月數或答案。"
+import re
+from decimal import Decimal
+from collections import Counter
+
+def validate_report(text, data):
+    actual = [line.strip() for line in text.splitlines() if line.strip()]
+    assert len(actual) == len(data) + 1, "請印出每區報表，最後一行印出冠軍。"
+    number = r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
+    row_pattern = r"(.+?)\s*[:：]\s*總業績\s*(" + number + r")\s*萬[，,]\s*月平均\s*(" + number + r")\s*萬"
+    records = []
+    for line in actual[:-1]:
+        match = re.fullmatch(row_pattern, line)
+        assert match, "請保留每區的名稱、總業績與月平均標示。"
+        records.append((match.group(1).strip(), Decimal(match.group(2)), Decimal(match.group(3))))
+    expected = [(region, Decimal(str(sum(values))), Decimal(str(round(sum(values)/len(values),1)))) for region, values in data.items()]
+    assert Counter(records) == Counter(expected), "各區總和及平均必須正確，不能漏區或重複；95與95.0都可以。"
+    champion = re.fullmatch(r"本季冠軍\s*[:：]\s*(.+?)[，,]\s*總業績\s*(" + number + r")\s*萬", actual[-1])
+    assert champion, "最後一行請印出本季冠軍與總業績。"
+    winner = max(data, key=lambda region: sum(data[region]))
+    assert champion.group(1).strip() == winner and Decimal(champion.group(2)) == Decimal(str(sum(data[winner]))), "冠軍名稱或總業績不正確。"
+    return winner
+
+winner = validate_report(out, expected_sales)
+assert best_region == winner and best_total == sum(expected_sales[winner]), "冠軍變數不正確。"
+for data in [{"北區":[500,10],"中區":[10,20],"南區":[1]}, {"北區":[1],"中區":[700,200,1,3],"南區":[9,10]}]:
+    scope, captured, _ = _rerun({"sales":data})
+    winner = validate_report(captured, data)
+    assert scope.get("best_region") == winner and scope.get("best_total") == sum(data[winner]), "請真正比較各區業績找出冠軍，不能寫死南區。"
 ```
 solution:
 ```python

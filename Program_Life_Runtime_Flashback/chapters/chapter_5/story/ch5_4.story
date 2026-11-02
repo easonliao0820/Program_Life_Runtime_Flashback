@@ -88,12 +88,53 @@ for memory in album:
 ```
 check:
 ```python
-assert "class Memory" in code, "要保留 Memory 這張設計圖。"
-assert len(album) >= 5, "album 裡要多一段你自己的回憶。"
-assert all(isinstance(m, Memory) for m in album), "album 裡的每一段都要是用 Memory(...) 做出來的物件。"
-assert out.count("歲那年") >= len(album), "最後用 for 迴圈讓每一段回憶都 recall() 一次。"
-mine = album[-1]
-set_flag("my_memory", "%s 歲那年，%s" % (mine.age, mine.title))
+import ast
+import contextlib
+import io
+import sys
+
+def _call_checked(fn, *args):
+    capture = io.StringIO()
+    ticks = [0]
+    def guard(frame, event, arg):
+        if event == "line":
+            ticks[0] += 1
+            assert ticks[0] <= 30000, "驗證執行過久，請檢查迴圈是否能停止。"
+        return guard
+    previous = sys.gettrace()
+    try:
+        with contextlib.redirect_stdout(capture):
+            sys.settrace(guard)
+            value = fn(*args)
+    finally:
+        sys.settrace(previous)
+    return value, capture.getvalue()
+
+assert "Memory" in globals() and isinstance(Memory, type), "請保留 Memory 類別。"
+def _memory_text(memory):
+    assert isinstance(memory, Memory), "每段回憶必須是 Memory 物件。"
+    assert isinstance(getattr(memory,"title",None), str) and memory.title.strip(), "回憶標題不能空白。"
+    assert type(getattr(memory,"age",None)) in (int, float) and memory.age >= 0, "回憶年齡請填非負數字。"
+    assert isinstance(getattr(memory,"feeling",None), str) and memory.feeling.strip(), "請填入回憶的心情。"
+    assert callable(getattr(memory,"recall",None)), "Memory 必須有可呼叫的 recall()。"
+    expected = f"{memory.age} 歲那年，{memory.title}，那時候的心情是「{memory.feeling}」。"
+    _, captured = _call_checked(memory.recall)
+    assert captured.strip() == expected, "recall() 印出的內容必須與物件欄位一致。"
+    return expected
+# 也測試新物件，避免 recall() 寫死某一段回憶。
+probe = Memory("測試一段新的回憶", 42, "安心")
+_memory_text(probe)
+assert "album" in globals() and isinstance(album,list) and len(album) >= 5, "請在 album 放入至少五段回憶。"
+assert len({id(memory) for memory in album}) == len(album), "每段回憶應是獨立物件，不能重複同一個物件湊數。"
+expected_lines = [_memory_text(memory) for memory in album]
+assert len(set(expected_lines)) == len(album), "請加入不同內容的回憶，不要複製同一段湊數。"
+original_titles = {"第一次自己算早餐錢", "奶奶擲出三個聖杯", "把第一份薪水分給爸媽", "Cindy 第一次說「做得好」"}
+assert any(memory.title not in original_titles for memory in album), "請加入至少一段屬於你自己的新回憶。"
+assert [x.strip() for x in lines if x.strip()] == expected_lines, "請依相簿順序逐段印出完整回憶，不能只印關鍵字。"
+tree = ast.parse(code)
+assert any(isinstance(n, ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr == "recall" for n in ast.walk(tree)), "請呼叫 recall() 回顧相簿。"
+mine = next(memory for memory in reversed(album) if memory.title not in original_titles)
+set_flag("my_memory", f"{mine.age} 歲那年，{mine.title}")
 ```
 solution:
 ```python
