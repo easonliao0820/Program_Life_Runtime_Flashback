@@ -60,7 +60,6 @@ __all__ = [
     "RequestLineTooLong",
     "SecurityError",
     "StatusLineTooLong",
-    "TooManyFragments",
     "TooManyHeaders",
     "WebSocketException",
     # .frames
@@ -132,7 +131,6 @@ if TYPE_CHECKING:
         RequestLineTooLong,
         SecurityError,
         StatusLineTooLong,
-        TooManyFragments,
         TooManyHeaders,
         WebSocketException,
     )
@@ -205,7 +203,6 @@ else:
             "RequestLineTooLong": ".exceptions",
             "SecurityError": ".exceptions",
             "StatusLineTooLong": ".exceptions",
-            "TooManyFragments": ".exceptions",
             "TooManyHeaders": ".exceptions",
             "WebSocketException": ".exceptions",
             # .frames

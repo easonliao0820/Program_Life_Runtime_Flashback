@@ -3,11 +3,10 @@ from __future__ import annotations
 import asyncio
 import codecs
 import collections
-import os
 from collections.abc import AsyncIterator, Sequence
 from typing import Any, Callable, Generic, Literal, TypeVar, overload
 
-from ..exceptions import ConcurrencyError, TooManyFragments
+from ..exceptions import ConcurrencyError
 from ..frames import BINARY, CONT, TEXT, Frame
 from ..typing import Data
 
@@ -15,8 +14,6 @@ from ..typing import Data
 __all__ = ["Assembler"]
 
 UTF8Decoder = codecs.getincrementaldecoder("utf-8")
-
-MAX_FRAGMENTS = int(os.environ.get("WEBSOCKETS_MAX_FRAGMENTS", "4096"))
 
 T = TypeVar("T")
 
@@ -177,8 +174,6 @@ class Assembler:
                     raise
                 self.maybe_resume()
                 assert frame.opcode is CONT
-                if len(frames) >= MAX_FRAGMENTS:
-                    raise TooManyFragments(MAX_FRAGMENTS)
                 frames.append(frame)
 
         finally:

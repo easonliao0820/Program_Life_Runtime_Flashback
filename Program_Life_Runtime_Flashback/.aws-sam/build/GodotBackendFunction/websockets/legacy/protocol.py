@@ -4,7 +4,6 @@ import asyncio
 import codecs
 import collections
 import logging
-import os
 import random
 import ssl
 import struct
@@ -24,7 +23,6 @@ from ..exceptions import (
     InvalidState,
     PayloadTooBig,
     ProtocolError,
-    TooManyFragments,
 )
 from ..extensions import Extension
 from ..frames import (
@@ -45,8 +43,6 @@ from .framing import Frame, prepare_ctrl, prepare_data
 
 
 __all__ = ["WebSocketCommonProtocol"]
-
-MAX_FRAGMENTS = int(os.environ.get("WEBSOCKETS_MAX_FRAGMENTS", "4096"))
 
 
 # In order to ensure consistency, the code always checks the current value of
@@ -995,10 +991,6 @@ class WebSocketCommonProtocol(asyncio.Protocol):
             self.transfer_data_exc = exc
             self.fail_connection(CloseCode.MESSAGE_TOO_BIG)
 
-        except TooManyFragments as exc:
-            self.transfer_data_exc = exc
-            self.fail_connection(CloseCode.MESSAGE_TOO_BIG, "too many fragments")
-
         except Exception as exc:
             # This shouldn't happen often because exceptions expected under
             # regular circumstances are handled above. If it does, consider
@@ -1079,8 +1071,6 @@ class WebSocketCommonProtocol(asyncio.Protocol):
                 raise ProtocolError("incomplete fragmented message")
             if frame.opcode != OP_CONT:
                 raise ProtocolError("unexpected opcode")
-            if len(fragments) >= MAX_FRAGMENTS:
-                raise TooManyFragments(MAX_FRAGMENTS)
             append(frame)
 
         return ("" if text else b"").join(fragments)
