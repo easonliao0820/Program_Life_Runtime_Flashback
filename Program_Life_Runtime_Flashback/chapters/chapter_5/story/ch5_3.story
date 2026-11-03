@@ -52,11 +52,47 @@ record_pressure("128")
 ```
 check:
 ```python
-assert "try" in code and "except" in code, "用 try / except 接住 int() 看不懂的時候。"
-assert record_pressure("一百二") is None, "爸爸打國字的時候，記錄不到數字，要 return None。"
-assert record_pressure("128") == 128, "打數字的時候，還是要正常記錄並回傳數字。"
-assert record_pressure("150") == 150
-assert "記錄 128" in out, "128 要被正常記錄下來。"
+import ast
+import contextlib
+import io
+import sys
+
+def _call_checked(fn, *args):
+    capture = io.StringIO()
+    ticks = [0]
+    def guard(frame, event, arg):
+        if event == "line":
+            ticks[0] += 1
+            assert ticks[0] <= 30000, "驗證執行過久，請檢查迴圈是否能停止。"
+        return guard
+    previous = sys.gettrace()
+    try:
+        with contextlib.redirect_stdout(capture):
+            sys.settrace(guard)
+            value = fn(*args)
+    finally:
+        sys.settrace(previous)
+    return value, capture.getvalue()
+
+import re
+assert "record_pressure" in globals() and callable(record_pressure), "請保留 record_pressure(text)。"
+tree = ast.parse(code)
+assert any(isinstance(n, ast.Try) and n.handlers for n in ast.walk(tree)), "請實際使用 try / except，不是只在註解裡寫。"
+for text in ["一百二", "abc", "", "12x"]:
+    value, captured = _call_checked(record_pressure, text)
+    assert value is None, "非數字輸入應回傳 None，而不是當機或假裝記錄成功。"
+    assert captured.strip() and any(word in captured for word in ["數字", "輸入", "格式", "無效"]), "輸入無效時請印出能理解的修正提示。"
+for number in [120,128,135,139,140,150,157]:
+    value, captured = _call_checked(record_pressure, str(number))
+    assert type(value) is int and value == number, "每個有效數字都必須正確轉換與回傳，不能只寫死128及150。"
+    assert re.search(r"記錄\s*[:：]?\s*" + str(number) + r"(?!\d)", captured), "請印出實際記錄的數字。"
+    if number >= 140:
+        assert "偏高" in captured, "140以上應提醒偏高。"
+    else:
+        assert "偏高" not in captured, "未達140時不可提醒偏高。"
+actual_lines = [x.strip() for x in lines if x.strip()]
+assert len(actual_lines) == 2 and any(word in actual_lines[0] for word in ["數字", "輸入", "格式", "無效"]), "請保留原本兩次呼叫，先提示國字輸入無效，再記錄128。"
+assert re.search(r"記錄\s*[:：]?\s*128(?!\d)", actual_lines[1]), "本次輸出必須正確記錄128。"
 ```
 solution:
 ```python

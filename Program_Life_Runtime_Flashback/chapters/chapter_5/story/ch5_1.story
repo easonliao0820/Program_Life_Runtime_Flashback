@@ -61,11 +61,47 @@ print(f"給爸媽 {family} 元，存起來 {saving} 元，自己用 {me} 元")
 ```
 check:
 ```python
-assert "def split_budget" in code and "return" in code, "要用 def 寫出 split_budget()，最後用 return 把結果交回來。"
-f, s, m = split_budget(30720)
-assert f + s + m == 30720, "三份加起來要剛好等於拿到的錢。"
-assert f >= 0 and s >= 0 and m >= 0, "每一份都不能是負的喔。"
-assert f > 0, "記得分一些給爸媽。"
+import ast
+import contextlib
+import io
+import sys
+
+def _call_checked(fn, *args):
+    capture = io.StringIO()
+    ticks = [0]
+    def guard(frame, event, arg):
+        if event == "line":
+            ticks[0] += 1
+            assert ticks[0] <= 30000, "驗證執行過久，請檢查迴圈是否能停止。"
+        return guard
+    previous = sys.gettrace()
+    try:
+        with contextlib.redirect_stdout(capture):
+            sys.settrace(guard)
+            value = fn(*args)
+    finally:
+        sys.settrace(previous)
+    return value, capture.getvalue()
+
+import math
+assert "split_budget" in globals() and callable(split_budget), "請保留 split_budget(money) 函式。"
+assert "calc_take_home" in globals() and callable(calc_take_home), "請保留 calc_take_home(salary) 函式。"
+for salary in [10000, 32000, 47500]:
+    take_home, _ = _call_checked(calc_take_home, salary)
+    assert take_home == salary - round(salary * 0.04), "實領薪水應扣除4%的勞健保。"
+for money in [1000, 30720, 42000, 55555]:
+    answer, _ = _call_checked(split_budget, money)
+    assert isinstance(answer, (list, tuple)) and len(answer) == 3, "請回傳給爸媽、存款、自用三份金額。"
+    assert all(type(x) in (int, float) and math.isfinite(x) and x >= 0 for x in answer), "三份金額須為有限、非負數值。"
+    assert math.isclose(sum(answer), money, rel_tol=0, abs_tol=0.000001), "三份加總必須等於傳入的金額，不能寫死薪水。"
+    assert answer[0] > 0, "記得分一些給爸媽。"
+assert "pay" in globals() and pay == 30720, "本次實領薪水應是30720元。"
+assert all(k in globals() for k in ["family", "saving", "me"]), "請保存本次三份金額。"
+actual_budget, _ = _call_checked(split_budget, pay)
+assert (family, saving, me) == tuple(actual_budget), "本次分配變數必須與函式結果一致。"
+expected = f"給爸媽 {family} 元，存起來 {saving} 元，自己用 {me} 元"
+actual_lines = [x.strip() for x in lines if x.strip()]
+assert actual_lines in ([expected], [f"實際拿到：{pay} 元", expected]), "請正確印出本次分配，保留實領金額那一行也可以。"
 set_flag("family_share", family)
 ```
 solution:
