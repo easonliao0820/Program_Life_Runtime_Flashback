@@ -9,6 +9,9 @@ extends Control
 
 const BG_DIR := "res://assets/backgrounds/"
 const CG_DIR := "res://assets/cg/"
+## 背景圖裁切時保留哪裡：0 = 保留最上面，1 = 保留最下面。
+## 不是 16:9 的圖（例如 AI 給的正方形）會填滿畫面，多的主要從上方裁，地板留著
+const CROP_ANCHOR_Y := 0.65
 
 const VIGNETTE_SHADER := """
 shader_type canvas_item;
@@ -194,6 +197,14 @@ func _make_layer(key: String, tone_name: String, caption: String = "") -> Contro
 		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		# 像素風：小圖放大時保持顆粒清楚，不要被線性過濾糊掉
+		tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		if not key.begins_with("cg:"):
+			# 填滿畫面但不置中裁：照 CROP_ANCHOR_Y 決定裁哪邊（畫面大小改變時重新排）
+			tr.stretch_mode = TextureRect.STRETCH_SCALE
+			holder.clip_contents = true
+			holder.resized.connect(_fit_cover.bind(holder, tr))
+			_fit_cover.call_deferred(holder, tr)
 		if key.begins_with("cg:"):
 			# CG 用米色底、置中不裁切（父母剪影這類方形圖）
 			var paper := ColorRect.new()
@@ -246,6 +257,21 @@ func _cg_caption(caption: String) -> Control:
 	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tag.add_child(lbl)
 	return tag
+
+
+## 等比放大到蓋滿 holder；左右置中，上下照 CROP_ANCHOR_Y 對齊
+func _fit_cover(holder: Control, tr: TextureRect) -> void:
+	if not is_instance_valid(tr) or tr.texture == null:
+		return
+	var ts := tr.texture.get_size()
+	var hs := holder.size
+	if ts.x <= 0 or ts.y <= 0 or hs.x <= 0 or hs.y <= 0:
+		return
+	var k := maxf(hs.x / ts.x, hs.y / ts.y)
+	var sz := ts * k
+	tr.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	tr.size = sz
+	tr.position = Vector2((hs.x - sz.x) * 0.5, (hs.y - sz.y) * CROP_ANCHOR_Y)
 
 
 func _try_texture(base: String) -> Texture2D:

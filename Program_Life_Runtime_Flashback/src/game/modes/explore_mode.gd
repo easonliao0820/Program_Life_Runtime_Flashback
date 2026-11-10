@@ -1,7 +1,8 @@
 extends Control
 
 ## 探索模式（畫面設定書 2.3）：2.1 找回憶盒子、3.1 整理書包、3.4 學測當天行前檢查。
-## - 俯視的房間，直接點擊物品；可互動物品用藍黃光圈標示，放進 list 的物品變淡並打勾
+## - 俯視的房間：玩家角色（目前先用圓形代替）用方向鍵／WASD 走動，走到物品旁邊出現「E」提示，按 E 互動
+## - 可互動物品用藍黃光圈標示，放進 list 的物品變淡並打勾
 ## - 右側面板即時顯示 Python 的 list，點物品時自動長出一行 bag.append(...)
 ## - 容量條：接近上限變橘色，超過變紅並提示「跑不快」
 ## - 倒數計時（3.1 捷運進站）
@@ -31,6 +32,15 @@ var _buttons: Dictionary = {}
 var _time_left: float = 0.0
 var _running: bool = false
 
+## 玩家角色與互動
+const WALK_SPEED := 420.0          ## 每秒走幾像素
+const INTERACT_RANGE := 120.0      ## 離物品多近才能按 E
+var _walker: Walker
+var _prompt: PanelContainer
+var _prompt_label: Label
+var _entries: Dictionary = {}      ## 物品名稱 -> entry
+var _nearest: String = ""
+
 
 func _ready() -> void:
 	UIKit.full_rect(self)
@@ -45,6 +55,12 @@ func _ready() -> void:
 	_room_title = UIKit.label("", 30, UIKit.INK)
 	_room_title.position = Vector2(30, 20)
 	_room.add_child(_room_title)
+	var help := UIKit.label("方向鍵／WASD 移動　．　靠近發光的東西按 E 互動　．　空白鍵出發", 22, Color(UIKit.INK, 0.6))
+	help.name = "Help"
+	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	help.position = Vector2(0, _room.size.y - 44)
+	help.custom_minimum_size = Vector2(_room.size.x, 0)
+	_room.add_child(help)
 
 	# 左下：Python 清單面板（點物品時即時長出程式碼）
 	var side := PanelContainer.new()
@@ -102,9 +118,11 @@ func play(def: Dictionary) -> Dictionary:
 	_capacity_bar.max_value = maxi(cap, 1)
 
 	for c in _room.get_children():
-		if c != _room_title:
+		if c != _room_title and c.name != "Help":
 			c.queue_free()
 	_buttons.clear()
+	_entries.clear()
+	_nearest = ""
 	# 一開始就在清單裡的東西（例如書包裡的漫畫）也放在房間裡，點了可以拿出來
 	var entries: Array = []
 	for start_item in def.get("start", []):
@@ -115,9 +133,22 @@ func play(def: Dictionary) -> Dictionary:
 		var b := ItemSpot.new()
 		b.item_name = entry["name"]
 		b.position = _spot_position(i, entries.size())
-		b.pressed_item.connect(_on_item.bind(entry))
 		_room.add_child(b)
 		_buttons[entry["name"]] = b
+		_entries[entry["name"]] = entry
+
+	# 玩家角色（先用圓形代替）：從房間下方中間出發
+	_walker = Walker.new()
+	_room.add_child(_walker)
+	_walker.position = Vector2(_room.size.x / 2.0, _room.size.y - 110)
+	# 「E」互動提示
+	_prompt = PanelContainer.new()
+	_prompt.add_theme_stylebox_override("panel", UIKit.navy_panel(8, 8))
+	_prompt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_prompt_label = UIKit.label("", 22, Color.WHITE)
+	_prompt.add_child(_prompt_label)
+	_prompt.visible = false
+	_room.add_child(_prompt)
 	_refresh()
 
 	visible = true
@@ -229,6 +260,9 @@ func _full_code() -> String:
 
 
 func _process(delta: float) -> void:
+	if _running:
+		_move_walker(delta)
+		_update_nearest()
 	if not _running or _time_left <= 0.0:
 		return
 	_time_left -= delta
@@ -239,9 +273,84 @@ func _process(delta: float) -> void:
 		_done.emit()
 
 
-## 探索完按空白鍵（或 Enter）＝按確認
+## 在輸入框打字時，不要讓角色跟著動、也不要觸發 E
+func _typing() -> bool:
+	return get_viewport().gui_get_focus_owner() is LineEdit or get_viewport().gui_get_focus_owner() is TextEdit
+
+
+## 方向鍵／WASD 移動，不能走出房間
+func _move_walker(delta: float) -> void:
+	if _walker == null or _typing():
+		return
+	var dir := Vector2.ZERO
+	if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
+		dir.x -= 1
+	if Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
+		dir.x += 1
+	if Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W):
+		dir.y -= 1
+	if Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S):
+		dir.y += 1
+	if dir == Vector2.ZERO:
+		_walker.moving = false
+		return
+	dir = dir.normalized()
+	_walker.facing = dir
+	_walker.moving = true
+	var margin := Walker.RADIUS + 12.0
+	var p := _walker.position + dir * WALK_SPEED * delta
+	p.x = clampf(p.x, margin, _room.size.x - margin)
+	p.y = clampf(p.y, 80.0 + margin, _room.size.y - 50.0 - margin)
+	_walker.position = p
+
+
+## 找出最近、而且在範圍內的物品，顯示「E」提示
+func _update_nearest() -> void:
+	if _walker == null:
+		return
+	var best := ""
+	var best_d := INTERACT_RANGE
+	for key in _buttons:
+		var b: ItemSpot = _buttons[key]
+		var d := _walker.position.distance_to(b.position + b.center())
+		if d < best_d:
+			best_d = d
+			best = key
+	if best != _nearest:
+		if _nearest != "" and _buttons.has(_nearest):
+			_buttons[_nearest].focused = false
+		_nearest = best
+		if _nearest != "":
+			_buttons[_nearest].focused = true
+	if _nearest == "":
+		_prompt.visible = false
+		return
+	_prompt_label.text = "  E　%s  " % _action_text(_nearest)
+	_prompt.visible = true
+	_prompt.reset_size()
+	var b: ItemSpot = _buttons[_nearest]
+	_prompt.position = b.position + Vector2(b.size.x / 2.0 - _prompt.size.x / 2.0, -36)
+
+
+## 按 E 會做什麼（顯示在提示上）
+func _action_text(item_name: String) -> String:
+	var entry: Dictionary = _entries.get(item_name, {})
+	if str(entry.get("code", "")) != "":
+		return "已經打開了" if _found.has(item_name) else "打開"
+	return "拿出來" if _items.has(item_name) else "放進%s" % ("書包" if str(_def.get("list", "bag")) in ["bag", "my_bag"] else "清單")
+
+
+## 空白鍵（或 Enter）＝出發；E＝跟旁邊的物品互動
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and _running and not _confirm.disabled and UIKit.is_continue_key(event):
+	if not visible or not _running:
+		return
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_E and not _typing():
+		get_viewport().set_input_as_handled()
+		if _nearest != "":
+			_on_item(_entries[_nearest])
+			_buttons[_nearest].bump()
+		return
+	if not _confirm.disabled and UIKit.is_continue_key(event):
 		get_viewport().set_input_as_handled()
 		_on_confirm()
 
@@ -290,28 +399,37 @@ func _escape(t: String) -> String:
 
 
 ## 房間裡可以點的物品：藍黃光圈，放進清單後變淡並打勾
+## 房間裡可以互動的物品：藍黃光圈；角色靠近時光圈變亮變大，放進清單後變淡並打勾
 class ItemSpot extends Control:
-	signal pressed_item
 	var item_name: String = ""
 	var taken: bool = false
+	var focused: bool = false
 	var _t: float = 0.0
+	var _bump: float = 0.0
 
 	func _ready() -> void:
 		size = Vector2(250, 130)
-		mouse_filter = Control.MOUSE_FILTER_STOP
-		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func center() -> Vector2:
+		return Vector2(size.x / 2.0, 50)
+
+	## 按 E 互動時彈一下
+	func bump() -> void:
+		_bump = 1.0
 
 	func _process(delta: float) -> void:
 		_t += delta
+		_bump = maxf(_bump - delta * 4.0, 0.0)
 		queue_redraw()
 
-	func _gui_input(event: InputEvent) -> void:
-		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			pressed_item.emit()
-
 	func _draw() -> void:
-		var c := Vector2(size.x / 2.0, 50)
-		var pulse := 0.5 + 0.5 * sin(_t * 3.0)
+		var c := center()
+		var pulse := 0.5 + 0.5 * sin(_t * (6.0 if focused else 3.0))
+		draw_set_transform(c, 0.0, Vector2.ONE * (1.0 + _bump * 0.25))
+		c = Vector2.ZERO
+		if focused:
+			draw_circle(c, 62 + pulse * 6, Color(UIKit.PY_YELLOW, 0.25))
 		if not taken:
 			draw_circle(c, 48 + pulse * 6, Color(UIKit.PY_BLUE, 0.18))
 			draw_arc(c, 44 + pulse * 4, 0, TAU, 48, Color(UIKit.PY_YELLOW, 0.9), 4)
@@ -319,7 +437,33 @@ class ItemSpot extends Control:
 		draw_circle(c, 32, Color(1, 1, 1, 0.35 if taken else 0.95))
 		if taken:
 			draw_polyline(PackedVector2Array([c + Vector2(-14, 0), c + Vector2(-3, 12), c + Vector2(18, -14)]), UIKit.RUN_GREEN, 6)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		var font := UIKit.body_font()
 		var tw := font.get_string_size(item_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x
 		draw_string(font, Vector2((size.x - tw) / 2.0, 122), item_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 26,
 			Color(UIKit.INK, 0.4 if taken else 1.0))
+
+
+## 玩家角色：場景與角色美術還沒做，先用圓形代替（主角代表色：藍灰），小圓點表示面向
+class Walker extends Control:
+	const RADIUS := 28.0
+	var facing: Vector2 = Vector2.UP
+	var moving: bool = false
+	var _t: float = 0.0
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		size = Vector2.ZERO
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		# 走路時上下輕輕晃
+		var bob := sin(_t * 14.0) * 3.0 if moving else 0.0
+		var c := Vector2(0, bob)
+		draw_circle(Vector2(0, RADIUS * 0.8), RADIUS * 0.9, Color(0, 0, 0, 0.15))  # 影子
+		draw_circle(c, RADIUS + 3, Color.WHITE)
+		draw_circle(c, RADIUS, ChapterRegistry.character_color("你"))
+		draw_circle(c + facing * (RADIUS * 0.55), 7, Color.WHITE)
