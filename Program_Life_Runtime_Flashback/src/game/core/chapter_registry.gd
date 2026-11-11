@@ -158,6 +158,7 @@ const BACKGROUNDS: Dictionary = {
 	"library": {"name": "圖書館", "tone": "highschool"},
 	"home": {"name": "家裡", "tone": "highschool"},
 	"cafe": {"name": "咖啡廳", "tone": "highschool"},
+	"study_montage": {"name": "倒數一百天", "tone": "highschool"},
 	"temple": {"name": "文昌帝君廟", "tone": "temple"},
 	"hospital": {"name": "病房", "tone": "birth"},
 	"dorm": {"name": "大學宿舍・早晨", "tone": "university"},
@@ -174,6 +175,43 @@ const BACKGROUNDS: Dictionary = {
 	"star_sky": {"name": "星空回憶空間", "tone": "memory"},
 	"white": {"name": "", "tone": "white"},
 	"black": {"name": "", "tone": "black"},
+}
+
+
+## 同一個地方的不同時段／狀態：沒有自己的圖時，拿 base 那張用調色變出來（AI 很難畫出「同一間」房間）。
+## 有自己的圖（assets/backgrounds/<鍵>.png）就用自己的，不調色。grade 對應 BG_GRADES。
+const BG_VARIANTS: Dictionary = {
+	"temple": {"base": "temple_day", "grade": "mystic"},
+	"my_room_dawn": {"base": "my_room", "grade": "dawn"},
+	"desk": {"base": "my_room", "grade": "night_lamp"},
+	"dorm_night": {"base": "dorm", "grade": "night"},
+	"office_dusk": {"base": "office", "grade": "dusk"},
+	"lake_dawn": {"base": "lake_sunset", "grade": "sunrise"},
+	"parents_home": {"base": "living_room", "grade": "aged"},
+	"home": {"base": "living_room", "grade": "night_lamp"},
+}
+
+## 調色參數（給 BackgroundView 的 GRADE_SHADER）：
+## mul 乘色、bright 亮度、sat 飽和度、top/bottom 由上到下的色罩（a = 強度）、
+## glow 一團光（a = 強度）與位置 glow_pos（0～1）、半徑 glow_r、vig 暗角、tame 壓暗原本很亮的地方（窗外天光）
+const BG_GRADES: Dictionary = {
+	"mystic": {"mul": Color(0.85, 0.62, 0.58), "bright": 0.72, "sat": 0.85,
+		"top": Color(0.12, 0.02, 0.02, 0.45), "bottom": Color(0.75, 0.68, 0.6, 0.3), "vig": 0.7,
+		"glow": Color(1.0, 0.75, 0.35, 0.35), "glow_pos": Vector2(0.5, 0.35), "glow_r": 0.3},
+	"dawn": {"mul": Color(0.85, 0.88, 1.05), "bright": 0.85, "sat": 0.7,
+		"top": Color(1.0, 0.75, 0.82, 0.25), "bottom": Color(0.4, 0.5, 0.78, 0.22), "vig": 0.35},
+	"night": {"mul": Color(0.35, 0.42, 0.72), "bright": 0.6, "sat": 0.5,
+		"top": Color(0.02, 0.03, 0.1, 0.45), "vig": 0.75, "tame": 0.7,
+		"glow": Color(0.6, 0.78, 1.0, 0.45), "glow_pos": Vector2(0.5, 0.62), "glow_r": 0.22},
+	"night_lamp": {"mul": Color(0.5, 0.46, 0.58), "bright": 0.7, "sat": 0.65,
+		"top": Color(0.03, 0.03, 0.08, 0.4), "vig": 0.7, "tame": 0.7,
+		"glow": Color(1.0, 0.78, 0.42, 0.55), "glow_pos": Vector2(0.5, 0.58), "glow_r": 0.38},
+	"dusk": {"mul": Color(1.1, 0.8, 0.58), "bright": 0.9, "sat": 0.9,
+		"top": Color(1.0, 0.55, 0.25, 0.25), "bottom": Color(0.3, 0.14, 0.2, 0.22), "vig": 0.45},
+	"sunrise": {"mul": Color(0.85, 0.92, 1.06), "bright": 0.95, "sat": 0.75,
+		"top": Color(1.0, 0.86, 0.72, 0.22), "bottom": Color(0.55, 0.72, 0.9, 0.25), "vig": 0.3},
+	"aged": {"mul": Color(1.04, 0.94, 0.8), "bright": 0.88, "sat": 0.55,
+		"top": Color(0.9, 0.74, 0.5, 0.14), "bottom": Color(0.35, 0.25, 0.15, 0.15), "vig": 0.45},
 }
 
 

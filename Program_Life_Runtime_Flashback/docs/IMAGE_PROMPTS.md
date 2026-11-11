@@ -3,6 +3,54 @@
 依照目前劇本實際用到的場景、CG、角色整理。
 **檔名照下面的寫法放到指定資料夾，遊戲就會自動換掉佔位圖，不用改程式。**
 
+## 🎯 總整理：到底要生哪些圖
+
+> 已經有：`delivery_room`（產房）、`temple_day`（廟・白天）、`living_room`（客廳）、`birth`（父母剪影 CG）。
+> 遊戲會自己調色變出來、**不用生**：`temple`、`my_room_dawn`、`desk`、`dorm_night`、`office_dusk`、`lake_dawn`、`parents_home`、`home`。
+
+### 背景（`assets/backgrounds/`）— 必生 15 張 ＋ 3.2 快轉三選一
+
+| # | 檔名 | 場景 | 會順便變出 |
+|---|---|---|---|
+| 1 | `breakfast_shop` | 巷口早餐店 | |
+| 2 | `convenience_store` | 便利商店 | |
+| 3 | `my_room` | 高中房間（白天） | 清晨版、深夜讀書版 |
+| 4 | `mrt_platform` | 捷運月台 | |
+| 5 | `mrt_car` | 捷運車廂 | |
+| 6 | `hospital` | 病房 | |
+| 7 | `dorm` | 大學宿舍（白天） | 深夜版 |
+| 8 | `classroom` | 大學階梯教室 | |
+| 9 | `stir_fry` | 熱炒店 | |
+| 10 | `graduation` | 畢業典禮校園 | |
+| 11 | `interview` | 面試會議室 | |
+| 12 | `office` | 辦公室（白天） | 傍晚版 |
+| 13 | `meeting_room` | 大會議室 | |
+| 14 | `photo_room` | 整理舊照片的房間 | |
+| 15 | `lake_sunset` | 湖邊夕陽 | 清晨日出版 |
+| 16 | 3.2 快轉 | 生 `school`、`library`、`cafe` 三張，**或**一支影片 `study_montage.ogv` | |
+
+建議先重生（現在是正方形，會被裁）：`temple_day`、`living_room` 改成 16:9。
+可以晚點：`star_sky`（回憶遊戲底圖；沒有圖時程式會自己畫星星）。
+
+### CG（`assets/cg/`）— 12 張
+
+`holding_hands`、`breakfast`、`mrt_gift`、`mrt_alone`、`grandma_prayer`、`lake_promise`、
+`mrt_wave`、`mom_breakfast`、`claire_thumbs_up`、`farewell_party`、`ending1`、`ending2`
+（每張的內容見「二、CG」）
+
+### 角色立繪（`assets/characters/`，去背）— 12 張
+
+`倖芳`、`倖芳_老年`、`Cindy`、`Claire`、`媽媽`、`媽媽_老年`、`爸爸`、`爸爸_老年`、`奶奶`、`翊丞`、`翊丞_臉紅`、`老闆娘`
+（`面試官` 不用生：複製一份 `Cindy.png` 改名就好）
+
+**合計：背景 15～18 張（或 15 張＋1 支影片）、CG 12 張、立繪 12 張。**
+
+### 同一個人的不同年齡／表情（PixelLab 一樣很難畫成同一個人）
+
+先生年輕版，再把年輕版當 **Init image／參考圖** 去生老年版、臉紅版，描述只改「white hair, older」或「blushing」。如果還是不像，跟我說，可以改用遊戲調色（例如臉紅直接疊紅暈）。
+
+---
+
 ## 使用方式
 
 1. 每一張圖都先貼「共同風格」，再接後面那一張的英文 prompt。
@@ -26,6 +74,40 @@
 - **已經生好但比例不對**：用工具的「擴展畫面（Outpaint / Expand / 生成式擴展）」往左右延伸成 16:9，不要硬拉長。
 - 遊戲裡的背景是「填滿畫面、多的裁掉」，比例差一點不會變形，但上下或左右會被切掉，所以重要的東西要放在畫面中間。
 - 左下角會疊站牌（地點名稱），下方三分之一會疊對話框，**主體放在畫面中上方**比較不會被擋住。
+
+### 用 PixelLab（pixellab.ai）生圖
+
+PixelLab 是像素專用工具，**不用自己放大**：照下面尺寸生出來直接存檔，遊戲會用「最近鄰」放大到全螢幕。
+
+**選哪個工具、畫布設多大（都要是 16:9 橫向，不要用正方形）**
+
+| 方案 | 工具 | 畫布寬×高 | 放大到 1920×1080 |
+|---|---|---|---|
+| 有 Pro | Create S-XL image (Pro) | **640×360** | 剛好 3 倍 |
+| Tier 2 以上 | Create medium–extra large image (Pixflux) | **480×270** | 剛好 4 倍 |
+| Tier 1 | Pixflux | **384×216** | 剛好 5 倍 |
+| 免費 | Pixflux | **240×135** | 剛好 8 倍 |
+
+> PixelLab 的尺寸限制是「面積」，例如 Tier 2 是 400×400 的面積，寬可以超過 400，所以 480×270 可以。
+
+**欄位怎麼填**
+
+| 欄位 | 填什麼 |
+|---|---|
+| Description | 這張圖的英文 prompt（灰框），**加上**下面「PixelLab 精簡版風格」那一行 |
+| Negative description | `close-up, cropped, square, text, letters, watermark, UI, border, blurry, fisheye` |
+| Camera view | `side`（平視，背景都用這個） |
+| Outline / Shading / Details | `selective outline` / `medium shading` / `highly detailed`（選得到就選這幾個） |
+| Remove background | **關掉**（背景要完整畫面；只有角色立繪才打開） |
+| Style image / Init image | 上傳 `assets/backgrounds/living_room.png` 當風格參考，整套畫風才會一致 |
+| Seed | 生到滿意的那張，記下 seed，同場景的不同時段（例如 `my_room` → `my_room_dawn`）用同一個 seed 再改描述 |
+
+**PixelLab 精簡版風格**（PixelLab 本來就是像素風，不用寫 pixel art、16:9 那些，換成這行）：
+
+```
+wide establishing shot, whole room visible from wall to wall, floor visible at the bottom,
+eye-level side view, warm nostalgic lighting, modern-day Taiwan, no people
+```
 
 ---
 
@@ -137,6 +219,7 @@ slightly chaotic and hurried mood, teal and sky-blue palette.
 ```
 
 **`my_room_dawn.png`**｜3.4 學測當天清晨
+> ✅ **不用生**：遊戲會拿 `my_room` 自動調色變出來（保證是同一個地方）。想要專屬的圖再生，放進去就會優先用。
 中文：同一間房間，清晨天剛亮，窗外淡藍帶粉，桌上整齊放著准考證、2B 鉛筆、橡皮擦、手錶。安靜、緊張。
 
 ```
@@ -147,26 +230,49 @@ calm but nervous atmosphere, soft cool light.
 ```
 
 **`mrt_platform.png`**｜3.1 趕捷運、4.3 寒假約在捷運站
-中文：台北捷運月台，月台門、關門警示燈、人潮、列車即將進站。跟登入畫面的捷運月台風格一致。
+中文：台北捷運地下月台（板南線那種）。全高的玻璃月台門、門上方的紅色關門警示燈、地上排隊的黃色箭頭和候車線、天花板的白色燈條、柱子上的藍色站名牌、上方的列車到站資訊螢幕。乘客多是上班族和穿台灣高中制服的學生。跟登入畫面的捷運月台風格一致。
 
 ```
-Full view of the platform seen from the middle of the platform, the platform floor with yellow safety line visible across the bottom of the image.
-A Taipei MRT station platform during the morning rush, platform screen doors with
-warning lights, commuters in motion blur, a train arriving, clean modern station design,
-blue accents, busy but hopeful mood. Match the style of the existing MRT login screen.
+Full view of the platform seen from the middle of the platform, the platform floor visible across the bottom of the image.
+An underground Taipei Metro (Taipei MRT, Taiwan) island platform like the Bannan Line,
+full-height glass platform screen doors along one side with small red warning lights above
+each door, yellow queuing arrows and waiting lines painted on the gray granite floor,
+long white linear ceiling lights, square pillars with blue station name panels,
+hanging LED arrival-time display boards, a silver Taipei MRT train with blue stripes
+pulling in behind the glass doors, commuters in office wear and Taiwanese high school
+uniforms, bright clean white lighting, busy but hopeful morning mood.
+Taipei Metro style, NOT a Japanese, Korean, Chinese mainland or European subway.
+Match the style of the existing MRT login screen.
 ```
 
 **`mrt_car.png`**｜3.1 車廂裡派森解說、送巧克力
-中文：擁擠的捷運車廂內部，扶手、吊環、窗外飛過的隧道光，人群有點模糊。
+中文：台北捷運（高運量，例如板南線）車廂內部，上下學尖峰有點擠。重點特徵：
+- **座椅沿著兩側車窗排成長條**（面對面坐），不是一排排的座位；一般座位是淺藍／藍綠色塑膠椅，**博愛座是深藍色**。
+- 不鏽鋼直立扶桿、頭頂橫桿上掛**三角形吊環**。
+- 車門上方有**路線圖跑馬燈／LED 螢幕**，車門是銀色雙開門，旁邊有紅色警示燈。
+- 白色乾淨的車廂、**冷白色燈光**（不是暖黃）、灰色防滑地板。
+- 窗外是黑色隧道，有光一道道閃過。
+- 乘客：穿台灣高中制服的學生、上班族在滑手機，人有點模糊。
 
 ```
-Full view down the length of the train car, seats on both sides, the train floor visible across the bottom of the image.
-Interior of a crowded Taipei MRT train car, metal handrails and hanging straps,
-tunnel lights streaking past the windows, passengers softly blurred, warm interior
-lighting, intimate feeling in a crowded space.
+Full view down the length of the train car from one end, the gray anti-slip floor visible across the bottom of the image.
+Interior of a Taipei Metro (Taipei MRT, Taiwan) high-capacity train car like the Bannan Line,
+long bench seats running along both side walls facing each other (longitudinal seating),
+light blue-green plastic seats with a few dark blue priority seats, stainless steel vertical
+poles, overhead horizontal bars with hanging triangular hand straps, silver double sliding
+doors with a small red indicator light, an LED route map strip above each door,
+clean white interior panels, bright cool white fluorescent ceiling lights,
+dark tunnel outside the windows with light streaks flashing past,
+moderately crowded with Taiwanese high school students in uniforms and office workers
+looking at their phones, passengers softly blurred, morning commute mood.
+Taipei Metro style, NOT a Japanese, Korean, Chinese mainland or European subway,
+no cross-facing seats, no warm yellow light.
 ```
+
+> 生出來還是不像的話：上網找一張「台北捷運 車廂 內部」的照片一起丟給生圖 AI，跟它說「照這張照片的車廂樣子，畫成像素風」。照片只當參考，不要直接放進遊戲。
 
 **`desk.png`**｜3.2 學測前 100 天
+> ✅ **不用生**：遊戲會拿 `my_room` 自動調色變出來（保證是同一個地方）。想要專屬的圖再生，放進去就會優先用。
 中文：深夜書桌，檯燈、堆滿的參考書、便利貼、手機放旁邊。孤單但努力。
 
 ```
@@ -177,7 +283,16 @@ determined mood.
 ```
 
 **`school.png`、`library.png`、`home.png`、`cafe.png`**｜3.2 「快轉 100 天」蒙太奇（背景快速切換）
+> ✅ `home` **不用生**（用 `living_room` 調成晚上開燈）。另外三張也可以改用一支影片，見下方。
 中文：四張讀書地點：學校教室、圖書館、家裡、咖啡廳。四張構圖要相近（同樣視角、都有一張讀書的桌子），快速切換才順。
+
+> **也可以改用一支小影片 `study_montage.ogv`**（有影片就用影片，四張圖可以不用生）：
+> - 內容：同一張書桌、同一個角度，背景在學校 → 圖書館 → 家裡 → 咖啡廳之間快速切換，桌上的書越堆越高、天色日夜交替，像縮時攝影。
+> - 規格：**16:9 橫向**、約 **8～15 秒、會循環播放**（頭尾接得起來最好），**不用聲音**，不要放文字（日期 D-100、字幕是遊戲自己疊上去的）。
+> - 格式：Godot 只能播 **`.ogv`**。拿到 mp4 的話，用免費的 HandBrake／線上轉檔網站轉成 ogv（Theora），或把 mp4 給我轉。
+> - 放到：`assets/backgrounds/study_montage.ogv`。放進去遊戲就會自動改播影片，日期倒數與字幕照樣跟著玩家的程式跑。
+> - 用 PixelLab 的話：可以先生四張圖，再用它的動畫功能做成影片；或把四張圖丟進剪輯軟體（CapCut、iMovie）每張 0.5 秒快切，輸出成影片。
+> - 其他背景也一樣：任何背景放 `<檔名>.ogv` 就會變成循環播放的動態背景（例如 `mrt_car.ogv` 窗外隧道燈閃過）。
 
 ```
 school.png  : A Taiwanese high school classroom after school, empty desks, chalkboard,
@@ -193,6 +308,7 @@ cafe.png    : A small cozy café corner, wooden table with open books and a latt
 ```
 
 **`temple.png`**｜3.3 昏倒後靈魂出竅到廟裡、5.4 奶奶過世後一個人回廟裡
+> ✅ **不用生**：遊戲會拿 `temple_day` 自動調色變出來（保證是同一個地方）。想要專屬的圖再生，放進去就會優先用。
 中文：同一間文昌帝君廟，但氣氛神祕：光線偏暗、香煙繚繞、金色與紅色。遊戲會自動把畫面降低彩度（靈魂狀態），所以原圖照正常顏色畫即可。
 
 ```
@@ -224,6 +340,7 @@ warm yellow palette.
 ```
 
 **`dorm_night.png`**｜4.3 深夜打一則訊息
+> ✅ **不用生**：遊戲會拿 `dorm` 自動調色變出來（保證是同一個地方）。想要專屬的圖再生，放進去就會優先用。
 中文：同一間宿舍，深夜，燈都關了，只有手機螢幕的光照在床上。
 
 ```
@@ -280,6 +397,7 @@ cluttered with snacks, gray-blue palette, daytime fluorescent light.
 ```
 
 **`office_dusk.png`**｜5.2 星期五傍晚、5.4 退休
+> ✅ **不用生**：遊戲會拿 `office` 自動調色變出來（保證是同一個地方）。想要專屬的圖再生，放進去就會優先用。
 中文：同一間辦公室，傍晚，夕陽從百葉窗照進來，橘色光條。
 
 ```
@@ -298,6 +416,7 @@ chart, long table, cool lighting.
 ```
 
 **`parents_home.png`**｜5.1 包紅包、5.3 爸媽的血壓
+> ✅ **不用生**：遊戲會拿 `living_room` 自動調色變出來（保證是同一個地方）。想要專屬的圖再生，放進去就會優先用。
 中文：爸媽家餐桌，比第二章的客廳舊一點，牆上多了主角的照片，桌上有血壓計。
 
 ```
@@ -328,6 +447,7 @@ the shore, warm and bittersweet farewell mood.
 ```
 
 **`lake_dawn.png`**｜5.4 看日出的約定、結局二
+> ✅ **不用生**：遊戲會拿 `lake_sunset` 自動調色變出來（保證是同一個地方）。想要專屬的圖再生，放進去就會優先用。
 中文：清晨的湖邊，日出，薄霧，湖水藍。
 
 ```
@@ -336,13 +456,57 @@ A lakeside at sunrise, soft mist over the water, pale gold and lake-blue colors,
 quiet hopeful morning.
 ```
 
-**`star_sky.png`**｜回憶遊戲（結局一、二）
-中文：深藍星空，碎片漂浮的回憶空間。（遊戲目前用程式畫星星，有圖會更好）
+**`star_sky.png`**｜第六章兩個結局的「回憶遊戲」底圖（結局一：把回憶接起來；結局二：把記憶補回來）
+
+**這個畫面在做什麼**：主角 80 歲、人生最後的時刻，派森帶他回到一片「記憶的星空」。
+空中漂著五片回憶碎片，玩家一片一片解開程式關卡，碎片恢復色彩、派森越來越透明。
+這張圖是**底圖**，碎片、派森、進度條都是遊戲自己疊上去的，**圖裡不要畫碎片、人物、派森**。
+
+**畫面怎麼排（1920×1080 為準）**
 
 ```
-A deep blue starry night sky, an abstract memory space with faint glowing particles,
-dreamy and calm.
+┌───────────────────────────────────────────────┐
+│ 標題文字             ✦ 碎片5（上方中央）                     │ ← 上方：星星最密、最深的藍
+│   ✦ 碎片1（左上）                          ✦ 碎片2（右上）     │
+│                    〔派森在正中央〕                          │ ← 中央：一圈柔和的淡金光暈（派森站的位置）
+│   ✦ 碎片3（左下）                          ✦ 碎片4（右下）     │
+│              ════ 金色進度條 ════                          │
+│ ┌──────────── 劇情對話框（下方三分之一）────────────┐        │ ← 下方：比較暗、比較單純
+└───────────────────────────────────────────────┘
 ```
+
+- **色調**：由上往下是深藍（#070d24 左右）→ 靛紫 → 底部帶一點夕陽餘暉的暗金或暗紫。整體要**偏暗**，疊上去的碎片和字才看得清楚。
+- **中央**：畫面正中央偏上（大約左右正中、上下 40% 的位置）有一團**很柔、很淡的金色光暈**，像有東西在那裡發光，但不要畫出任何人。
+- **四個角落附近**（左上、右上、左下、右下）：留給碎片，背景放**比較暗、比較乾淨**，不要放亮的星雲。
+- **細節**：細小的星星（大小不一、少數幾顆有十字光芒）、一條淡淡的銀河斜斜劃過、很淡的星雲雲霧（藍紫、帶一點粉）、空中漂著極小的光點像灰塵或螢火蟲。
+- **人生的回聲（可選，非常淡，像星座一樣若隱若現）**：遠處的星星連成很淡的輪廓：一顆蛋餅／一台捷運列車／一座廟的屋簷／一片湖。只能是星座線條那麼淡，不能搶走焦點。
+- **下方三分之一**：會被對話框蓋住，畫面放簡單、暗一點就好（可以是一片很遠、很暗的湖面倒映星空）。
+- **不要**：文字、人物、派森、碎片、行星、月亮特寫、太亮或太飽和的顏色、科幻太空船。
+
+```
+Wide landscape image, 16:9 aspect ratio, pixel art, 16-bit retro game background.
+A dreamy "sky of memories" at night: a deep navy blue starry sky (#070d24) fading to indigo
+and violet toward the bottom, with a faint warm dark-gold afterglow at the very bottom edge.
+Countless tiny stars of different sizes, a few with small cross-shaped sparkles,
+a soft faint Milky Way band crossing diagonally, very subtle blue-violet and pink nebula haze,
+tiny floating light particles like dust or fireflies.
+At the exact center, slightly above the middle, a very soft and faint golden glow,
+as if something gentle is shining there, but no figure.
+The four areas near the corners (upper-left, upper-right, lower-left, lower-right) stay darker
+and clean, without bright nebula, leaving space for UI.
+Optional: very faint constellation-like outlines in the distant stars hinting at a life story
+(an egg crepe, a metro train, a temple roof, a lake), almost invisible.
+The bottom third is simple and dark, like a distant calm lake reflecting the stars.
+Calm, nostalgic, bittersweet, peaceful farewell mood.
+No text, no people, no characters, no planets, no big moon, no spaceships, not too bright,
+not oversaturated.
+```
+
+> PixelLab 精簡版（Description 用）：
+> `night sky of memories, deep navy to indigo gradient, tiny stars, faint milky way, soft violet nebula haze, floating light particles, faint golden glow at the center, dark clean corners, dark calm lake at the bottom reflecting stars, calm nostalgic mood`
+> Negative：`people, character, text, planet, moon, spaceship, bright, oversaturated`
+
+> 放進 `assets/backgrounds/star_sky.png` 就會自動使用（程式畫的星星會疊在上面繼續閃）。
 
 ---
 
@@ -506,7 +670,9 @@ A friendly middle-aged woman running a breakfast shop, apron, headscarf, cheerfu
 
 ## 檢查清單
 
-- [ ] 背景 29 張（另有 `delivery_room` 已經有圖；`school`、`library`、`home`、`cafe` 四張構圖要一致；`star_sky` 目前程式還是自己畫星星，要用圖的話跟我說）
-- [ ] CG 12 張（另有 `birth` 已經有圖）
-- [ ] 立繪 ★ 標記的 13 張
+- [ ] 背景必生 15 張（見最上面「總整理」）
+- [ ] 3.2 快轉：`school`、`library`、`cafe` 三張，或 `study_montage.ogv` 一支影片
+- [ ] （建議）`temple_day`、`living_room` 重生成 16:9
+- [ ] CG 12 張
+- [ ] 立繪 12 張（`面試官` 複製 `Cindy` 即可）
 - [ ] 全部都是像素風、跟現有的登入畫面／嬰兒房／子宮／派森同一個畫風
