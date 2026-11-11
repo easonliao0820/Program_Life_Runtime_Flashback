@@ -12,6 +12,32 @@ const CG_DIR := "res://assets/cg/"
 ## 背景圖裁切時保留哪裡：0 = 保留最上面，1 = 保留最下面。
 ## 不是 16:9 的圖（例如 AI 給的正方形）會填滿畫面，多的主要從上方裁，地板留著
 const CROP_ANCHOR_Y := 0.65
+## 同一張圖變出不同時段（傍晚、深夜、清晨、靈魂出竅…），參數見 ChapterRegistry.BG_GRADES
+const GRADE_SHADER := """
+shader_type canvas_item;
+uniform vec4 mul : source_color = vec4(1.0);
+uniform float bright = 1.0;
+uniform float sat = 1.0;
+uniform vec4 top_c : source_color = vec4(0.0);
+uniform vec4 bottom_c : source_color = vec4(0.0);
+uniform vec4 glow : source_color = vec4(0.0);
+uniform vec2 glow_pos = vec2(0.5);
+uniform float glow_r = 0.3;
+uniform float vig = 0.0;
+uniform float tame = 0.0;
+void fragment() {
+	vec4 c = texture(TEXTURE, UV);
+	float g = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+	vec3 rgb = mix(vec3(g), c.rgb, sat) * mul.rgb * bright;
+	rgb *= 1.0 - tame * smoothstep(0.5, 0.95, g);
+	vec4 ov = mix(top_c, bottom_c, UV.y);
+	rgb = mix(rgb, ov.rgb, ov.a);
+	float d = distance(UV, glow_pos);
+	rgb += glow.rgb * glow.a * smoothstep(glow_r, 0.0, d) * (0.4 + g);
+	rgb *= 1.0 - vig * smoothstep(0.3, 0.85, length(UV - 0.5));
+	COLOR = vec4(rgb, c.a);
+}
+"""
 
 const VIGNETTE_SHADER := """
 shader_type canvas_item;
@@ -183,6 +209,19 @@ func _make_layer(key: String, tone_name: String, caption: String = "") -> Contro
 	var holder := Control.new()
 	UIKit.full_rect(holder)
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# 背景也可以是影片：assets/backgrounds/<key>.ogv（Godot 只吃 .ogv），循環播放、填滿畫面
+	if not key.begins_with("cg:") and has_video(key):
+		var vp := VideoStreamPlayer.new()
+		UIKit.full_rect(vp)
+		vp.stream = load(BG_DIR + key + ".ogv")
+		vp.expand = true
+		vp.loop = true
+		vp.autoplay = true
+		vp.volume_db = -80.0   # 背景影片不出聲，音樂另外放
+		vp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		vp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		holder.add_child(vp)
+		return holder
 	var tex: Texture2D = null
 	if ChapterRegistry.ART.has(key) and ResourceLoader.exists(ChapterRegistry.ART[key]):
 		tex = load(ChapterRegistry.ART[key])
@@ -190,6 +229,13 @@ func _make_layer(key: String, tone_name: String, caption: String = "") -> Contro
 		tex = _try_texture(CG_DIR + key.substr(3))
 	else:
 		tex = _try_texture(BG_DIR + key)
+	# 沒有自己的圖，但可以從同一個地方的圖調色變出來
+	var grade: Dictionary = {}
+	if tex == null and ChapterRegistry.BG_VARIANTS.has(key):
+		var v: Dictionary = ChapterRegistry.BG_VARIANTS[key]
+		tex = _try_texture(BG_DIR + str(v["base"]))
+		if tex:
+			grade = ChapterRegistry.BG_GRADES.get(v["grade"], {})
 	if tex:
 		var tr := TextureRect.new()
 		UIKit.full_rect(tr)
@@ -213,6 +259,8 @@ func _make_layer(key: String, tone_name: String, caption: String = "") -> Contro
 			paper.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			holder.add_child(paper)
 			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		if not grade.is_empty():
+			tr.material = _grade_material(grade)
 		holder.add_child(tr)
 		if caption != "":
 			holder.add_child(_cg_caption(caption))
@@ -272,6 +320,27 @@ func _fit_cover(holder: Control, tr: TextureRect) -> void:
 	tr.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	tr.size = sz
 	tr.position = Vector2((hs.x - sz.x) * 0.5, (hs.y - sz.y) * CROP_ANCHOR_Y)
+
+
+func _grade_material(g: Dictionary) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = _shader(GRADE_SHADER)
+	m.set_shader_parameter("mul", g.get("mul", Color.WHITE))
+	m.set_shader_parameter("bright", g.get("bright", 1.0))
+	m.set_shader_parameter("sat", g.get("sat", 1.0))
+	m.set_shader_parameter("top_c", g.get("top", Color(0, 0, 0, 0)))
+	m.set_shader_parameter("bottom_c", g.get("bottom", Color(0, 0, 0, 0)))
+	m.set_shader_parameter("glow", g.get("glow", Color(0, 0, 0, 0)))
+	m.set_shader_parameter("glow_pos", g.get("glow_pos", Vector2(0.5, 0.5)))
+	m.set_shader_parameter("glow_r", g.get("glow_r", 0.3))
+	m.set_shader_parameter("vig", g.get("vig", 0.0))
+	m.set_shader_parameter("tame", g.get("tame", 0.0))
+	return m
+
+
+## 有沒有這個背景的影片版（assets/backgrounds/<key>.ogv）
+func has_video(key: String) -> bool:
+	return ResourceLoader.exists(BG_DIR + key + ".ogv")
 
 
 func _try_texture(base: String) -> Texture2D:
