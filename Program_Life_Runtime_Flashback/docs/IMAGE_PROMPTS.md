@@ -500,7 +500,7 @@ A friendly middle-aged woman running a breakfast shop, apron, headscarf, cheerfu
 |---|---|
 | 探索模式的俯視房間 | 2.1 客廳、3.1 主角房間、3.4 清晨房間的**俯視角**地圖（畫面設定書：「主角房間（俯視＋一般）」）。目前房間是米色底，需要的話我再加讀圖的功能 |
 | 探索模式的主角角色 | 目前用藍灰色圓形代替；可以畫一組俯視角、四方向走路的小角色圖 |
-| 記憶地圖縮圖 | `assets/thumbnails/<小節id>.png`（例如 `ch2_2.png`），沒有的話會用色調代替 |
+| 記憶地圖縮圖 | `assets/thumbnails/<小節id>.png`（例如 `ch2_2.png`）；沒有的話自動用該節劇本裡第一張已有的背景圖，再沒有才用色調代替 |
 
 ---
 
