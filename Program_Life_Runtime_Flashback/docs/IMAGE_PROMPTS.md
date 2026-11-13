@@ -5,6 +5,8 @@
 
 ## 🎯 總整理：到底要生哪些圖
 
+> 📌 **目前還缺哪些、可直接複製的完整 prompt，看 [IMAGE_TODO.md](IMAGE_TODO.md)。**
+
 > 已經有：`delivery_room`（產房）、`temple_day`（廟・白天）、`living_room`（客廳）、`birth`（父母剪影 CG）。
 > 遊戲會自己調色變出來、**不用生**：`temple`、`my_room_dawn`、`desk`、`dorm_night`、`office_dusk`、`lake_dawn`、`parents_home`、`home`。
 
