@@ -56,6 +56,9 @@ const NOT_CHATTABLE := ["你", "派森", "系統", "……", "心聲", "旁白"]
 var bg: Control
 var portraits: Control
 var orb: Control
+## true = 派森一直在場（第一章他還沒報名字、台詞顯示成「……」的時候）
+var _orb_stay: bool = false
+var _orb_show_token: int = 0
 var code_card: PanelContainer
 var dialogue: Control
 var choice_menu: Control
@@ -104,6 +107,8 @@ func _ready() -> void:
 	orb = PysonOrb.new()
 	add_child(orb)
 	orb.place(ORB_FULL, ORB_FULL_SCALE)
+	# 派森只有說話的時候才出現（@orb stay 可以讓他一直在場，@orb auto 恢復）
+	orb.set_present(false, true)
 	code_card = _add(CodeCard.new())
 	memory_mode = _add(MemoryMode.new())
 	explore_mode = _add(ExploreMode.new())
@@ -145,7 +150,8 @@ func _ready() -> void:
 	chat.persona = func(who: String) -> String: return PERSONAS.get(who, "你是遊戲《派森與我的一生》裡的角色「%s」。" % who)
 	chat.asked.connect(func(who: String, _q: String):
 		if who == "派森":
-			orb.speak(true))
+			orb.speak(true)
+			_orb_present_for(14.0))
 	_refresh_chat()
 	GameState.value_changed.connect(_on_value_changed)
 
@@ -227,6 +233,7 @@ func say(speaker: String, text: String) -> void:
 		return
 	portraits.highlight(speaker)
 	var is_pyson := speaker == "派森"
+	_orb_present(is_pyson)
 	orb.speak(is_pyson)
 	if is_pyson:
 		orb.set_mood(_guess_mood(text))
@@ -240,14 +247,17 @@ func narrate(text: String) -> void:
 		await phone.add_note(text)
 		return
 	portraits.highlight("")
+	_orb_present(false)
 	await dialogue.show_line("narrate", "", text)
 
 
 func think(text: String) -> void:
+	_orb_present(false)
 	await dialogue.show_line("think", "", text)
 
 
 func system_line(text: String) -> void:
+	_orb_present(false)
 	await dialogue.show_line("system", "系統", text)
 
 
@@ -399,7 +409,23 @@ func show_frame(on: bool) -> void:
 	bg.show_frame(on)
 
 
+## 派森在不在場：只有他說話時出現（_orb_stay 時一直在）
+func _orb_present(on: bool) -> void:
+	_orb_show_token += 1
+	orb.set_present(on or _orb_stay)
+
+
+## 關卡／探索／聊天中派森開口：出現一段時間後自己淡出
+func _orb_present_for(seconds: float) -> void:
+	_orb_present(true)
+	var token := _orb_show_token
+	get_tree().create_timer(seconds).timeout.connect(func():
+		if token == _orb_show_token:
+			_orb_present(false))
+
+
 ## @orb mood happy｜@orb fade 0.4｜@orb hide｜@orb show｜@orb pos 960 300｜@orb blur 10
+## @orb stay（一直在場）｜@orb auto（只有說話時出現，預設）
 func orb_command(args: Array) -> void:
 	if args.is_empty():
 		return
@@ -420,6 +446,12 @@ func orb_command(args: Array) -> void:
 				orb.set_fade(0.0)
 				orb.visible = true
 				create_tween().tween_method(orb.set_fade, 0.0, target, 1.2)
+		"stay":
+			_orb_stay = true
+			_orb_present(true)
+		"auto":
+			# 不馬上消失：下一句不是派森說的才會淡出
+			_orb_stay = false
 		"pos":
 			if args.size() > 2:
 				orb.place(Vector2(float(args[1]), float(args[2])))
@@ -653,6 +685,7 @@ func _pyson_speak(text: String, mood: String) -> void:
 	orb.set_mood(mood)
 	orb.speak(true)
 	get_tree().create_timer(1.2).timeout.connect(orb.speak.bind(false))
+	_orb_present_for(6.0)
 
 
 # ------------------------------------------------------------------

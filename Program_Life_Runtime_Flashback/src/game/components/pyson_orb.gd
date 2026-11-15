@@ -50,6 +50,9 @@ var radius: float = 46.0
 var brightness: float = 0.8
 var mood: String = "idle"
 var fade: float = 1.0  ## 結局用：越來越透明
+## 在不在場（0～1）：劇情裡派森只有說話時才出現，由 GameStage 用 set_present 控制；預設在場
+var presence: float = 1.0
+var _present_target: float = 1.0
 var _t: float = 0.0
 var _speaking: bool = false
 var _base_pos: Vector2
@@ -151,6 +154,13 @@ func speak(on: bool) -> void:
 	_speaking = on
 
 
+## 出現／消失（淡入淡出）。instant = 直接到位
+func set_present(on: bool, instant: bool = false) -> void:
+	_present_target = 1.0 if on else 0.0
+	if instant:
+		presence = _present_target
+
+
 func set_fade(value: float) -> void:
 	fade = clampf(value, 0.0, 1.0)
 	_particles.emitting = fade < 0.95 or mood in ["sad", "fading"]
@@ -186,7 +196,8 @@ func _process(delta: float) -> void:
 	scale = scale.lerp(Vector2(s, s), delta * 4.0)
 	position = _base_pos + Vector2(0, bob)
 	# 模糊時稍微透明（最多淡到 0.65）
-	modulate.a = fade * (1.0 - minf(_blur / 30.0, 0.35))
+	presence = move_toward(presence, _present_target, delta * 4.0)  # 約 0.25 秒淡入淡出
+	modulate.a = fade * (1.0 - minf(_blur / 30.0, 0.35)) * presence
 	if _sprite:
 		_sprite.speed_scale = anim_speed
 		# 說話、開心時亮一點；擔心時暗一點
