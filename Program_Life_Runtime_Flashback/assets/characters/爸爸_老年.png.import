@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d242wvxret2h1"
-path="res://.godot/imported/CG mom.png-72fd984a307dd799749439ac271f6979.ctex"
+uid="uid://yt15wex4sphq"
+path="res://.godot/imported/爸爸_老年.png-e24daa868d9e905a0d32f21b6565df1c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://CG mom.png"
-dest_files=["res://.godot/imported/CG mom.png-72fd984a307dd799749439ac271f6979.ctex"]
+source_file="res://assets/characters/爸爸_老年.png"
+dest_files=["res://.godot/imported/爸爸_老年.png-e24daa868d9e905a0d32f21b6565df1c.ctex"]
 
 [params]
 
