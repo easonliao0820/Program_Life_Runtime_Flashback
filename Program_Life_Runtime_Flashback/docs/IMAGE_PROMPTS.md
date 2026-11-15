@@ -5,6 +5,8 @@
 
 ## 🎯 總整理：到底要生哪些圖
 
+> 📌 **目前還缺哪些、可直接複製的完整 prompt，看 [IMAGE_TODO.md](IMAGE_TODO.md)。**
+
 > 已經有：`delivery_room`（產房）、`temple_day`（廟・白天）、`living_room`（客廳）、`birth`（父母剪影 CG）。
 > 遊戲會自己調色變出來、**不用生**：`temple`、`my_room_dawn`、`desk`、`dorm_night`、`office_dusk`、`lake_dawn`、`parents_home`、`home`。
 
@@ -36,7 +38,7 @@
 
 `holding_hands`、`breakfast`、`mrt_gift`、`mrt_alone`、`grandma_prayer`、`lake_promise`、
 `mrt_wave`、`mom_breakfast`、`claire_thumbs_up`、`farewell_party`、`ending1`、`ending2`
-（每張的內容見「二、CG」）
+（每張的內容見 [CG_PROMPTS.md](CG_PROMPTS.md)）
 
 ### 角色立繪（`assets/characters/`，去背）— 12 張
 
@@ -512,58 +514,7 @@ not oversaturated.
 
 ## 二、CG（放到 `assets/cg/`）
 
-每張 CG 會在劇情中出現，也會在回憶相簿與結局再出現一次，**縮小成縮圖時也要看得懂**。
-
-| 檔名 | 用在 | 中文說明 |
-|---|---|---|
-| `birth.png` | 第一章 | **已有**（`assets/images/parentsfull.png` 父母剪影），想換成彩色版再生 |
-| `holding_hands.png` | 2.2 | 媽媽牽著小孩的手走在巷子裡的背影，早晨 |
-| `breakfast.png` | 2.2 | 小孩捧著培根蛋吐司吃得很開心的特寫 |
-| `mrt_gift.png` | 3.1 有送禮 | 擁擠車廂裡，周圍人群淡成模糊色塊，只有主角與倖芳清晰，倖芳收到巧克力在笑 |
-| `mrt_alone.png` | 3.1 沒送禮 | 車門關上，玻璃窗倒映出隔壁車廂一個熟悉的背影（倖芳） |
-| `grandma_prayer.png` | 3.3 | 奶奶跪在拜墊上雙手合十的背影，香煙裊裊 |
-| `lake_promise.png` | 4.3 有送禮 | 兩人並肩在湖邊看日出 |
-| `mrt_wave.png` | 4.3 沒送禮 | 捷運站人群中，倖芳回頭揮手 |
-| `mom_breakfast.png` | 5.1 | 媽媽看到餐桌上的培根蛋吐司，愣住、眼眶泛紅 |
-| `claire_thumbs_up.png` | 5.2 | Claire 在桌子底下偷偷比讚 |
-| `farewell_party.png` | 5.4 | Cindy 的退休歡送會 |
-| `ending1.png` | 結局一 | 派森化成光點，融進老年主角的胸口（湖邊夕陽） |
-| `ending2.png` | 結局二 | 主角第一次擁抱派森，整個人化成光點 |
-
-**英文 prompt：**
-
-```
-holding_hands.png  : View from behind of a young mother holding a small child's hand,
-                     walking down a narrow Taiwanese alley in the morning, long soft shadows.
-breakfast.png      : Close-up of a happy 5-year-old child holding a bacon-and-egg toast
-                     with both hands, cheeks full, warm breakfast-shop background.
-mrt_gift.png       : Inside a crowded MRT car, surrounding passengers dissolve into soft
-                     blurred color shapes, only two high school students are in sharp focus,
-                     a girl with shoulder-length black hair and a pink hair clip smiling while
-                     holding a small handmade chocolate box.
-mrt_alone.png      : MRT train doors closing, the glass window reflects the faint back of a
-                     familiar girl in the next car, melancholic blue tones.
-grandma_prayer.png : View from behind of an elderly woman with short curly hair and a floral
-                     shirt kneeling on a red temple cushion, hands pressed together in prayer,
-                     incense smoke curling upward.
-lake_promise.png   : Two young adults sitting side by side at a lakeside watching the
-                     sunrise, seen from behind, golden light on the water.
-mrt_wave.png       : In a busy MRT station crowd, a young woman turns back and waves goodbye
-                     with a gentle smile.
-mom_breakfast.png  : A middle-aged mother at the dining table looking at a bacon-and-egg
-                     toast and iced milk tea placed in front of her, surprised and teary-eyed.
-claire_thumbs_up.png: Under an office desk, a hand of a woman with round glasses giving a
-                     secret thumbs-up, playful.
-farewell_party.png : An office farewell party for a retiring female manager with short hair,
-                     colleagues holding flowers and a cake, warm light.
-ending1.png        : At a lakeside bench at sunset, a glowing figure dissolves into small
-                     points of blue and yellow light that flow into an elderly person's chest.
-ending2.png        : An elderly person embraces a glowing blue-and-yellow figure, their body
-                     turning into floating points of light absorbed into the glow, ethereal.
-```
-
-> 派森（`ending1`、`ending2` 裡的發光人物）要跟現有的派森動圖長得一樣：
-> 藍色連帽長袍、藍色頭髮帶黃色漸層、身邊有藍黃光點。生圖時把 `paisen_float_sparkle_sheet.png` 當參考圖一起給。
+已移到獨立文件 👉 **[CG_PROMPTS.md](CG_PROMPTS.md)**（劇情、構圖規則、參考圖、完整 prompt）。
 
 ---
 
