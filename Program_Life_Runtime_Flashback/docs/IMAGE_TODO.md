@@ -7,7 +7,7 @@
 | 類別 | 資料夾 | 還缺 |
 |---|---|---|
 | 背景 | `assets/backgrounds/` | 4 張（`photo_room` ＋ 快轉用 `school`、`library`、`cafe`，後三張可改一支影片） |
-| CG | `assets/cg/` | 12 張（資料夾目前是空的） |
+| CG | `assets/cg/` | 12 張 → 見 [CG_PROMPTS.md](CG_PROMPTS.md) |
 | 立繪 | `assets/characters/` | 4 張：`倖芳_老年`、`媽媽_老年`、`爸爸_老年`、`翊丞_臉紅`（基本立繪 8 張＋面試官已放好） |
 
 > ⚠️ 現有的 19 張背景全部是 **512×512 正方形**，遊戲會裁成 16:9，上下大約各切掉 22%。
@@ -69,33 +69,9 @@ foreground, warm string lights.
 
 ---
 
-## 二、CG（12 張）— 放 `assets/cg/`，16:9 橫向
+## 二、CG（12 張）— 已移到獨立文件
 
-> 每張開頭都先貼這段 **CG 共同風格**，再接下面那張的描述：
-
-```
-Wide landscape image, 16:9 aspect ratio (1920x1080), cinematic medium-wide shot.
-Pixel art, 16-bit retro game style, detailed hand-placed pixels, soft warm lighting,
-gentle muted colors, nostalgic and cozy atmosphere, modern-day Taiwan setting,
-no text, no letters, no watermark, no UI, no border.
-```
-
-| 檔名 | 劇情 | 接在共同風格後面的描述 |
-|---|---|---|
-| `holding_hands.png` | 2.2 媽媽牽手走巷子 | `View from behind of a young mother holding a small child's hand, walking down a narrow Taiwanese alley in the morning, long soft shadows.` |
-| `breakfast.png` | 2.2 吃培根蛋吐司 | `Close-up of a happy 5-year-old child holding a bacon-and-egg toast with both hands, cheeks full, warm breakfast-shop background.` |
-| `mrt_gift.png` | 3.1 有送禮 | `Inside a crowded MRT car, surrounding passengers dissolve into soft blurred color shapes, only two high school students are in sharp focus, a girl with shoulder-length black hair and a pink hair clip smiling while holding a small handmade chocolate box.` |
-| `mrt_alone.png` | 3.1 沒送禮 | `MRT train doors closing, the glass window reflects the faint back of a familiar girl in the next car, melancholic blue tones.` |
-| `grandma_prayer.png` | 3.3 奶奶拜拜 | `View from behind of an elderly woman with short curly hair and a floral shirt kneeling on a red temple cushion, hands pressed together in prayer, incense smoke curling upward.` |
-| `lake_promise.png` | 4.3 有送禮 | `Two young adults sitting side by side at a lakeside watching the sunrise, seen from behind, golden light on the water.` |
-| `mrt_wave.png` | 4.3 沒送禮 | `In a busy MRT station crowd, a young woman turns back and waves goodbye with a gentle smile.` |
-| `mom_breakfast.png` | 5.1 媽媽看到早餐 | `A middle-aged mother at the dining table looking at a bacon-and-egg toast and iced milk tea placed in front of her, surprised and teary-eyed.` |
-| `claire_thumbs_up.png` | 5.2 偷偷比讚 | `Under an office desk, a hand of a woman with round glasses giving a secret thumbs-up, playful.` |
-| `farewell_party.png` | 5.4 Cindy 退休 | `An office farewell party for a retiring female manager with short hair, colleagues holding flowers and a cake, warm light.` |
-| `ending1.png` | 結局一 | `At a lakeside bench at sunset, a glowing figure in a blue hooded robe with blue hair fading to yellow dissolves into small points of blue and yellow light that flow into an elderly person's chest.` |
-| `ending2.png` | 結局二 | `An elderly person embraces a glowing figure in a blue hooded robe with blue hair fading to yellow, their body turning into floating points of blue and yellow light absorbed into the glow, ethereal.` |
-
-> `ending1`、`ending2` 生圖時把 `src/actors/npc/paisen_float_sparkle_sheet.png`（派森）一起丟給 AI 當參考圖。
+👉 **[CG_PROMPTS.md](CG_PROMPTS.md)**：每張 CG 的劇情、畫面、參考圖、色調和可以直接複製的 prompt 都在那裡。
 
 ---
 
@@ -134,6 +110,6 @@ consistent proportions for a visual novel, no text, no watermark.
 
 - [ ] `photo_room`
 - [ ] `school`、`library`、`cafe`（或 `study_montage.ogv`）
-- [ ] CG：holding_hands、breakfast、mrt_gift、mrt_alone、grandma_prayer、lake_promise、mrt_wave、mom_breakfast、claire_thumbs_up、farewell_party、ending1、ending2
+- [ ] CG 12 張 → 清單在 [CG_PROMPTS.md](CG_PROMPTS.md)
 - [x] 立繪：倖芳、Cindy、Claire、媽媽、爸爸、奶奶、翊丞、老闆娘、面試官（2026-11-13 放好）
-- [ ] 立繪：倖芳_老年、媽媽_老年、爸爸_老年、翊丞_臉紅
+- [ ] 立繪：倖芳_老年、媽媽_老年、爸爸_老年、翊丞_臉紅（沒有的話遊戲暫時顯示一般版）
