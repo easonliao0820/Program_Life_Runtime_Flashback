@@ -195,7 +195,8 @@ func _process(delta: float) -> void:
 		return
 	if _typing:
 		var speed: float = GameState.settings.get("text_speed", 40.0)
-		_shown_chars += delta * (speed * 20.0 if skip_mode or GameFlow.autopilot else speed)
+		var fast: bool = skip_mode or (GameFlow.autopilot and not GameFlow.autopilot_watch)
+		_shown_chars += delta * (speed * 20.0 if fast else speed)
 		_text.visible_characters = int(_shown_chars)
 		if _shown_chars >= _text.get_total_character_count():
 			_finish_typing()
@@ -203,7 +204,7 @@ func _process(delta: float) -> void:
 	_next_mark.modulate.a = 0.5 + 0.5 * sin(Time.get_ticks_msec() / 250.0)
 	if skip_mode or auto_mode or GameFlow.autopilot:
 		_hold += delta
-		var wait: float = 0.08 if skip_mode or GameFlow.autopilot else float(GameState.settings.get("auto_delay", 1.6))
+		var wait: float = 0.08 if skip_mode or (GameFlow.autopilot and not GameFlow.autopilot_watch) else float(GameState.settings.get("auto_delay", 1.6))
 		if _hold >= wait:
 			request_advance()
 

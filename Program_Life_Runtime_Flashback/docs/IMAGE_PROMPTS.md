@@ -108,7 +108,9 @@ PixelLab 是像素專用工具，**不用自己放大**：照下面尺寸生出�
 
 ```
 wide establishing shot, whole room visible from wall to wall, floor visible at the bottom,
-eye-level side view, warm nostalgic lighting, modern-day Taiwan, no people
+eye-level side view, warm nostalgic lighting, no people,
+Taiwan setting: aluminum windows with iron grilles, ceramic or terrazzo floor tiles, fluorescent tube lights,
+concrete apartment blocks and scooters outside, NOT Japan, NOT Korea
 ```
 
 ---
@@ -124,7 +126,10 @@ to the right wall and from the ceiling (or sky) down to the floor (or ground),
 the floor clearly visible and filling the bottom third of the image, every piece of
 furniture fully in frame and not cropped, no close-up, no extreme perspective, no fisheye.
 Pixel art, 16-bit retro game background, detailed hand-placed pixels, soft warm lighting,
-gentle muted colors, nostalgic and cozy atmosphere, modern-day Taiwan setting,
+gentle muted colors, nostalgic and cozy atmosphere, set in Taiwan (Taipei, 2000s-2010s):
+aluminum-frame windows with iron window grilles, glossy ceramic or terrazzo floor tiles,
+fluorescent tube lights, concrete apartment blocks with iron balconies and parked scooters outside,
+Taiwan, NOT Japan, NOT Korea, NOT mainland China,
 no people unless described, no text, no letters, no watermark, no UI, no border.
 ```
 

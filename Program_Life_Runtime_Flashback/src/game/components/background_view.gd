@@ -9,6 +9,9 @@ extends Control
 
 const BG_DIR := "res://assets/backgrounds/"
 const CG_DIR := "res://assets/cg/"
+## 背景上的小動畫（PixelLab 動畫匯出的 sprite sheet），擺在哪裡見 ChapterRegistry.BG_FX
+const FX_DIR := "res://assets/backgrounds/fx/"
+const SheetAnim := preload("res://src/game/components/sheet_anim.gd")
 ## 背景圖裁切時保留哪裡：0 = 保留最上面，1 = 保留最下面。
 ## 不是 16:9 的圖（例如 AI 給的正方形）會填滿畫面，多的主要從上方裁，地板留著
 const CROP_ANCHOR_Y := 0.65
@@ -223,21 +226,37 @@ func _make_layer(key: String, tone_name: String, caption: String = "") -> Contro
 		holder.add_child(vp)
 		return holder
 	var tex: Texture2D = null
+	# 動態背景：assets/backgrounds/<key>_anim.png（一列橫排、每格 16:9），有的話優先用
+	var anim: Array[Texture2D] = []
+	var art_key := key   # 實際用到哪個地方的圖（變體會換成 base），小動畫照這個找
 	if ChapterRegistry.ART.has(key) and ResourceLoader.exists(ChapterRegistry.ART[key]):
 		tex = load(ChapterRegistry.ART[key])
 	elif key.begins_with("cg:"):
 		tex = _try_texture(CG_DIR + key.substr(3))
 	else:
-		tex = _try_texture(BG_DIR + key)
+		anim = _try_anim(key)
+		if anim.is_empty():
+			tex = _try_texture(BG_DIR + key)
 	# 沒有自己的圖，但可以從同一個地方的圖調色變出來
 	var grade: Dictionary = {}
-	if tex == null and ChapterRegistry.BG_VARIANTS.has(key):
+	if tex == null and anim.is_empty() and ChapterRegistry.BG_VARIANTS.has(key):
 		var v: Dictionary = ChapterRegistry.BG_VARIANTS[key]
-		tex = _try_texture(BG_DIR + str(v["base"]))
-		if tex:
+		art_key = str(v["base"])
+		anim = _try_anim(art_key)
+		if anim.is_empty():
+			tex = _try_texture(BG_DIR + art_key)
+		if tex or not anim.is_empty():
 			grade = ChapterRegistry.BG_GRADES.get(v["grade"], {})
+	if not anim.is_empty():
+		tex = anim[0]
 	if tex:
-		var tr := TextureRect.new()
+		var tr: TextureRect
+		if anim.size() > 1:
+			var sa := SheetAnim.new()
+			sa.setup(anim, float(ChapterRegistry.BG_ANIM_FPS.get(art_key, 6.0)))
+			tr = sa
+		else:
+			tr = TextureRect.new()
 		UIKit.full_rect(tr)
 		tr.texture = tex
 		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -261,6 +280,8 @@ func _make_layer(key: String, tone_name: String, caption: String = "") -> Contro
 			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		if not grade.is_empty():
 			tr.material = _grade_material(grade)
+		if not key.begins_with("cg:"):
+			_add_fx(tr, key if ChapterRegistry.BG_FX.has(key) else art_key, grade)
 		holder.add_child(tr)
 		if caption != "":
 			holder.add_child(_cg_caption(caption))
@@ -320,6 +341,58 @@ func _fit_cover(holder: Control, tr: TextureRect) -> void:
 	tr.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	tr.size = sz
 	tr.position = Vector2((hs.x - sz.x) * 0.5, (hs.y - sz.y) * CROP_ANCHOR_Y)
+	_layout_fx(tr)
+
+
+## 背景上的小動畫：照 ChapterRegistry.BG_FX 的設定，從 assets/backgrounds/fx/ 找圖疊上去。
+## 沒有圖的就跳過，所以可以一個一個慢慢補。
+func _add_fx(tr: TextureRect, key: String, grade: Dictionary) -> void:
+	for spec: Dictionary in ChapterRegistry.BG_FX.get(key, []):
+		var path := FX_DIR + str(spec["sheet"]) + ".png"
+		if not ResourceLoader.exists(path):
+			continue
+		var sheet: Texture2D = load(path)
+		var frames := SheetAnim.slice(sheet, int(spec.get("frames", 0)))
+		if frames.is_empty():
+			continue
+		var fx := SheetAnim.new()
+		fx.setup(frames, float(spec.get("fps", 8.0)))
+		fx.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		fx.stretch_mode = TextureRect.STRETCH_SCALE
+		fx.flip_h = bool(spec.get("flip", false))
+		fx.modulate.a = float(spec.get("alpha", 1.0))
+		if not grade.is_empty():
+			# 背景被調成夜晚／傍晚時，小動畫也跟著變暗變色（只取乘色和亮度，避免 shader 的暈影套在小圖上）
+			var m: Color = grade.get("mul", Color.WHITE)
+			var b: float = grade.get("bright", 1.0)
+			fx.modulate = Color(m.r * b, m.g * b, m.b * b, fx.modulate.a)
+		var fsz := frames[0].get_size()
+		fx.set_meta("fx_pos", spec.get("pos", Vector2(0.5, 0.5)))
+		fx.set_meta("fx_h", float(spec.get("h", 0.2)))
+		fx.set_meta("fx_aspect", fsz.x / maxf(fsz.y, 1.0))
+		tr.add_child(fx)
+
+
+## pos = 小動畫「中心」在背景圖上的位置（0～1），h = 高度佔背景圖的比例
+func _layout_fx(tr: TextureRect) -> void:
+	for c in tr.get_children():
+		if not c.has_meta("fx_pos"):
+			continue
+		var h: float = tr.size.y * float(c.get_meta("fx_h"))
+		var sz := Vector2(h * float(c.get_meta("fx_aspect")), h)
+		var p: Vector2 = c.get_meta("fx_pos")
+		c.size = sz
+		c.position = p * tr.size - sz / 2.0
+
+
+## 動態背景的 sprite sheet：<key>_anim.png，一列橫排，每格都是 16:9（例如 640×360 一格）
+func _try_anim(key: String) -> Array[Texture2D]:
+	var path := BG_DIR + key + "_anim.png"
+	if not ResourceLoader.exists(path):
+		var none: Array[Texture2D] = []
+		return none
+	var sheet: Texture2D = load(path)
+	return SheetAnim.slice(sheet, 0, roundi(sheet.get_height() * 16.0 / 9.0))
 
 
 func _grade_material(g: Dictionary) -> ShaderMaterial:

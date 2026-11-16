@@ -6,6 +6,9 @@ extends Control
 ## 「你」是第一人稱視角，預設不顯示立繪。
 
 const CHAR_DIR := "res://assets/characters/"
+const SheetAnim := preload("res://src/game/components/sheet_anim.gd")
+## 待機動畫（<角色>_idle.png 或 <角色>_<表情>_idle.png）：一列橫排，每格跟立繪一樣 1:2（例如 128×256 一格）
+const IDLE_FPS := 10.0
 const SLOTS := {"left": 0.27, "right": 0.73, "center": 0.5}
 
 ## 角色名 -> {node, slot}
@@ -25,6 +28,7 @@ func show_character(char_name: String, slot: String = "", expression: String = "
 		entry["slot"] = slot
 		_move(entry["node"], slot)
 		_set_texture(entry["node"], char_name, expression)
+		_face(entry["node"], slot)
 		return
 	# 同一個位置已經有人，先讓他離開
 	for other in _shown.keys():
@@ -33,9 +37,17 @@ func show_character(char_name: String, slot: String = "", expression: String = "
 	var node := _make_portrait(char_name, expression)
 	add_child(node)
 	_move(node, slot, true)
+	_face(node, slot)
 	node.modulate.a = 0.0
 	create_tween().tween_property(node, "modulate:a", 1.0, 0.35)
 	_shown[char_name] = {"node": node, "slot": slot}
+
+
+## 站在右邊的角色左右翻轉，讓兩邊的人面對面（立繪都是朝同一個方向畫的）
+func _face(holder: Control, slot: String) -> void:
+	for c in holder.get_children():
+		if c is TextureRect:
+			c.flip_h = slot == "right"
 
 
 func hide_character(char_name: String) -> void:
@@ -93,9 +105,17 @@ func _make_portrait(char_name: String, expression: String) -> Control:
 func _set_texture(holder: Control, char_name: String, expression: String) -> void:
 	for c in holder.get_children():
 		c.queue_free()
-	var tex := _find_texture(char_name, expression)
+	var idle := _find_idle(char_name, expression)
+	var tex: Texture2D = idle[0] if not idle.is_empty() else _find_texture(char_name, expression)
 	if tex:
-		var tr := TextureRect.new()
+		var tr: TextureRect
+		if idle.size() > 1:
+			# 待機動畫：大部分時間停在第一格（睜眼），每 2.5～5 秒播一輪（眨眼／呼吸）
+			var sa := SheetAnim.new()
+			sa.setup(idle, IDLE_FPS, 2.5, 5.0)
+			tr = sa
+		else:
+			tr = TextureRect.new()
 		UIKit.full_rect(tr)
 		tr.texture = tex
 		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -121,6 +141,16 @@ func _find_texture(char_name: String, expression: String) -> Texture2D:
 			if ResourceLoader.exists(base + ext):
 				return load(base + ext)
 	return null
+
+
+## 有表情時只找那個表情的待機動畫（找不到就用靜態的表情圖，不會退回一般表情的動畫）
+func _find_idle(char_name: String, expression: String) -> Array[Texture2D]:
+	var base := CHAR_DIR + char_name + ("_" + expression if expression != "" else "") + "_idle.png"
+	if not ResourceLoader.exists(base):
+		var none: Array[Texture2D] = []
+		return none
+	var sheet: Texture2D = load(base)
+	return SheetAnim.slice(sheet, 0, sheet.get_height() / 2)
 
 
 ## 佔位剪影：頭＋肩膀，半透明代表色

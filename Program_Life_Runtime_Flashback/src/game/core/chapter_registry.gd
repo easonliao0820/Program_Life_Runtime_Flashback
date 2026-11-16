@@ -215,6 +215,53 @@ const BG_GRADES: Dictionary = {
 }
 
 
+## 動態背景（assets/backgrounds/<鍵>_anim.png）每秒播幾格；沒寫的用 6。
+const BG_ANIM_FPS: Dictionary = {
+	"mrt_car": 8.0,
+	"lake_sunset": 4.0,
+}
+
+## 背景上的小動畫（PixelLab 生的 sprite sheet，放 assets/backgrounds/fx/<sheet>.png，一列橫排、每格正方形）。
+## pos = 小動畫中心在背景圖上的位置（0～1，左上是 0,0），h = 高度佔背景圖的幾成，fps 每秒幾格，
+## flip 左右翻轉（同一張窗簾可以左右各用一次），alpha 透明度，frames 格子不是正方形時指定格數。
+## 圖還沒生的就自動跳過。背景換成新的 16:9 圖之後，位置要跟著重新對。
+## ⚠️ 現在的背景是正方形：上方約 28%、下方約 15% 會被裁掉，y 要放在 0.3～0.85 之間才看得到。
+const BG_FX: Dictionary = {
+	"breakfast_shop": [
+		{"sheet": "steam", "pos": Vector2(0.42, 0.47), "h": 0.18, "fps": 8.0, "alpha": 0.85},
+	],
+	"temple_day": [
+		{"sheet": "incense_smoke", "pos": Vector2(0.58, 0.5), "h": 0.26, "fps": 6.0, "alpha": 0.8},
+	],
+	"living_room": [
+		{"sheet": "dust_motes", "pos": Vector2(0.55, 0.6), "h": 0.4, "fps": 5.0, "alpha": 0.7},
+		{"sheet": "crt_flicker", "pos": Vector2(0.78, 0.53), "h": 0.08, "fps": 6.0},
+	],
+	"convenience_store": [
+		{"sheet": "steam", "pos": Vector2(0.47, 0.66), "h": 0.1, "fps": 8.0, "alpha": 0.7},
+	],
+	"my_room": [
+		{"sheet": "curtain", "pos": Vector2(0.47, 0.42), "h": 0.26, "fps": 5.0},
+	],
+	"hospital": [
+		{"sheet": "iv_drip", "pos": Vector2(0.33, 0.44), "h": 0.12, "fps": 4.0},
+	],
+	"dorm": [
+		{"sheet": "curtain", "pos": Vector2(0.8, 0.4), "h": 0.26, "fps": 5.0, "flip": true},
+	],
+	"stir_fry": [
+		{"sheet": "steam", "pos": Vector2(0.4, 0.7), "h": 0.2, "fps": 8.0, "alpha": 0.85},
+	],
+	"graduation": [
+		{"sheet": "falling_leaves", "pos": Vector2(0.3, 0.5), "h": 0.5, "fps": 6.0},
+	],
+	"lake_sunset": [
+		{"sheet": "water_shimmer", "pos": Vector2(0.7, 0.62), "h": 0.08, "fps": 4.0, "frames": 4},
+		{"sheet": "birds", "pos": Vector2(0.35, 0.38), "h": 0.1, "fps": 6.0},
+	],
+}
+
+
 ## 專案裡已經有的美術（舊版素材），檔名不在 assets/backgrounds、assets/cg 的先在這裡對應。
 ## 之後有正式圖，直接放到 assets/backgrounds/<鍵>.png 或 assets/cg/<名稱>.png 即可（會優先使用）。
 const ART: Dictionary = {

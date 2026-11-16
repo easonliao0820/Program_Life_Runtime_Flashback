@@ -180,7 +180,7 @@ func _scroll_to_end() -> void:
 
 func _wait_click() -> void:
 	if GameFlow.autopilot:
-		await get_tree().create_timer(0.05).timeout
+		await get_tree().create_timer(1.5 if GameFlow.autopilot_watch else 0.05).timeout
 		return
 	_waiting_click = true
 	_hint.visible = true

@@ -350,11 +350,13 @@ func _on_skip() -> void:
 
 ## 自動駕駛：用 solution 跑一次，確認每一關的參考解答真的能過關
 func _autopilot() -> void:
-	await get_tree().create_timer(0.1).timeout
+	await get_tree().create_timer(1.5 if GameFlow.autopilot_watch else 0.1).timeout
 	_editor.text = fill_code(str(_level.get("solution", "")))
 	await _on_run()
 	if _passed:
 		print("[autopilot] ✔ ", _level.get("id", ""), "　", _last_said)
+		if GameFlow.autopilot_watch:
+			await get_tree().create_timer(2.0).timeout   # 觀看模式：讓人看一下解答和執行結果
 		_continue_pressed.emit()
 	else:
 		push_error("[autopilot] ✘ %s：%s" % [_level.get("id", ""), _last_said])

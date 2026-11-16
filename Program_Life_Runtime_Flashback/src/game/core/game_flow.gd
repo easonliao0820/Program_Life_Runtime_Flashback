@@ -15,6 +15,8 @@ const MAP_SCENE := "res://src/ui/level_select/level_select.tscn"
 
 ## 自動駕駛（tests/full_playthrough_test 用）：自動點對話、選第一個選項、用參考解答過關。
 var autopilot: bool = false
+## 觀看模式（tests/watch_playthrough 用）：一樣自動玩，但對話用正常速度播，讓人看得清楚。
+var autopilot_watch: bool = false
 signal autopilot_finished
 
 ## 開發用：從章節選擇跳進某一節時，帶著預設的旗標，避免缺少前面章節的變數。
