@@ -659,6 +659,9 @@ func _pyson_speak(text: String, mood: String) -> void:
 # 3.2.2 快轉演出 與 結尾
 # ------------------------------------------------------------------
 
+## 3.2 快轉的影片版背景鍵（有 assets/backgrounds/study_montage.ogv 才會用）
+const MONTAGE_VIDEO := "study_montage"
+
 ## @montage stop=倒數第 25 天 | 學校=school | 圖書館=library | 家裡=home | 咖啡廳=cafe
 ## 把上一關印出的每一行快速播過：背景依關鍵字切換、左上角日期快速倒數、遇到 ===== 停頓一下。
 func montage(arg: String) -> void:
@@ -690,6 +693,11 @@ func montage(arg: String) -> void:
 	var rx := RegEx.new()
 	rx.compile("倒數第 (\\d+) 天")
 	var current := ""
+	# 有影片版（assets/backgrounds/study_montage.ogv）就整段播影片，不切四張圖；
+	# 日期與字幕一樣跟著玩家程式印出來的每一行跑
+	if bg.has_video(MONTAGE_VIDEO):
+		bg.show_bg(MONTAGE_VIDEO, "", true)
+		places.clear()
 	for line in str(GameState.get_value("last_output", "")).split("\n"):
 		var m := rx.search(line)
 		if m:

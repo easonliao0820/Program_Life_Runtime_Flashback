@@ -2,13 +2,20 @@ import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any, Literal
 
+from botocore.exceptions import BotoCoreError, ClientError
 from dotenv import load_dotenv
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request, Response
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
-from pydantic import BaseModel, Field
-from botocore.exceptions import BotoCoreError, ClientError
+from pydantic import BaseModel, ConfigDict, Field
+
+from ai_access_policy import authorize_ai
+from ai_service import generate
 from auth_service import (
     ACCESS_TOKEN_MINUTES,
     REFRESH_TOKEN_DAYS,
@@ -18,17 +25,10 @@ from auth_service import (
     verify_access_token,
     verify_refresh_token,
 )
-from typing import Any
-from save_repository import (
-    save_player_game,
-    load_player_game,
-)
-
-from typing import Literal
 from error_repository import save_player_error
-from ai_access_policy import authorize_ai
-from ai_service import generate
+from oauth_service import exchange_google_code
 from player_repository import get_or_create_google_player, get_player_by_id
+from save_repository import load_player_game, save_player_game
 from session_repository import (
     create_session,
     get_session,
@@ -52,11 +52,14 @@ class GoogleLoginRequest(BaseModel):
     # 前端取得的 Google 身分憑證；接收後仍需驗證。
     id_token: str
 
+
 class RefreshTokenRequest(BaseModel):
     refresh_token: str = Field(min_length=1)
 
+
 class GameSaveRequest(BaseModel):
     save: dict[str, Any]
+
 
 class AIRequest(BaseModel):
     # 限制完整 prompt（包含角色設定與玩家程式）。
@@ -82,13 +85,32 @@ class PlayerErrorRequest(BaseModel):
     backend: str = Field(default="", max_length=120)
 
 
+class DesktopExchangeRequest(BaseModel):
+    # Desktop PKCE 授權碼由 Lambda 交換，Client Secret 不經過 Godot。
+    model_config = ConfigDict(extra="forbid")
+    code: str = Field(min_length=1, max_length=4096)
+    code_verifier: str = Field(min_length=43, max_length=128)
+    redirect_uri: str = Field(min_length=1, max_length=128)
 
-# 登入與未來私人資料 API 共用的 Google Token 驗證接點。
-def verify_google_token(token: str) -> dict:
+
+@app.exception_handler(RequestValidationError)
+async def safe_validation_error(request: Request, exc: RequestValidationError):
+    # 不把原始 OAuth code / verifier 反射給客戶端。
+    if request.url.path == "/auth/google/desktop/exchange":
+        return JSONResponse(
+            status_code=422,
+            content={"detail": "invalid_auth_request"},
+            headers={"Cache-Control": "no-store"},
+        )
+    return await request_validation_exception_handler(request, exc)
+
+
+# 與 Desktop OAuth 交換端點共用 Google ID Token 驗證。
+def verify_google_token(token: str, transport=None) -> dict:
     try:
         return id_token.verify_oauth2_token(
             token,
-            google_requests.Request(),
+            transport if transport is not None else google_requests.Request(),
             GOOGLE_CLIENT_ID,
         )
     except (ValueError, KeyError) as exc:
@@ -104,6 +126,26 @@ def health():
     return {"status": "ok"}
 
 
+@app.post("/auth/google/desktop/exchange")
+def desktop_exchange(payload: DesktopExchangeRequest, response: Response):
+    # 新增朋友的 Desktop OAuth 功能，不取代既有 JWT 流程。
+    response.headers["Cache-Control"] = "no-store"
+    try:
+        return exchange_google_code(
+            payload.code,
+            payload.code_verifier,
+            payload.redirect_uri,
+            GOOGLE_CLIENT_ID,
+            verify_google_token,
+        )
+    except HTTPException as exc:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers={"Cache-Control": "no-store"},
+        )
+
+
 @app.post("/auth/google")
 def google_login(payload: GoogleLoginRequest):
     # 先驗證 Google 身分，不能直接相信前端傳入的資料。
@@ -112,7 +154,6 @@ def google_login(payload: GoogleLoginRequest):
     try:
         # 查詢或建立 DynamoDB 玩家資料。
         player = get_or_create_google_player(info)
-
     except (ClientError, BotoCoreError) as exc:
         print(f"DynamoDB 玩家資料處理失敗：{type(exc).__name__}")
 
@@ -134,21 +175,14 @@ def google_login(payload: GoogleLoginRequest):
             detail="Google 身分資料不完整",
         ) from exc
 
-    
     try:
         # 為這次登入建立獨立的工作階段。
         session_id = str(uuid.uuid4())
-
-        # 簽發兩種用途不同的 Token。
         access_token = create_access_token(player["id"])
-        refresh_token = create_refresh_token(
-            player["id"],
-            session_id,
-        )
+        refresh_token = create_refresh_token(player["id"], session_id)
 
         # DynamoDB 只保存 Refresh Token 的雜湊。
         refresh_token_hash = hash_refresh_token(refresh_token)
-
         expires_at = int(
             (
                 datetime.now(timezone.utc)
@@ -166,7 +200,6 @@ def google_login(payload: GoogleLoginRequest):
 
     except (ClientError, BotoCoreError, RuntimeError, KeyError, ValueError) as exc:
         print(f"登入憑證或工作階段建立失敗：{type(exc).__name__}")
-
         raise HTTPException(
             status_code=503,
             detail="登入憑證服務暫時無法使用，請稍後再試",
@@ -183,139 +216,92 @@ def google_login(payload: GoogleLoginRequest):
     }
 
 
-
 @app.get("/auth/me")
 def get_current_player(authorization: str | None = Header(default=None)):
     """使用後端 JWT 驗證登入狀態並取得玩家資料。"""
-
-    # 必須提供 Authorization: Bearer <access_token>
     if not authorization:
-        raise HTTPException(
-            status_code=401,
-            detail="缺少登入憑證",
-        )
+        raise HTTPException(status_code=401, detail="缺少登入憑證")
 
     scheme, separator, token = authorization.partition(" ")
+    if not separator or scheme.lower() != "bearer" or not token.strip():
+        raise HTTPException(status_code=401, detail="Authorization 格式錯誤")
 
-    if (
-        not separator
-        or scheme.lower() != "bearer"
-        or not token.strip()
-    ):
-        raise HTTPException(
-            status_code=401,
-            detail="Authorization 格式錯誤",
-        )
-
-    # 驗證 JWT 簽章、期限、類型及玩家 ID。
     try:
         player_id = verify_access_token(token.strip())
     except ValueError as exc:
         raise HTTPException(
-            status_code=401,
-            detail="登入憑證無效或已過期",
+            status_code=401, detail="登入憑證無效或已過期"
         ) from exc
     except (ClientError, BotoCoreError, RuntimeError) as exc:
         print(f"JWT 驗證服務失敗：{type(exc).__name__}")
         raise HTTPException(
-            status_code=503,
-            detail="登入驗證服務暫時無法使用",
+            status_code=503, detail="登入驗證服務暫時無法使用"
         ) from exc
 
-    # 確認 DynamoDB 中確實存在該玩家。
     try:
         player = get_player_by_id(player_id)
     except (ClientError, BotoCoreError) as exc:
         print(f"DynamoDB 玩家查詢失敗：{type(exc).__name__}")
         raise HTTPException(
-            status_code=503,
-            detail="玩家資料服務暫時無法使用",
+            status_code=503, detail="玩家資料服務暫時無法使用"
         ) from exc
 
     if player is None:
         raise HTTPException(
-            status_code=401,
-            detail="玩家不存在或登入狀態無效",
+            status_code=401, detail="玩家不存在或登入狀態無效"
         )
 
-    return {
-        "success": True,
-        "player": player,
-    }
+    return {"success": True, "player": player}
 
 
 @app.post("/auth/refresh")
 def refresh_login(payload: RefreshTokenRequest):
     """驗證並輪替 Refresh Token，發放新的登入憑證。"""
-
-    # 第一步：驗證 Refresh Token 的 JWT 簽章與內容。
     try:
-        player_id, session_id = verify_refresh_token(
-            payload.refresh_token
-        )
+        player_id, session_id = verify_refresh_token(payload.refresh_token)
     except ValueError as exc:
         raise HTTPException(
-            status_code=401,
-            detail="Refresh Token 無效或已過期",
+            status_code=401, detail="Refresh Token 無效或已過期"
         ) from exc
     except (ClientError, BotoCoreError, RuntimeError) as exc:
         print(f"Refresh Token 驗證服務失敗：{type(exc).__name__}")
         raise HTTPException(
-            status_code=503,
-            detail="登入驗證服務暫時無法使用",
+            status_code=503, detail="登入驗證服務暫時無法使用"
         ) from exc
 
-    # 第二步：查詢 DynamoDB 工作階段。
     try:
         session = get_session(player_id, session_id)
     except (ClientError, BotoCoreError) as exc:
         print(f"工作階段查詢失敗：{type(exc).__name__}")
         raise HTTPException(
-            status_code=503,
-            detail="工作階段服務暫時無法使用",
+            status_code=503, detail="工作階段服務暫時無法使用"
         ) from exc
 
     if session is None:
-        raise HTTPException(
-            status_code=401,
-            detail="登入工作階段不存在",
-        )
+        raise HTTPException(status_code=401, detail="登入工作階段不存在")
 
-    # 第三步：確認玩家仍然存在。
     try:
         player = get_player_by_id(player_id)
     except (ClientError, BotoCoreError) as exc:
         print(f"玩家資料查詢失敗：{type(exc).__name__}")
         raise HTTPException(
-            status_code=503,
-            detail="玩家資料服務暫時無法使用",
+            status_code=503, detail="玩家資料服務暫時無法使用"
         ) from exc
 
     if player is None:
-        raise HTTPException(
-            status_code=401,
-            detail="玩家不存在",
-        )
+        raise HTTPException(status_code=401, detail="玩家不存在")
 
-    # 第四步：產生新的 Token。
     try:
         new_access_token = create_access_token(player_id)
-        new_refresh_token = create_refresh_token(
-            player_id,
-            session_id,
-        )
-
+        new_refresh_token = create_refresh_token(player_id, session_id)
         old_hash = hash_refresh_token(payload.refresh_token)
         new_hash = hash_refresh_token(new_refresh_token)
-
         new_expires_at = int(
             (
                 datetime.now(timezone.utc)
                 + timedelta(days=REFRESH_TOKEN_DAYS)
             ).timestamp()
         )
-
-        # 第五步：使用條件式更新，確保舊 Token 只能成功輪替一次。
         rotated = rotate_refresh_token(
             player_id=player_id,
             session_id=session_id,
@@ -327,14 +313,12 @@ def refresh_login(payload: RefreshTokenRequest):
     except (ClientError, BotoCoreError, RuntimeError) as exc:
         print(f"Refresh Token 輪替失敗：{type(exc).__name__}")
         raise HTTPException(
-            status_code=503,
-            detail="登入憑證服務暫時無法使用",
+            status_code=503, detail="登入憑證服務暫時無法使用"
         ) from exc
 
     if not rotated:
         raise HTTPException(
-            status_code=401,
-            detail="Refresh Token 已失效或已被使用",
+            status_code=401, detail="Refresh Token 已失效或已被使用"
         )
 
     return {
@@ -350,53 +334,36 @@ def refresh_login(payload: RefreshTokenRequest):
 @app.post("/auth/logout")
 def logout(payload: RefreshTokenRequest):
     """撤銷目前 Refresh Token 對應的登入工作階段。"""
-
-    # 第一步：驗證 Refresh Token。
     try:
-        player_id, session_id = verify_refresh_token(
-            payload.refresh_token
-        )
-
+        player_id, session_id = verify_refresh_token(payload.refresh_token)
     except ValueError as exc:
         raise HTTPException(
-            status_code=401,
-            detail="Refresh Token 無效或已過期",
+            status_code=401, detail="Refresh Token 無效或已過期"
         ) from exc
-
     except (ClientError, BotoCoreError, RuntimeError) as exc:
         print(f"登出 Token 驗證失敗：{type(exc).__name__}")
-
         raise HTTPException(
-            status_code=503,
-            detail="登入驗證服務暫時無法使用",
+            status_code=503, detail="登入驗證服務暫時無法使用"
         ) from exc
 
-    # 第二步：計算 Refresh Token Hash。
     try:
         token_hash = hash_refresh_token(payload.refresh_token)
-
     except (RuntimeError, ValueError) as exc:
         print(f"登出 Token Hash 計算失敗：{type(exc).__name__}")
-
         raise HTTPException(
-            status_code=503,
-            detail="登入憑證服務暫時無法使用",
+            status_code=503, detail="登入憑證服務暫時無法使用"
         ) from exc
 
-    # 第三步：撤銷 DynamoDB 中的 Session。
     try:
         revoked = revoke_session(
             player_id=player_id,
             session_id=session_id,
             refresh_token_hash=token_hash,
         )
-
     except (ClientError, BotoCoreError) as exc:
         print(f"DynamoDB Session 撤銷失敗：{type(exc).__name__}")
-
         raise HTTPException(
-            status_code=503,
-            detail="Session 撤銷服務暫時無法使用",
+            status_code=503, detail="Session 撤銷服務暫時無法使用"
         ) from exc
 
     if not revoked:
@@ -405,40 +372,25 @@ def logout(payload: RefreshTokenRequest):
             detail="Session 已失效或 Refresh Token 已被使用",
         )
 
-    return {
-        "success": True,
-        "message": "登出成功",
-    }
-
+    return {"success": True, "message": "登出成功"}
 
 
 @app.get("/players/me/save")
-def get_my_game_save(
-    authorization: str | None = Header(default=None),
-):
+def get_my_game_save(authorization: str | None = Header(default=None)):
     """讀取目前登入玩家的雲端進度。"""
-
-    # 沿用現有 /auth/me 的 JWT 驗證。
     auth_result = get_current_player(authorization)
     player_id = auth_result["player"]["id"]
 
     try:
         record = load_player_game(player_id)
-
     except (ClientError, BotoCoreError, KeyError, ValueError) as exc:
         print(f"雲端存檔讀取失敗：{type(exc).__name__}")
-
         raise HTTPException(
-            status_code=503,
-            detail="雲端存檔暫時無法讀取",
+            status_code=503, detail="雲端存檔暫時無法讀取"
         ) from exc
 
     if record is None:
-        return {
-            "success": True,
-            "has_save": False,
-            "save": None,
-        }
+        return {"success": True, "has_save": False, "save": None}
 
     return {
         "success": True,
@@ -454,10 +406,8 @@ def put_my_game_save(
     authorization: str | None = Header(default=None),
 ):
     """儲存目前登入玩家的遊戲進度。"""
-
     auth_result = get_current_player(authorization)
     player_id = auth_result["player"]["id"]
-
     save_data = payload.save
 
     if (
@@ -467,29 +417,18 @@ def put_my_game_save(
         or not isinstance(save_data.get("section_id"), str)
         or not save_data["section_id"].strip()
     ):
-        raise HTTPException(
-            status_code=422,
-            detail="遊戲存檔格式不正確",
-        )
+        raise HTTPException(status_code=422, detail="遊戲存檔格式不正確")
 
     try:
-        updated_at = save_player_game(
-            player_id,
-            save_data,
-        )
-
+        updated_at = save_player_game(player_id, save_data)
     except ValueError as exc:
         raise HTTPException(
-            status_code=413,
-            detail="遊戲存檔過大或內容無效",
+            status_code=413, detail="遊戲存檔過大或內容無效"
         ) from exc
-
     except (ClientError, BotoCoreError) as exc:
         print(f"雲端存檔寫入失敗：{type(exc).__name__}")
-
         raise HTTPException(
-            status_code=503,
-            detail="雲端存檔暫時無法寫入",
+            status_code=503, detail="雲端存檔暫時無法寫入"
         ) from exc
 
     return {
@@ -498,41 +437,28 @@ def put_my_game_save(
         "updated_at": updated_at,
     }
 
+
 @app.post("/players/me/errors", status_code=201)
 def record_player_error(
     payload: PlayerErrorRequest,
     authorization: str | None = Header(default=None),
 ):
     """記錄目前登入玩家的程式執行錯誤。"""
-
-    # 使用原本的 JWT 驗證取得玩家身分。
     auth_result = get_current_player(authorization)
     player_id = auth_result["player"]["id"]
 
     try:
-        inserted = save_player_error(
-            player_id,
-            payload.dict(),
-        )
-
+        inserted = save_player_error(player_id, payload.dict())
     except ValueError as exc:
-        raise HTTPException(
-            status_code=422,
-            detail="錯誤紀錄格式不正確",
-        ) from exc
-
+        raise HTTPException(status_code=422, detail="錯誤紀錄格式不正確") from exc
     except (ClientError, BotoCoreError) as exc:
         print(f"錯誤紀錄儲存失敗：{type(exc).__name__}")
-
         raise HTTPException(
-            status_code=503,
-            detail="錯誤紀錄服務暫時無法使用",
+            status_code=503, detail="錯誤紀錄服務暫時無法使用"
         ) from exc
 
-    return {
-        "success": True,
-        "duplicate": not inserted,
-    }
+    return {"success": True, "duplicate": not inserted}
+
 
 @app.post("/ai/generate")
 def ai_generate(
@@ -543,9 +469,6 @@ def ai_generate(
     authorize_ai(authorization, verify_google_token)
 
     if not payload.prompt.strip():
-        raise HTTPException(
-            status_code=422,
-            detail="Prompt 不可為空白",
-        )
+        raise HTTPException(status_code=422, detail="Prompt 不可為空白")
 
     return {"text": generate(payload.prompt)}

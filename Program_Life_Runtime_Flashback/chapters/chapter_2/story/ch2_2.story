@@ -60,7 +60,7 @@ print(100 - (bacon_egg_toast + iced_milk)) # 付 100 元，要找 40 元
 
 @level ch2_2_breakfast
 title: 算算早餐錢
-goal: 你點了{food}和{drink}。用程式算出總共多少錢，以及付 100 元要找多少。
+goal: 你點了{food}和{drink}。用程式算出總共多少錢，以及付 100 元要找多少。請保留 food、drink 的價格，第一行只印總價，第二行只印找零；兩行都只輸出整數，不加文字。
 tags: {food}　{food_price} 元 | {drink}　{drink_price} 元 | 付 100 元
 hint: 先把兩個價格放進盒子，再用 + 加起來。
 hint: 找零就是 100 - (food + drink)，記得括號。
@@ -73,15 +73,28 @@ print()   # 付 100 元要找多少？
 ```
 check:
 ```python
-total = <<food_price>> + <<drink_price>>
-nums = [l.strip() for l in lines]
-assert str(total) in nums, "總共多少錢還沒算對喔：把兩個價格加起來印出來。"
-assert str(100 - total) in nums, "還要印出付 100 元要找多少錢。"
+expected_food = <<food_price>>
+expected_drink = <<drink_price>>
+expected_total = expected_food + expected_drink
+expected_change = 100 - expected_total
+
+assert "food" in globals() and type(food) is int and food == expected_food, \
+    "請保留你點的食物價格。"
+assert "drink" in globals() and type(drink) is int and drink == expected_drink, \
+    "請保留你點的飲料價格。"
+
+actual_lines = [line.strip() for line in lines if line.strip()]
+assert len(actual_lines) == 2, \
+    "請只輸出兩行整數：第一行總價，第二行找零，不加其他文字。"
+assert actual_lines[0] == str(expected_total), \
+    "第一行總價不正確，請把食物與飲料價格加起來。"
+assert actual_lines[1] == str(expected_change), \
+    "第二行找零不正確，請用100減掉總價。"
 ```
 solution:
 ```python
-food = 35
-drink = 25
+food = <<food_price>>
+drink = <<drink_price>>
 print(food + drink)
 print(100 - (food + drink))
 ```

@@ -48,8 +48,48 @@ habit.recall()
 ```
 check:
 ```python
-assert isinstance(habit, Memory), "habit 要用 Memory(...) 做出來。"
-assert "歲那年" in out, "記得讓 habit.recall()。"
+import ast
+import contextlib
+import io
+import sys
+
+def _call_checked(fn, *args):
+    capture = io.StringIO()
+    ticks = [0]
+    def guard(frame, event, arg):
+        if event == "line":
+            ticks[0] += 1
+            assert ticks[0] <= 30000, "驗證執行過久，請檢查迴圈是否能停止。"
+        return guard
+    previous = sys.gettrace()
+    try:
+        with contextlib.redirect_stdout(capture):
+            sys.settrace(guard)
+            value = fn(*args)
+    finally:
+        sys.settrace(previous)
+    return value, capture.getvalue()
+
+assert "Memory" in globals() and isinstance(Memory, type), "請保留 Memory 類別。"
+def _memory_text(memory):
+    assert isinstance(memory, Memory), "每段回憶必須是 Memory 物件。"
+    assert isinstance(getattr(memory,"title",None), str) and memory.title.strip(), "回憶標題不能空白。"
+    assert type(getattr(memory,"age",None)) in (int, float) and memory.age >= 0, "回憶年齡請填非負數字。"
+    assert isinstance(getattr(memory,"feeling",None), str) and memory.feeling.strip(), "請填入回憶的心情。"
+    assert callable(getattr(memory,"recall",None)), "Memory 必須有可呼叫的 recall()。"
+    expected = f"{memory.age} 歲那年，{memory.title}，那時候的心情是「{memory.feeling}」。"
+    _, captured = _call_checked(memory.recall)
+    assert captured.strip() == expected, "recall() 印出的內容必須與物件欄位一致。"
+    return expected
+# 也測試新物件，避免 recall() 寫死某一段回憶。
+probe = Memory("測試一段新的回憶", 42, "安心")
+_memory_text(probe)
+assert "habit" in globals(), "請用 Memory 建立 habit。"
+expected = _memory_text(habit)
+assert out.strip() == expected, "請印出 habit 的完整回憶，不是只印「歲那年」。"
+assert any(isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute)
+           and isinstance(n.func.value,ast.Name) and n.func.value.id == "habit"
+           and n.func.attr == "recall" for n in ast.walk(ast.parse(code))), "請呼叫 habit.recall()。"
 ```
 solution:
 ```python
@@ -81,9 +121,35 @@ for person in ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞"]:
 ```
 check:
 ```python
-r = say_love("派森")
-assert isinstance(r, str) and "派森" in r and "我愛你" in r, "say_love(\"派森\") 要回傳「派森，謝謝你，我愛你。」"
-assert out.count("我愛你") >= 5, "對每一個人都說一次。"
+import ast
+import contextlib
+import io
+import sys
+
+def _call_checked(fn, *args):
+    capture = io.StringIO()
+    ticks = [0]
+    def guard(frame, event, arg):
+        if event == "line":
+            ticks[0] += 1
+            assert ticks[0] <= 30000, "驗證執行過久，請檢查迴圈是否能停止。"
+        return guard
+    previous = sys.gettrace()
+    try:
+        with contextlib.redirect_stdout(capture):
+            sys.settrace(guard)
+            value = fn(*args)
+    finally:
+        sys.settrace(previous)
+    return value, capture.getvalue()
+
+assert "say_love" in globals() and callable(say_love), "請保留 say_love(name) 函式。"
+for name in ["派森","媽媽","測試朋友","Claire"]:
+    answer, captured = _call_checked(say_love,name)
+    assert answer == f"{name}，謝謝你，我愛你。", "函式必須依傳入姓名回傳完整感謝句，不能寫死派森。"
+    assert captured == "", "say_love 請回傳字串，交由外面的 print 印出。"
+people = ["爸爸","媽媽","奶奶","倖芳","翊丞"]
+assert [x.strip() for x in lines if x.strip()] == [f"{name}，謝謝你，我愛你。" for name in people], "請依原本清單對五個不同的人各說一次，不能重複同一句湊數。"
 ```
 solution:
 ```python
@@ -113,8 +179,75 @@ print("三個聖杯。奶奶，謝謝你。")
 ```
 check:
 ```python
-assert consecutive_holy >= 3, "要連續三個聖杯。"
-assert "奶奶，謝謝你" in out
+import ast
+import contextlib
+import io
+import sys
+
+def _call_checked(fn, *args):
+    capture = io.StringIO()
+    ticks = [0]
+    def guard(frame, event, arg):
+        if event == "line":
+            ticks[0] += 1
+            assert ticks[0] <= 30000, "驗證執行過久，請檢查迴圈是否能停止。"
+        return guard
+    previous = sys.gettrace()
+    try:
+        with contextlib.redirect_stdout(capture):
+            sys.settrace(guard)
+            value = fn(*args)
+    finally:
+        sys.settrace(previous)
+    return value, capture.getvalue()
+
+import copy
+import builtins
+import types
+
+def _rerun(replacements=None, sequence=None):
+    replacements = replacements or {}
+    parsed = ast.parse(code)
+    scope = {"__builtins__": dict(vars(builtins)), "__name__": "__main__"}
+    for key, value in replacements.items():
+        scope["_validation_" + key] = copy.deepcopy(value)
+        found = False
+        for statement in parsed.body:
+            if isinstance(statement, ast.Assign) and any(
+                isinstance(target, ast.Name) and target.id == key
+                for target in statement.targets
+            ):
+                statement.value = ast.Name(id="_validation_" + key, ctx=ast.Load())
+                found = True
+                break
+        assert found, "請保留題目原本的 " + key + " 初始化資料。"
+    draws = []
+    if sequence is not None:
+        def draw(options):
+            assert list(options) == ["聖杯", "聖杯", "笑杯", "陰杯"], "請保留原本的筊杯機率清單。"
+            assert len(draws) < len(sequence), "連續三個聖杯後應停止，不能再擲。"
+            value = sequence[len(draws)]
+            draws.append(value)
+            return value
+        real_import = builtins.__import__
+        def test_import(name, globals=None, locals=None, fromlist=(), level=0):
+            if name == "random":
+                return types.SimpleNamespace(choice=draw)
+            return real_import(name, globals, locals, fromlist, level)
+        scope["__builtins__"]["__import__"] = test_import
+    compiled = compile(ast.fix_missing_locations(parsed), "<validation>", "exec")
+    _, captured = _call_checked(lambda: exec(compiled, scope))
+    return scope, captured, draws
+
+assert "consecutive_holy" in globals() and type(consecutive_holy) is int and consecutive_holy == 3, "必須連續三個聖杯才停止。"
+assert out.strip() == "三個聖杯。奶奶，謝謝你。", "請保留原本完整的感謝句。"
+tree = ast.parse(code)
+assert any(isinstance(n,ast.While) for n in ast.walk(tree)), "請使用 while 迴圈。"
+for sequence in [["聖杯"]*3,["聖杯","聖杯","笑杯","聖杯","聖杯","聖杯"],["聖杯","陰杯","聖杯","聖杯","聖杯"],["笑杯","陰杯","聖杯","聖杯","聖杯"]]:
+    scope,captured,draws = _rerun(sequence=sequence)
+    assert draws == sequence, "遇到非聖杯要歸零，直到連續三個聖杯才停止；不可直接設定計數器。"
+    assert scope.get("consecutive_holy") == 3, "結束時應恰好連續三個聖杯。"
+    assert captured.strip() == "三個聖杯。奶奶，謝謝你。", "完成後請印出原本完整的感謝句。"
 ```
 solution:
 ```python
@@ -142,7 +275,8 @@ if my_answer == 72:
 ```
 check:
 ```python
-assert my_answer == 72 and "沒問題" in out, "(25 + 60) 打 85 折，再 round()。"
+assert "my_answer" in globals() and type(my_answer) is int and my_answer == 72, "請算(25+60)打85折，round()後應為整數72。"
+assert out.strip() == "沒問題，總共 72 元。", "店員算對了，請依原本格式印出「沒問題，總共 72 元。」，不要加否定句。"
 ```
 solution:
 ```python

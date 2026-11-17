@@ -66,9 +66,8 @@ print(f"我愛我的{love}")
 ```
 check:
 ```python
-assert "love" in globals(), "要先建立一個叫 love 的盒子。"
-assert isinstance(love, str) and love.strip() != "", "love 盒子裡要放進一串用引號包起來的文字。"
-assert ("我愛我的" + love) in out, "要印出「我愛我的" + love + "」喔。"
+assert "love" in globals() and isinstance(love, str) and love.strip(), "love 必須放入非空字串。"
+assert out.strip() == "我愛我的" + love, "請完整印出「我愛我的」加上 love 的內容，不加其他語句。"
 ```
 solution:
 ```python
@@ -108,8 +107,77 @@ print(type(my_age))
 ```
 check:
 ```python
-for t in ["int", "float", "str"]:
-    assert "<class '%s'>" % t in out, "三個盒子的種類都要印出來，還少了 %s。" % t
+import ast
+import contextlib
+import io
+import sys
+
+def _call_checked(fn, *args):
+    capture = io.StringIO()
+    ticks = [0]
+    def guard(frame, event, arg):
+        if event == "line":
+            ticks[0] += 1
+            assert ticks[0] <= 30000, "驗證執行過久，請檢查迴圈是否能停止。"
+        return guard
+    previous = sys.gettrace()
+    try:
+        with contextlib.redirect_stdout(capture):
+            sys.settrace(guard)
+            value = fn(*args)
+    finally:
+        sys.settrace(previous)
+    return value, capture.getvalue()
+
+import copy
+import builtins
+import types
+
+def _rerun(replacements=None, sequence=None):
+    replacements = replacements or {}
+    parsed = ast.parse(code)
+    scope = {"__builtins__": dict(vars(builtins)), "__name__": "__main__"}
+    for key, value in replacements.items():
+        scope["_validation_" + key] = copy.deepcopy(value)
+        found = False
+        for statement in parsed.body:
+            if isinstance(statement, ast.Assign) and any(
+                isinstance(target, ast.Name) and target.id == key
+                for target in statement.targets
+            ):
+                statement.value = ast.Name(id="_validation_" + key, ctx=ast.Load())
+                found = True
+                break
+        assert found, "請保留題目原本的 " + key + " 初始化資料。"
+    draws = []
+    if sequence is not None:
+        def draw(options):
+            assert list(options) == ["聖杯", "聖杯", "笑杯", "陰杯"], "請保留原本的筊杯機率清單。"
+            assert len(draws) < len(sequence), "連續三個聖杯後應停止，不能再擲。"
+            value = sequence[len(draws)]
+            draws.append(value)
+            return value
+        real_import = builtins.__import__
+        def test_import(name, globals=None, locals=None, fromlist=(), level=0):
+            if name == "random":
+                return types.SimpleNamespace(choice=draw)
+            return real_import(name, globals, locals, fromlist, level)
+        scope["__builtins__"]["__import__"] = test_import
+    compiled = compile(ast.fix_missing_locations(parsed), "<validation>", "exec")
+    _, captured = _call_checked(lambda: exec(compiled, scope))
+    return scope, captured, draws
+
+expected_types = {"mom_age": int, "my_age": float, "my_name": str}
+for name, expected_type in expected_types.items():
+    assert name in globals() and type(globals()[name]) is expected_type, "請建立正確型別的 " + name + "。"
+tree = ast.parse(code)
+assert any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+           and n.func.id == "type" for n in ast.walk(tree)), "請使用 type() 查詢變數型別。"
+expected = ["<class 'int'>", "<class 'float'>", "<class 'str'>"]
+assert [x.strip() for x in lines if x.strip()] == expected, "請依 mom_age、my_age、my_name 的順序印出三個型別。"
+# 重跑完整程式，保留玩家自己的變數、迴圈及函式；不再只抽取頂層print。
+_, captured, _ = _rerun({"mom_age":"測試", "my_age":2, "my_name":3.5})
+assert [x.strip() for x in captured.splitlines() if x.strip()] == ["<class 'str'>", "<class 'int'>", "<class 'float'>"], "請輸出變數的實際 type()，不要寫死型別文字。"
 ```
 solution:
 ```python

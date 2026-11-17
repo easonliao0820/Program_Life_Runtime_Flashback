@@ -32,7 +32,7 @@ else:
 
 @level ch2_3_breakfast
 title: 關卡一：早餐時段
-goal: 豆漿 25 元＋草莓吐司 60 元，早餐時段打 85 折。結帳螢幕上，店員收 72 元。算算看店員對不對。
+goal: 豆漿 25 元＋草莓吐司 60 元，早餐時段打 85 折。結帳螢幕上，店員收 72 元。算算看店員對不對。請保留起始程式的判斷與輸出格式，只補上 my_answer 的計算式。
 tags: 豆漿 25 元 | 草莓吐司 60 元 | 85 折 = × 0.85 | 店員收 72 元
 hint: 打 85 折就是乘上 0.85；算完記得用 round() 變成整數。
 starter:
@@ -48,8 +48,24 @@ else:
 ```
 check:
 ```python
-assert my_answer == 72, "my_answer 還不對喔：(25 + 60) 打 85 折，再 round() 一下。"
-assert "沒問題" in out, "這次店員是對的，要印出「沒問題」。"
+assert "my_answer" in globals(), "請把計算結果存入 my_answer。"
+
+assert type(my_answer) is int and my_answer == 72, \
+    "請使用 round() 計算：(25 + 60) × 0.85，結果應為整數72。"
+
+assert "soy_milk" in globals() and soy_milk == 25, \
+    "豆漿價格應保留為25元。"
+
+assert "strawberry_toast" in globals() and strawberry_toast == 60, \
+    "草莓吐司價格應保留為60元。"
+
+assert "clerk_total" in globals() and clerk_total == 72, \
+    "店員收費應保留為72元。"
+
+actual_lines = [line.strip() for line in lines if line.strip()]
+
+assert actual_lines == ["沒問題！總共是 72 元。"], \
+    "這次店員算對了，請保留原本的輸出格式：沒問題！總共是 72 元。"
 ```
 solution:
 ```python
@@ -67,7 +83,7 @@ success: 85 折之後是 72 元，跟結帳螢幕上一樣。店員算對了，�
 
 @level ch2_3_onigiri
 title: 關卡二：第二件 6 折
-goal: 御飯糰 35 元＋兩瓶奶茶各 30 元，飲料第二件 6 折。店員收 95 元。這次自己寫出 if / else 判斷。
+goal: 御飯糰35元＋兩瓶奶茶各30元，飲料第二件6折。店員收95元。計算金額，並用 if / else 判斷。算對時印「沒問題！總共是 ○○ 元。」；算錯時印「咦？應該是 ○○ 元才對，跟店員確認一下吧。」其中○○使用 my_answer 的值。
 tags: 御飯糰 35 元 | 奶茶 30 元 × 2 | 第二件 6 折 | 店員收 95 元
 hint: 第二瓶奶茶是 30 × 0.6。總價 = 35 + 30 + 30 × 0.6。
 hint: 照著關卡一的樣子，用 if my_answer == clerk_total: 判斷，else 底下印出提醒。
@@ -80,9 +96,38 @@ my_answer =
 ```
 check:
 ```python
-assert "if" in code and "else" in code, "要自己用 if / else 判斷店員算得對不對。"
-assert round(my_answer) == 83, "金額還不對：35 + 30 + 30 × 0.6 是多少呢？"
-assert out.strip() != "" and "沒問題" not in out, "店員這次算錯了，else 底下要印出提醒。"
+import ast
+
+assert "onigiri" in globals() and onigiri == 35, \
+    "御飯糰價格應保留為35元。"
+
+assert "milk_tea" in globals() and milk_tea == 30, \
+    "每瓶奶茶的價格應保留為30元。"
+
+assert "clerk_total" in globals() and clerk_total == 95, \
+    "店員收費應保留為95元。"
+
+assert "my_answer" in globals(), \
+    "請把計算結果存入 my_answer。"
+
+assert type(my_answer) in (int, float) and my_answer == 83, \
+    "應付金額是35＋30＋30×0.6＝83元。"
+
+# 檢查真正的 if / else，不把註解當成程式
+tree = ast.parse(code)
+has_if_else = any(
+    isinstance(node, ast.If)
+    and node.body
+    and node.orelse
+    for node in ast.walk(tree)
+)
+assert has_if_else, "請使用真正的 if / else 判斷店員算得對不對。"
+
+actual_lines = [line.strip() for line in lines if line.strip()]
+expected = f"咦？應該是 {my_answer} 元才對，跟店員確認一下吧。"
+
+assert actual_lines == [expected], \
+    "店員多收錢了，請依題目格式印出應付金額及提醒。"
 ```
 solution:
 ```python
@@ -105,7 +150,7 @@ success: 第二瓶 6 折，應該是 83 元——店員多收了 12 元，被你
 
 @level ch2_3_noodles
 title: 關卡三：幫她算算看
-goal: 三明治 49 元兩個＋茶葉蛋 13 元，全部打 9 折，店員一開始收 111 元。幫她算算看店員對不對，小數點要用 round() 處理喔。
+goal: 三明治49元兩個＋茶葉蛋13元，全部打9折，店員收111元。使用 round() 計算金額，保留原本的 if / else 判斷及輸出格式，只補上 my_answer 的計算式。只輸出判斷結果那一句。
 tags: 三明治 49 元 × 2 | 茶葉蛋 13 元 | 全部 9 折 | 店員收 111 元
 hint: (49 × 2 + 13) × 0.9 = 99.9，round() 之後是多少？
 hint: 算出來跟 111 不一樣，else 底下要印出提醒。
@@ -122,8 +167,46 @@ else:
 ```
 check:
 ```python
-assert my_answer == 100, "還不對喔：先算 (49 × 2 + 13) × 0.9，再用 round()。"
-assert "沒問題" not in out and out.strip() != "", "店員收了 111 元，跟你算的不一樣，要印出提醒。"
+import ast
+
+assert "sandwich" in globals() and sandwich == 49, \
+    "每個三明治的價格應保留為49元。"
+
+assert "tea_egg" in globals() and tea_egg == 13, \
+    "茶葉蛋價格應保留為13元。"
+
+assert "clerk_total" in globals() and clerk_total == 111, \
+    "店員收費應保留為111元。"
+
+assert "my_answer" in globals(), \
+    "請把計算結果存入 my_answer。"
+
+assert type(my_answer) is int and my_answer == 100, \
+    "先算(49×2＋13)×0.9＝99.9，再用 round() 得到整數100。"
+
+tree = ast.parse(code)
+
+has_round = any(
+    isinstance(node, ast.Call)
+    and isinstance(node.func, ast.Name)
+    and node.func.id == "round"
+    for node in ast.walk(tree)
+)
+assert has_round, "請實際呼叫 round() 處理小數，註解裡寫 round() 不算。"
+
+has_if_else = any(
+    isinstance(node, ast.If)
+    and node.body
+    and node.orelse
+    for node in ast.walk(tree)
+)
+assert has_if_else, "請保留 if / else 判斷。"
+
+actual_lines = [line.strip() for line in lines if line.strip()]
+expected = "咦？好像哪裡算錯了，跟店員確認一下吧。"
+
+assert actual_lines == [expected], \
+    "應付100元，店員收111元。請保留原本 else 裡的提醒文字，不要另外印出其他內容。"
 ```
 solution:
 ```python

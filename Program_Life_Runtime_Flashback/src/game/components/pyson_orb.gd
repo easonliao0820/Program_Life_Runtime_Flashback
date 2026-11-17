@@ -1,8 +1,11 @@
 extends Control
 
 ## 派森（畫面設定書 第三節）
-## 正式美術：src/actors/npc/paisen_float_sparkle_sheet.png（一列 24 格的動圖：揮手、飄浮、身邊有光點）。
-## 有這張圖就播放動圖；沒有就退回用程式畫的藍黃光球。
+## 正式美術（docs/PAISEN_DESIGN.md，新設計 A「光之精靈」）：
+##   1. src/actors/npc/paisen.png：單張靜止圖，飄浮、彈跳、光點都由程式做（優先使用）
+##   2. src/actors/npc/paisen_float_sparkle_sheet.png：舊版一列 24 格的動圖（沒有 paisen.png 時用）
+## 都沒有就退回用程式畫的藍黃光球。
+## 新派森之後做成動圖的話：一列 N 格放成 paisen.png，再把 STILL_FRAMES 改成 N。
 ## 情緒（兩種外觀都一樣）：
 ##   說話 → 變亮；開心 → 動畫加快、輕輕彈跳；擔心 → 變暗、動畫變慢；
 ##   說大道理 → 緩慢；難過、晚年（fading）→ 光忽明忽暗、身邊散出光點；結局 → 越來越透明（set_fade）
@@ -11,9 +14,15 @@ extends Control
 ## 每一節開頭會自動恢復清楚。
 ## 請保留 place / set_mood / speak / set_fade / set_sprite_scale / set_blur 介面，GameStage 與回憶模式都會用到。
 
+const STILL := "res://src/actors/npc/paisen.png"
+const STILL_FRAMES := 1
 const SHEET := "res://src/actors/npc/paisen_float_sparkle_sheet.png"
 const SHEET_FRAMES := 24
 const SHEET_FPS := 12.0
+## 顯示大小的基準：舊動圖一格 391 像素高。換成別的尺寸的圖時自動換算，畫面上的大小不變
+const REF_HEIGHT := 391.0
+
+var _fit: float = 1.0  ## 圖片高度換算成 REF_HEIGHT 的倍率
 
 ## 動圖的模糊：在圖上取周圍 7×7 個點加權平均（各格之間有透明空隙，不會糊到隔壁格）
 const BLUR_SHADER := """
@@ -87,18 +96,24 @@ func _ready() -> void:
 	_base_pos = position
 
 
-## 把動圖切成 24 格做成動畫（保持像素風，不模糊）
+## 把圖切成一格一格做成動畫（保持像素風，不模糊）；新版靜止圖就是只有 1 格
 func _build_sprite() -> void:
-	if not ResourceLoader.exists(SHEET):
+	var path := STILL
+	var count := STILL_FRAMES
+	if not ResourceLoader.exists(path):
+		path = SHEET
+		count = SHEET_FRAMES
+	if not ResourceLoader.exists(path):
 		return
-	var sheet: Texture2D = load(SHEET)
-	var fw := sheet.get_width() / SHEET_FRAMES
+	var sheet: Texture2D = load(path)
+	var fw := sheet.get_width() / count
 	var fh := sheet.get_height()
+	_fit = REF_HEIGHT / float(fh)
 	var frames := SpriteFrames.new()
 	frames.add_animation("float")
 	frames.set_animation_loop("float", true)
 	frames.set_animation_speed("float", SHEET_FPS)
-	for i in SHEET_FRAMES:
+	for i in count:
 		var atlas := AtlasTexture.new()
 		atlas.atlas = sheet
 		atlas.region = Rect2(i * fw, 0, fw, fh)
@@ -115,16 +130,16 @@ func _build_sprite() -> void:
 	mat.shader = shader
 	_sprite.material = mat
 	_sprite.position = size / 2.0
-	_sprite.scale = Vector2.ONE * _sprite_scale
+	_sprite.scale = Vector2.ONE * _sprite_scale * _fit
 	add_child(_sprite)
 	_sprite.play("float")
 
 
-## 動圖顯示的大小（1.0 = 原圖 391 像素高）
+## 派森顯示的大小（1.0 = 畫面上 391 像素高，不管圖片本身多大）
 func set_sprite_scale(s: float) -> void:
 	_sprite_scale = s
 	if _sprite:
-		_sprite.scale = Vector2.ONE * s
+		_sprite.scale = Vector2.ONE * s * _fit
 
 
 ## 模糊程度（0 = 清楚；第一章用 10 左右）。模糊時也稍微透明，像一團看不清的光
@@ -132,7 +147,8 @@ func set_blur(amount: float) -> void:
 	_blur = maxf(amount, 0.0)
 	if _sprite:
 		_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if _blur > 0.0 else CanvasItem.TEXTURE_FILTER_NEAREST
-		(_sprite.material as ShaderMaterial).set_shader_parameter("radius", _blur)
+		# radius 是以圖片像素計算；圖越小放越大，要換算回來，畫面上的模糊程度才一樣
+		(_sprite.material as ShaderMaterial).set_shader_parameter("radius", _blur / _fit)
 
 
 func place(pos: Vector2, sprite_scale: float = -1.0) -> void:

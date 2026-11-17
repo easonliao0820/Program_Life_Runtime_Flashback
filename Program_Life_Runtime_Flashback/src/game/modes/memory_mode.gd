@@ -10,6 +10,8 @@ extends Control
 
 signal _picked(index: int)
 
+const SKY_IMAGE := "res://assets/backgrounds/star_sky"
+
 var _sky: Control
 var _orb: Control
 var _bar: ProgressBar
@@ -21,7 +23,23 @@ var _done_flags: Array = []
 func _ready() -> void:
 	UIKit.full_rect(self)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	# 有正式圖（assets/backgrounds/star_sky.png）就當底圖，程式畫的星星疊在上面繼續閃
+	var sky_tex: Texture2D = null
+	for ext in [".png", ".jpg", ".webp"]:
+		if ResourceLoader.exists(SKY_IMAGE + ext):
+			sky_tex = load(SKY_IMAGE + ext)
+			break
+	if sky_tex:
+		var pic := TextureRect.new()
+		UIKit.full_rect(pic)
+		pic.texture = sky_tex
+		pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(pic)
 	_sky = StarSky.new()
+	_sky.over_image = sky_tex != null
 	UIKit.full_rect(_sky)
 	add_child(_sky)
 	_orb = preload("res://src/game/components/pyson_orb.gd").new()
@@ -161,6 +179,7 @@ class Fragment extends Control:
 
 
 class StarSky extends Control:
+	var over_image: bool = false   ## 底下有星空圖：不畫底色、星星淡一點
 	var _stars: Array = []
 	var _t: float = 0.0
 
@@ -176,7 +195,10 @@ class StarSky extends Control:
 		queue_redraw()
 
 	func _draw() -> void:
-		draw_rect(Rect2(Vector2.ZERO, size), Color("#070d24"))
+		if not over_image:
+			draw_rect(Rect2(Vector2.ZERO, size), Color("#070d24"))
 		for s in _stars:
 			var a: float = 0.4 + 0.6 * absf(sin(_t * 0.8 + s[2]))
+			if over_image:
+				a *= 0.5
 			draw_circle(s[0], s[1], Color(1, 0.97, 0.85, a))

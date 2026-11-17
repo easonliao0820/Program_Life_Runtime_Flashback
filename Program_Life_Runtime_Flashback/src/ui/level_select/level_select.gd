@@ -5,7 +5,7 @@ extends Control
 ##   - 走過的小節解鎖、播完的小節顯示 ✓ COMPLETED
 ##   - 點卡片從那一節開頭開始（GameFlow.play_from_map）
 ##   - 第六章之後分岔成結局一、結局二
-## 縮圖：assets/thumbnails/<小節id>.png；沒有就用該節的人生階段色調。
+## 縮圖：assets/thumbnails/<小節id>.png；沒有就用該節劇本裡第一張有圖的背景；再沒有就用人生階段色調。
 
 @onready var back_button: Button = $Header/BackButton
 @onready var reset_button: Button = $Header/ResetButton
@@ -169,7 +169,11 @@ func _thumbnail(sec: Dictionary) -> Texture2D:
 			return load(THUMB_DIR + id + ext)
 	if THUMB_ART.has(id) and ResourceLoader.exists(THUMB_ART[id]):
 		return load(THUMB_ART[id])
-	# 沒有縮圖：用這一節的人生階段色調
+	# 沒有專用縮圖：用這一節劇本裡第一張已經有圖的背景（@bg）
+	var bg_tex := _story_background(str(sec.get("story", "")))
+	if bg_tex:
+		return bg_tex
+	# 都沒有：用這一節的人生階段色調
 	var tone := ChapterRegistry.tone(str(sec.get("tone", "birth")))
 	var grad := Gradient.new()
 	grad.set_color(0, tone["top"])
@@ -181,6 +185,25 @@ func _thumbnail(sec: Dictionary) -> Texture2D:
 	gt.width = 32
 	gt.height = 32
 	return gt
+
+
+## 照劇本順序找 @bg，回傳第一張在 assets/backgrounds（或 ChapterRegistry.ART）有圖的背景
+func _story_background(story_path: String) -> Texture2D:
+	var f := FileAccess.open(story_path, FileAccess.READ)
+	if f == null:
+		return null
+	while not f.eof_reached():
+		var line := f.get_line().strip_edges()
+		if not line.begins_with("@bg "):
+			continue
+		var key := line.substr(4).strip_edges().get_slice(" ", 0)
+		if ChapterRegistry.ART.has(key) and ResourceLoader.exists(ChapterRegistry.ART[key]):
+			return load(ChapterRegistry.ART[key])
+		for ext in [".png", ".jpg", ".webp"]:
+			var path: String = "res://assets/backgrounds/" + key + ext
+			if ResourceLoader.exists(path):
+				return load(path)
+	return null
 
 
 # ------------------------------------------------------------------

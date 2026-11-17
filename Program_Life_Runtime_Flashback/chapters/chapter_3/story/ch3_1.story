@@ -47,7 +47,7 @@ confirm: 出發！
 
 @level ch3_1_check_bag
 title: 確認書包
-goal: 剛剛的動作都變成了程式。印出書包裡的東西和數量，再用 in 檢查手作巧克力有沒有在書包裡。
+goal: 剛剛的動作都變成了程式。印出書包裡的東西和數量，再用 in 檢查手作巧克力有沒有在書包裡。請保留兩行輸出：第一行印出 bag 清單，第二行印「書包裡有 ○ 樣東西」，○使用實際數量；不要另外印其他內容。
 tags: bag.append() | bag.remove() | len(bag) | "手作巧克力" in bag
 hint: 書包超過 5 樣的話，用 bag.remove("東西") 拿掉一樣。
 hint: if "手作巧克力" in bag: 底下寫 gave_gift = True，else 底下寫 gave_gift = False。
@@ -64,13 +64,52 @@ else:
 ```
 check:
 ```python
+import ast
+
 assert "bag" in globals() and isinstance(bag, list), "要有一個叫 bag 的 list。"
-assert "len(" in code, "用 len() 數數看書包裡有幾樣東西。"
-assert len(bag) <= 5, "（東西太多了，跑不快，會趕不上捷運！）用 bag.remove() 拿掉一樣吧。"
+assert all(isinstance(item, str) for item in bag), "書包清單中的每一項都必須是物品名稱。"
+assert len(bag) <= 5, "東西太多了，跑不快！請把書包整理到不超過5樣。"
 assert "悠遊卡" in bag, "沒有悠遊卡，進不了捷運站喔。"
-assert "gave_gift" in globals(), "最後用 in 檢查巧克力有沒有在書包裡，結果存進 gave_gift。"
+assert "gave_gift" in globals() and type(gave_gift) is bool, "請把是否帶巧克力存成布林值 gave_gift。"
 assert gave_gift == ("手作巧克力" in bag), "gave_gift 要跟書包裡有沒有巧克力一致。"
-set_flag("gave_gift", "手作巧克力" in bag)
+
+tree = ast.parse(code)
+has_len_bag = any(
+    isinstance(node, ast.Call)
+    and isinstance(node.func, ast.Name)
+    and node.func.id == "len"
+    and len(node.args) == 1
+    and isinstance(node.args[0], ast.Name)
+    and node.args[0].id == "bag"
+    for node in ast.walk(tree)
+)
+assert has_len_bag, "請用 len(bag) 計算書包數量，註解裡寫不算。"
+has_gift_check = any(
+    isinstance(node, ast.Compare)
+    and any(
+        isinstance(op, (ast.In, ast.NotIn))
+        and isinstance(left, ast.Constant)
+        and left.value == "手作巧克力"
+        and isinstance(right, ast.Name)
+        and right.id == "bag"
+        for left, op, right in zip(
+            [node.left] + node.comparators[:-1], node.ops, node.comparators
+        )
+    )
+    for node in ast.walk(tree)
+)
+assert has_gift_check, "請用 in 檢查手作巧克力是否在 bag 裡。"
+
+actual_lines = [line.strip() for line in lines if line.strip()]
+assert len(actual_lines) == 2, "請只印兩行：第一行書包清單，第二行實際數量。"
+try:
+    printed_bag = ast.literal_eval(actual_lines[0])
+except (ValueError, SyntaxError):
+    raise AssertionError("第一行請直接印出 bag 清單。")
+assert isinstance(printed_bag, list) and printed_bag == bag, "印出的清單必須與 bag 實際內容及順序一致。"
+assert actual_lines[1] == f"書包裡有 {len(bag)} 樣東西", "第二行請依格式印出書包的實際數量。"
+
+set_flag("gave_gift", gave_gift)
 set_flag("forgot_homework", "數學作業" not in bag)
 ```
 solution:
