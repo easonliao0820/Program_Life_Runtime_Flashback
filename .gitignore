@@ -1,12 +1,47 @@
-# 排除所有 addons
-Program_Life_Runtime_Flashback/addons/
 
-# 排除 macOS 特有的暫存檔
-.DS_Store
+# ==============================
+# Godot
+# ==============================
+.godot/
+.import/
+*.import
+.mono/
+export_credentials.cfg
+*.tmp
 
-# 排除 Python 編譯檔
+# ==============================
+# Python
+# ==============================
 __pycache__/
 *.py[cod]
+.venv/
+venv/
+lambda-env/
+lambda_package/
+package/
+.pytest_cache/
 
-# 排除環境變數檔（含 API key）
+# ==============================
+# AWS
+# ==============================
+.aws-sam/
+lambda_deploy_*.zip
+lambda_backup_*.zip
+godot-backend-api-deploy.zip
+
+# ==============================
+# Secrets
+# ==============================
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ==============================
+# Temporary files
+# ==============================
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -276,6 +276,19 @@ func _on_run() -> void:
 		_errors += 1
 		_update_progress()
 		var err: Dictionary = result.get("error", {})
+		
+		ErrorLogManager.record_error({
+			"section_id": GameState.section_id,
+			"level_id": str(_level.get("id", "unknown")),
+			"attempt": attempt,
+			"error_kind": "python_exception",
+			"error_type": str(err.get("type", "UnknownError")),
+			"error_message": str(err.get("message", "")),
+			"line": int(err.get("line", 0)),
+			"source_line": str(err.get("text", "")),
+			"code": code,
+			"backend": str(result.get("backend", ""))
+		})
 		var plain := ErrorExplainer.explain(err, code)
 		_output.text = stdout + "[color=#ff8f80]（程式在這裡停下來了）[/color]"
 		if int(err.get("line", 0)) > 0:
@@ -292,6 +305,19 @@ func _on_run() -> void:
 		_update_progress()
 		_output.text = stdout if stdout != "" else "[color=#a89c86]（沒有印出任何東西）[/color]"
 		var msg: String = str(result.get("message", ""))
+		
+		ErrorLogManager.record_error({
+			"section_id": GameState.section_id,
+			"level_id": str(_level.get("id", "unknown")),
+			"attempt": attempt,
+			"error_kind": "check_failed",
+			"error_type": "CheckFailed",
+			"error_message": msg,
+			"line": 0,
+			"source_line": "",
+			"code": code,
+			"backend": str(result.get("backend", ""))
+		})
 		_say(msg if msg != "" else "程式可以跑了，但結果還不太對，再看一次任務卡吧。", "worried")
 		return
 

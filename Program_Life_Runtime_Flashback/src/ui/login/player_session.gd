@@ -17,7 +17,7 @@ func set_verified_player(
 	email: String,
 	avatar_url: String
 ) -> void:
-	# id 對應 Google sub；未來資料庫應以後端驗證後的 sub 辨識玩家。
+	# id 是後端產生的玩家 UUID，Google sub 僅用於帳號綁定。
 	player_id = id
 	player_name = name
 	player_email = email
@@ -26,6 +26,17 @@ func set_verified_player(
 
 	login_changed.emit(true)
 
+func _ready() -> void:
+	var auth_manager = get_node("/root/AuthManager")
+
+	auth_manager.backend_session_expired.connect(
+		_on_backend_session_expired
+	)
+
+
+func _on_backend_session_expired() -> void:
+	print("[PlayerSession] 後端登入狀態已失效")
+	logout()
 
 func logout() -> void:
 	# 同時清除憑證與畫面狀態；這裡沒有刪除存檔或呼叫雲端刪除 API。

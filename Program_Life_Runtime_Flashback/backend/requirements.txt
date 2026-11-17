@@ -5,3 +5,4 @@ requests
 python-dotenv
 mangum
 boto3
+PyJWT==2.15.1
