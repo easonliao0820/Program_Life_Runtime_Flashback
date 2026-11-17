@@ -83,64 +83,123 @@ success: 85 折之後是 72 元，跟結帳螢幕上一樣。店員算對了，�
 
 @level ch2_3_onigiri
 title: 關卡二：第二件 6 折
-goal: 御飯糰35元＋兩瓶奶茶各30元，飲料第二件6折。店員收95元。計算金額，並用 if / else 判斷。算對時印「沒問題！總共是 ○○ 元。」；算錯時印「咦？應該是 ○○ 元才對，跟店員確認一下吧。」其中○○使用 my_answer 的值。
-tags: 御飯糰 35 元 | 奶茶 30 元 × 2 | 第二件 6 折 | 店員收 95 元
-hint: 第二瓶奶茶是 30 × 0.6。總價 = 35 + 30 + 30 × 0.6。
-hint: 照著關卡一的樣子，用 if my_answer == clerk_total: 判斷，else 底下印出提醒。
+goal: 御飯糰35元，兩瓶奶茶各30元，只有第二瓶打6折。店員收95元，算得對嗎？請完成兩處：①把 my_answer 的0換成計算式；②把 if 後的 False 換成「自己算的金額等於店員收費」的比較式。輸出文字已準備好，請保留。
+tags: 第一瓶原價 | 第二瓶 × 0.6 | == 比較是否相等
+hint: 總價是「御飯糰＋第一瓶奶茶＋第二瓶奶茶」，只有第二瓶乘上0.6。
+hint: my_answer = round(onigiri + milk_tea + milk_tea * 0.6)，判斷條件使用 my_answer == clerk_total。
 starter:
 ```python
 onigiri = 35
 milk_tea = 30
 clerk_total = 95
-my_answer = 
+
+# ① 把 0 換成正確的計算式
+my_answer = 0
+
+# ② 把 False 換成兩個金額是否相等的比較式
+if False:
+    print("店員算對了！")
+else:
+    print("店員算錯了，請再確認金額。")
+
+print("應付金額：", my_answer)
 ```
 check:
 ```python
 import ast
+import contextlib
+import io
+import re
+import sys
 
-assert "onigiri" in globals() and onigiri == 35, \
-    "御飯糰價格應保留為35元。"
+assert globals().get("onigiri") == 35, \
+    "請保留御飯糰價格 35 元。"
 
-assert "milk_tea" in globals() and milk_tea == 30, \
-    "每瓶奶茶的價格應保留為30元。"
+assert globals().get("milk_tea") == 30, \
+    "請保留奶茶價格 30 元。"
 
-assert "clerk_total" in globals() and clerk_total == 95, \
-    "店員收費應保留為95元。"
+assert globals().get("clerk_total") == 95, \
+    "請保留店員收費 95 元。"
 
-assert "my_answer" in globals(), \
-    "請把計算結果存入 my_answer。"
+assert type(globals().get("my_answer")) in (int, float) and my_answer == 83, \
+    "第二瓶才打 6 折：35＋30＋30×0.6＝83 元。"
 
-assert type(my_answer) in (int, float) and my_answer == 83, \
-    "應付金額是35＋30＋30×0.6＝83元。"
+# 忽略空白、換行及常見標點差異。
+def normalize(text):
+    return re.sub(r"[\s，,。.!！?？:：、；;]", "", text)
 
-# 檢查真正的 if / else，不把註解當成程式
 tree = ast.parse(code)
-has_if_else = any(
-    isinstance(node, ast.If)
-    and node.body
-    and node.orelse
-    for node in ast.walk(tree)
+
+branches = [
+    node for node in tree.body
+    if isinstance(node, ast.If) and node.orelse
+]
+
+assert len(branches) == 1, \
+    "請保留一組 if / else，並完成比較條件。"
+
+# 單獨測試玩家填寫的 if / else。
+branch_code = compile(
+    ast.Module(body=[branches[0]], type_ignores=[]),
+    "<branch-test>",
+    "exec"
 )
-assert has_if_else, "請使用真正的 if / else 判斷店員算得對不對。"
 
-actual_lines = [line.strip() for line in lines if line.strip()]
-expected = f"咦？應該是 {my_answer} 元才對，跟店員確認一下吧。"
+for charged in (83, 95, 80):
+    scope = dict(globals())
+    scope["clerk_total"] = charged
+    capture = io.StringIO()
+    steps = [0]
 
-assert actual_lines == [expected], \
-    "店員多收錢了，請依題目格式印出應付金額及提醒。"
+    def guard(frame, event, arg):
+        if event == "line":
+            steps[0] += 1
+            assert steps[0] < 3000, \
+                "這題只需要 if / else，不需要重複執行迴圈。"
+        return guard
+
+    previous = sys.gettrace()
+    try:
+        sys.settrace(guard)
+        with contextlib.redirect_stdout(capture):
+            exec(branch_code, scope)
+    finally:
+        sys.settrace(previous)
+
+    expected = (
+        "店員算對了！"
+        if charged == 83
+        else "店員算錯了，請再確認金額。"
+    )
+
+    assert normalize(capture.getvalue()) == normalize(expected), \
+        "金額已算對！請比較 my_answer 和 clerk_total 是否相等，並保留兩個分支的提示文字。"
+
+# 檢查實際輸出，接受 83 或 83.0。
+expected_output = "店員算錯了，請再確認金額。應付金額：83"
+
+assert normalize(out) in (
+    normalize(expected_output),
+    normalize(expected_output + ".0")
+), \
+    "請保留預先提供的輸出文字及最後的應付金額；空白、換行與標點不影響判定。"
 ```
 solution:
 ```python
 onigiri = 35
 milk_tea = 30
 clerk_total = 95
+
 my_answer = round(onigiri + milk_tea + milk_tea * 0.6)
+
 if my_answer == clerk_total:
-    print(f"沒問題！總共是 {my_answer} 元。")
+    print("店員算對了！")
 else:
-    print(f"咦？應該是 {my_answer} 元才對，跟店員確認一下吧。")
+    print("店員算錯了，請再確認金額。")
+
+print("應付金額：", my_answer)
 ```
-success: 第二瓶 6 折，應該是 83 元——店員多收了 12 元，被你抓到了！
+success: 第二瓶6折，應付83元！你用程式發現店員多收了12元。
 @end
 
 （你結完帳，正要離開，排在你後面的女生卻在櫃檯前面停住了。她穿著跟你一樣的制服，書包上掛著一個湖景照片做成的吊飾。）
