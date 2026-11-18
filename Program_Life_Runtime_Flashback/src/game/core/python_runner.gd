@@ -117,7 +117,7 @@ def run_request_json(text):
     return json.dumps(run_request(json.loads(text)), ensure_ascii=True, default=str)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and len(sys.argv) >= 3:
     # 用法：python harness.py 請求.json 結果.json
     with open(sys.argv[1], encoding="utf-8") as f:
         answer = run_request_json(f.read())

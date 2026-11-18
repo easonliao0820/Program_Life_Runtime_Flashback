@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Program Life: Runtime Flashback"
 run/main_scene="uid://cik3wl46ws6nq"
-config/features=PackedStringArray("4.7", "GL Compatibility")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -65,6 +65,7 @@ space={
 google/client_id="201834248641-sdq2fk3tburk3hgvhbf41ffrsuhstfbp.apps.googleusercontent.com"
 google/exchange_mode="lambda"
 google/desktop_exchange_url="https://oj3wxp63b5ttx6sfklndqcrccq0nnxwq.lambda-url.ap-southeast-2.on.aws/auth/google/desktop/exchange"
+google/web_client_id="201834248641-di7ar5sjto6gmd81ku3lk8vd0vj61ujp.apps.googleusercontent.com"
 
 [physics]
 

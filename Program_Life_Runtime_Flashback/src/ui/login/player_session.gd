@@ -39,6 +39,8 @@ func _on_backend_session_expired() -> void:
 	logout()
 
 func logout() -> void:
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();")
 	# 同時清除憑證與畫面狀態；這裡沒有刪除存檔或呼叫雲端刪除 API。
 	get_node("/root/AuthManager").clear_token()
 	player_id = ""
