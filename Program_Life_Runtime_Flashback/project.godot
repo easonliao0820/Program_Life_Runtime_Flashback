@@ -29,6 +29,8 @@ GameFlow="*res://src/game/core/game_flow.gd"
 PythonRunner="*res://src/game/core/python_runner.gd"
 PlayerSession="*res://src/ui/login/player_session.gd"
 AuthManager="*res://src/core/network/auth_manager.gd"
+CloudSaveManager="*uid://cf0kwk1blpt3"
+ErrorLogManager="*uid://d4kgoeoaxbl32"
 
 [display]
 

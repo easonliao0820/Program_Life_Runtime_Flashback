@@ -188,6 +188,140 @@ func delete_save() -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 
 
+## 根據後端驗證的玩家 ID，選擇專屬本機存檔。
+func select_player_save(player_id: String) -> bool:
+	if player_id.strip_edges().is_empty():
+		push_error("[GameState] 無效的玩家 ID")
+		return false
+
+	var suffix := player_id.sha256_text().substr(0, 24)
+	save_path = "user://plrf_save_%s.json" % suffix
+
+	print("[GameState] 已切換至玩家專屬存檔")
+	return true
+
+
+
+## 匯入 AWS 雲端進度。
+## 雲端不儲存 backlog，因此保留該帳號本機的劇情回顧。
+func import_cloud_save(save_data: Dictionary) -> bool:
+	# 1. 驗證雲端存檔版本。
+	if int(save_data.get("version", 0)) != SAVE_VERSION:
+		push_error("[CloudSave] 不支援的存檔版本")
+		return false
+
+	if str(save_data.get("user_name", "")).strip_edges().is_empty():
+		push_error("[CloudSave] 存檔缺少角色名稱")
+		return false
+
+	if str(save_data.get("section_id", "")).strip_edges().is_empty():
+		push_error("[CloudSave] 存檔缺少小節 ID")
+		return false
+
+	# 2. 驗證必要的遊戲資料。
+	for key in [
+		"flags",
+		"vars",
+		"levels",
+		"chat_history",
+		"settings"
+	]:
+		if not (save_data.get(key) is Dictionary):
+			push_error("[CloudSave] 存檔欄位格式錯誤：" + key)
+			return false
+
+	for key in [
+		"achievements",
+		"reached_sections",
+		"completed_sections"
+	]:
+		if not (save_data.get(key) is Array):
+			push_error("[CloudSave] 存檔欄位格式錯誤：" + key)
+			return false
+
+	# 3. 取得該玩家原本的本機存檔。
+	# save_path 已在登入時依 player_id 切換。
+	var local_data = _read_save()
+
+	# 4. 建立合併後的存檔。
+	var merged_data: Dictionary = save_data.duplicate(true)
+
+	var local_backlog: Array = []
+
+	if local_data is Dictionary:
+		var saved_backlog = local_data.get("backlog", [])
+
+		if saved_backlog is Array:
+			local_backlog = saved_backlog.duplicate(true)
+
+	# 不採用 AWS 的 backlog，即使舊雲端存檔仍包含它。
+	# 只使用這台電腦、這個帳號的回顧紀錄。
+	merged_data["backlog"] = local_backlog
+
+	# 5. 相同資料不必重寫。
+	if local_data is Dictionary and local_data == merged_data:
+		print("[CloudSave] 本機與雲端進度相同")
+		return true
+
+	# 6. 覆寫前先備份既有本機存檔。
+	if FileAccess.file_exists(save_path):
+		var backup_path := (
+			save_path
+			+ ".backup_"
+			+ str(int(Time.get_unix_time_from_system()))
+			+ "_"
+			+ str(Time.get_ticks_usec())
+			+ ".json"
+		)
+
+		var backup_error := DirAccess.copy_absolute(
+			save_path,
+			backup_path
+		)
+
+		if backup_error != OK:
+			push_error("[CloudSave] 本機備份失敗，停止匯入")
+			return false
+
+		print("[CloudSave] 已備份原本的本機進度")
+
+	# 7. 寫入暫存檔。
+	var temp_path := save_path + ".incoming"
+
+	var file := FileAccess.open(
+		temp_path,
+		FileAccess.WRITE
+	)
+
+	if file == null:
+		push_error("[CloudSave] 無法建立暫存檔")
+		return false
+
+	var written := file.store_string(
+		JSON.stringify(merged_data, "\t")
+	)
+
+	file.close()
+
+	if not written:
+		push_error("[CloudSave] 無法寫入雲端存檔")
+		return false
+
+	# 8. 替換正式本機存檔。
+	var rename_error := DirAccess.rename_absolute(
+		temp_path,
+		save_path
+	)
+
+	if rename_error != OK:
+		push_error("[CloudSave] 無法替換本機存檔")
+		return false
+
+	print("[CloudSave] 雲端進度已匯入，保留本機回顧")
+	return true
+
+
+
 func _read_save() -> Variant:
 	var file := FileAccess.open(save_path, FileAccess.READ)
 	if file == null:

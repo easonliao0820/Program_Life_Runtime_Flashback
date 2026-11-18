@@ -18,6 +18,9 @@ var _title: Label
 
 
 const GEAR_ICON := "res://assets/images/gear.png"
+const BACKEND_URL := "https://oj3wxp63b5ttx6sfklndqcrccq0nnxwq.lambda-url.ap-southeast-2.on.aws"
+
+var _logout_busy := false
 
 
 func _ready() -> void:
@@ -95,6 +98,9 @@ func is_panel_open() -> bool:
 
 
 func close_panel() -> void:
+	if _logout_busy:
+		return
+
 	_overlay.visible = false
 	get_tree().paused = false
 	panel_closed.emit()
@@ -184,20 +190,31 @@ func _open_settings() -> void:
 	_content.add_child(map_btn)
 	_content.add_child(UIKit.label("走過的小節會在地圖上解鎖，點選就能從那一節重新開始。", 20, Color("#556877")))
 
+	
 	_content.add_child(HSeparator.new())
-	var back := UIKit.button("存檔並回到標題畫面", UIKit.RESET_GRAY)
+
+	# B：存檔、撤銷 AWS Session、返回標題畫面。
+	var back := UIKit.button(
+		"存檔並回到標題畫面",
+		UIKit.RESET_GRAY
+	)
 	back.pressed.connect(func():
-		close_panel()
-		GameFlow.back_to_title())
+		_logout_and_leave(false)
+	)
 	_content.add_child(back)
-	# 中離遊戲：先存檔再關閉（網頁版沒有「關閉程式」，不顯示）
+
+	# C：存檔、撤銷 AWS Session、關閉遊戲。
+	# 網頁版不提供關閉程式按鈕。
 	if not OS.has_feature("web"):
-		var quit := UIKit.button("中離遊戲（存檔後關閉）", Color("#7a2a2a"))
+		var quit := UIKit.button(
+			"中離遊戲（存檔後關閉）",
+			Color("#7a2a2a")
+		)
 		quit.pressed.connect(func():
-			GameState.save_game()
-			get_tree().paused = false
-			get_tree().quit())
+			_logout_and_leave(true)
+		)
 		_content.add_child(quit)
+
 
 
 func _add_slider(label_text: String, min_v: float, max_v: float, value: float, on_change: Callable) -> void:
@@ -215,3 +232,164 @@ func _add_slider(label_text: String, min_v: float, max_v: float, value: float, o
 	s.value_changed.connect(on_change)
 	row.add_child(s)
 	_content.add_child(row)
+
+
+## 正式登出流程。
+## quit_game = false：返回標題。
+## quit_game = true：關閉遊戲。
+func _logout_and_leave(quit_game: bool) -> void:
+	if _logout_busy:
+		return
+
+	_logout_busy = true
+
+	# 登出期間避免操作其他選單按鈕。
+	for child in _content.get_children():
+		if child is BaseButton:
+			child.disabled = true
+
+	
+	print("[Logout] 開始存檔...")
+	GameState.save_game()
+	print("[Logout] 本機存檔完成")
+	
+	if PlayerSession.is_logged_in:
+		var errors_synced: bool = await ErrorLogManager.flush_pending(
+			6.0
+		)
+
+		if not errors_synced:
+			push_warning(
+				"[ErrorLog] 尚有錯誤紀錄未同步，"
+				+ "已保留本機供下次登入重送"
+			)
+
+
+	# 有登入時，必須先完成雲端存檔，才能撤銷 Session。
+	if PlayerSession.is_logged_in:
+		print("[CloudSave] 正在上傳遊戲進度...")
+
+		var upload_result: Dictionary = await CloudSaveManager.upload_save()
+
+		if upload_result.get("ok", false):
+			print("[CloudSave] AWS 雲端存檔成功")
+		else:
+			var message := str(
+				upload_result.get("message", "未知錯誤")
+			)
+
+			push_warning(
+				"[CloudSave] 雲端存檔失敗：" + message
+			)
+
+			# 不直接登出，避免下次登入時雲端舊進度
+			# 蓋掉這次尚未同步的進度。
+			_logout_busy = false
+
+			for child in _content.get_children():
+				if child is BaseButton:
+					child.disabled = false
+
+			toast_requested.emit("雲端存檔失敗，請重試")
+			return
+	else:
+		print("[CloudSave] 未登入，僅保留本機存檔")
+
+	var refresh_token := AuthManager.get_backend_refresh_token()
+
+	var revoked := false
+
+	if not refresh_token.is_empty():
+		print("[Logout] 正在撤銷 AWS Session...")
+		revoked = await _send_backend_logout(refresh_token)
+
+		# 防止 Access Token 自動更新剛好與登出同時發生。
+		# 如果 Refresh Token 已輪替，使用最新 Token 再試一次。
+		if not revoked:
+			var latest_token := AuthManager.get_backend_refresh_token()
+
+			if (
+				not latest_token.is_empty()
+				and latest_token != refresh_token
+			):
+				print("[Logout] 偵測到 Token 輪替，重新嘗試登出...")
+				revoked = await _send_backend_logout(latest_token)
+	else:
+		print("[Logout] 沒有可用的 Refresh Token")
+
+	if revoked:
+		print("[Logout] AWS Session 撤銷成功")
+	else:
+		push_warning(
+			"[Logout] AWS Session 未確認撤銷，"
+			+ "仍會清除本機登入狀態"
+		)
+
+	# 清除 Godot 中的登入資料與 Token。
+	PlayerSession.logout()
+	print("[Logout] 本機登入狀態已清除")
+
+	# 恢復遊戲樹，讓場景可以正常切換。
+	get_tree().paused = false
+	_logout_busy = false
+
+	if quit_game:
+		print("[Logout] 正在關閉遊戲")
+		get_tree().quit()
+	else:
+		print("[Logout] 正在返回標題畫面")
+		GameFlow.back_to_title()
+
+
+## 呼叫 AWS /auth/logout。
+## 只有 HTTP 200 且 success=true 才視為成功。
+func _send_backend_logout(refresh_token: String) -> bool:
+	var http := HTTPRequest.new()
+	http.process_mode = Node.PROCESS_MODE_ALWAYS
+	http.timeout = 15.0
+	add_child(http)
+
+	var headers := PackedStringArray([
+		"Content-Type: application/json"
+	])
+
+	var body := JSON.stringify({
+		"refresh_token": refresh_token
+	})
+
+	var error := http.request(
+		BACKEND_URL + "/auth/logout",
+		headers,
+		HTTPClient.METHOD_POST,
+		body
+	)
+
+	if error != OK:
+		print("[Logout] 無法發送登出請求：", error)
+		http.queue_free()
+		return false
+
+	var response: Array = await http.request_completed
+	http.queue_free()
+
+	var result := int(response[0])
+	var status_code := int(response[1])
+	var response_body: PackedByteArray = response[3]
+
+	if result != HTTPRequest.RESULT_SUCCESS:
+		print("[Logout] AWS 連線失敗，結果：", result)
+		return false
+
+	print("[Logout] AWS HTTP 狀態碼：", status_code)
+
+	if status_code != 200:
+		return false
+
+	var data = JSON.parse_string(
+		response_body.get_string_from_utf8()
+	)
+
+	return (
+		data is Dictionary
+		and data.get("success", false) == true
+	)

@@ -151,6 +151,44 @@ Windows 請先開啟 Docker Desktop 並使用 Linux containers，等 `docker inf
 
 目前 template 引用既有 execution role，沒有宣告 DynamoDB；新增資料庫應另行規劃。Web 上線前也需驗收 OAuth 與 CORS，不能以桌面測試結果代替。
 
+---
+
+## 後端功能擴充：玩家驗證、雲端存檔與錯誤紀錄
+
+本階段擴充原有的 Google 登入與 AWS FastAPI 後端，新增 JWT 身分驗證、DynamoDB 玩家資料管理、雲端存檔及 Python 程式錯誤紀錄功能。
+
+### Google 登入與 JWT
+
+- Google 登入成功後，由後端建立玩家 UUID，並簽發 Access Token 與 Refresh Token。
+- 支援 Token 自動更新、Refresh Token 輪替及登出時撤銷 Session。
+- 使用 DynamoDB `Players` 儲存玩家帳號、Google 綁定與登入工作階段。
+
+### AWS 雲端存檔
+
+- 使用玩家 UUID 區分不同帳號的遊戲進度。
+- 登入時下載 DynamoDB 雲端存檔，並與該玩家的本機存檔整合。
+- 支援遊戲進度上傳，雲端採用精簡存檔格式，不上傳劇情回顧 `backlog`。
+
+### Python 錯誤紀錄
+
+- 記錄程式執行例外（`python_exception`）與關卡檢查失敗（`check_failed`）。
+- 將玩家、關卡、錯誤訊息與程式碼等資訊儲存至 DynamoDB `PlayerErrors`。
+- 網路異常時先保存在本機佇列，待連線正常後重新上傳。
+
+### 新增 API
+
+| Method | API | 用途 |
+|---|---|---|
+| GET | `/auth/me` | 驗證玩家 JWT |
+| POST | `/auth/refresh` | 更新 Token |
+| POST | `/auth/logout` | 登出並撤銷 Session |
+| GET / PUT | `/players/me/save` | 雲端進度讀取與儲存 |
+| POST | `/players/me/errors` | 上傳 Python 錯誤紀錄 |
+
+主要程式位於 `backend/`、`src/core/network/` 及 `src/ui/login/`。
+
+未來預計增加管理員分析介面，統計玩家在不同關卡的常見程式錯誤與學習狀況。
+
 ## 協作方式
 
 1. 更新團隊分支後，在自己的分支修改並測試。

@@ -187,4 +187,6 @@ script = ExtResource("7_pajja")
 
 [node name="AuthVerifyRequest" type="HTTPRequest" parent="GoogleLogin" unique_id=1263988000]
 
+[node name="AuthMeRequest" type="HTTPRequest" parent="GoogleLogin" unique_id=754307444]
+
 [connection signal="finished" from="VideoStreamPlayer" to="." method="_on_video_stream_player_finished"]
