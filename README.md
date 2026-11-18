@@ -1,19 +1,20 @@
-# 程式人生：跑馬燈 
+# 程式人生：跑馬燈
 
 > 如果人生是一段程式碼，你會如何編寫你的回憶？
 
-《程式人生：跑馬燈》（Program Life: Runtime Flashback）是一款結合 Python 教學與台灣生活情境的敘事遊戲。玩家透過早餐店、便利商店、校園及職場等人生片段學習程式，並由導師「派森」提供錯誤解釋與引導提示。
+《程式人生：跑馬燈》（Program Life: Runtime Flashback）是一款結合 Python 教學與台灣生活情境的敘事遊戲。玩家在人生不同階段完成程式任務，並由導師「派森」提供錯誤解釋與引導提示。
 
-本文件依目前工作目錄的實作整理；本機程式與設定不代表已部署到 AWS 或完成 Web 驗收。
+本文件依 2026-11-19 的原始碼整理。程式已實作、雲端已部署與完整驗收是不同狀態，請以實際測試紀錄確認。
 
-## 目前功能與開發狀態
+## 目前進度
 
-- **遊戲主線**：Godot 4.6、Compatibility 模式，以 `GameStage` 播放各章 `.story` 劇本；第一至第三章的舊場景仍保留。
-- **Google 登入**：桌面 OAuth 取得 Google ID Token，由 AWS FastAPI 後端驗證身分。
-- **登入後跳轉**：有有效本機存檔時，直接進入記錄的小節開頭；無存檔時建立初始進度並進章節選擇。訪客仍走前言流程。
-- **AI 提示**：Godot 經 AWS `/ai/generate` 取得 Gemini 回覆，訪客與已登入玩家皆可使用，預設沒有每日配額或玩家冷卻時間。
-- **存檔**：目前使用本機 JSON，尚未依 Google 帳號隔離，也未串接 DynamoDB。
-- **Web**：已有 Pyodide 執行路徑；瀏覽器登入、CORS、程式中斷與完整 Web demo 仍需整合及實測。
+- **遊戲主線**：Godot 4.6、Compatibility 模式；第一至第六章共 20 份 `.story` 劇本，包含兩種結局。第一至第三章舊場景仍保留。
+- **Desktop 登入**：Google OAuth + PKCE + State + Loopback，透過 Lambda 交換 Token；已由開發者確認 Windows 登入成功。
+- **Web 登入**：GIS 官方按鈕與 JavaScriptBridge 已接回既有玩家流程；完整 localhost／Amplify 登入仍需驗收。
+- **玩家與資料**：已有遊戲 JWT、Token 自動更新、Session 撤銷、DynamoDB 玩家資料、雲端存檔與錯誤紀錄。
+- **AI 提示**：訪客與登入玩家皆可使用 AWS Gemini，預設無每日配額及玩家冷卻時間。
+- **Web 發布**：已由開發者確認成功匯出並部署 [Amplify 展示網站](https://main.dopnyv7gaqxh9.amplifyapp.com)。網站發布成功不代表所有功能都已驗收。
+- **待完善**：Web Python 中斷、執行資源限制、新舊場景整合、跨裝置存檔衝突處理及完整流程測試。
 
 ## 專案目錄
 
@@ -24,77 +25,117 @@ Program_Life_Runtime_Flashback/
 ├─ README.md
 └─ Program_Life_Runtime_Flashback/
    ├─ project.godot
+   ├─ export_presets.cfg
    ├─ login_screen.tscn
-   ├─ backend/                 # FastAPI、AI 政策、Gemini 服務與 Lambda 入口
-   ├─ template.yaml            # 既有 AWS SAM 部署設定
-   ├─ chapters/                # 各章場景、劇本與對話資料
+   ├─ backend/              # FastAPI、OAuth、JWT、DynamoDB 與 Gemini
+   ├─ template.yaml         # SAM：既有角色、資料表名稱與 Function URL CORS
+   ├─ chapters/             # 章節、題目與劇本
    ├─ src/
-   │  ├─ core/                 # AiBridge、簡易沙盒與 AuthManager
-   │  ├─ game/                 # GameFlow、GameState、PythonRunner 與新主線畫面
-   │  └─ ui/                   # Google 登入、舊程式面板與章節地圖
-   ├─ tests/                   # 原有劇本／關卡測試
-   └─ docs/
-      └─ GAME_STRUCTURE.md
+   │  ├─ core/network/      # AuthManager、CloudSaveManager、ErrorLogManager
+   │  ├─ core/              # AiBridge、舊執行器
+   │  ├─ game/              # 主線、關卡、PythonRunner、進度與 UI
+   │  └─ ui/login/          # Desktop OAuth、Web GIS 與玩家狀態
+   ├─ tests/                # 劇本／關卡流程測試
+   └─ docs/                 # 架構與素材文件
 ```
 
-劇本語法、畫面模式與素材位置請參閱 [遊戲架構說明](Program_Life_Runtime_Flashback/docs/GAME_STRUCTURE.md)。舊文件若與目前程式不同，以原始碼為準。
+劇本語法與遊戲結構參閱 [GAME_STRUCTURE.md](Program_Life_Runtime_Flashback/docs/GAME_STRUCTURE.md)。文件與原始碼不同時，先核對目前實作。
 
 ## 開啟遊戲
 
-1. 安裝 Godot 4.6.x，匯入 [project.godot](Program_Life_Runtime_Flashback/project.godot)。
-2. 確認渲染模式為 **Compatibility**。
-3. 桌面程式關卡需安裝 Python 3。`PythonRunner` 會嘗試尋找 `py`、`python` 或 `python3`；也可在內層專案 `.env` 設定 `PYTHON_PATH`。
-4. 執行專案，從登入頁選擇 Google 登入或訪客登入。
+1. 使用 Godot 4.6.x 匯入 [project.godot](Program_Life_Runtime_Flashback/project.godot)，保持 Compatibility 模式。
+2. 桌面程式關卡需安裝 Python 3。PythonRunner 嘗試尋找 `py`、`python`、`python3`，也支援在內層 `.env` 設定 `PYTHON_PATH`。
+3. 執行專案，選擇 Google 或訪客登入。
 
-目前新主線透過 `PythonRunner` 呼叫系統 Python／Pyodide，不以 py4godot 作為執行入口。專案仍可能留有舊擴充設定；若出現 py4godot DLL 或 `StorySystem` Autoload UID 載入錯誤，需檢查既有擴充與 Autoload 路徑。
+新主線透過系統 Python／Pyodide 執行。若遇到既有 py4godot DLL 或 StorySystem Autoload UID 載入錯誤，需檢查擴充及路徑設定，不能將其視為登入驗收成功。
 
-## Google 登入與存檔
-
-```text
-GoogleAuth 取得 Token → AWS /auth/google 驗證
-  → PlayerSession 保存玩家資訊、AuthManager 保存 ID Token
-  → GameFlow.start_after_login()
-     ├─ 有有效本機進度：直接繼續記錄小節
-     └─ 無進度／小節無法對應：章節選擇
-```
-
-- [google_auth.gd](Program_Life_Runtime_Flashback/src/ui/login/google_auth.gd)：Google 授權、PKCE、本機 TCP 回呼與 Token 交換。Client ID 從 `project.godot` 的 `oauth/google/client_id` 讀取，不讀 `.env`、不附 Client Secret。此設定為公開值，須與 AWS 驗證接受的 Client ID 對應。
-- 無 Secret 交換的實測結果與官方規格差異，見 [Desktop OAuth 調查](Program_Life_Runtime_Flashback/docs/DESKTOP_OAUTH_FINDINGS.md)。Godot 端已移除本機 Secret 依賴，但 Google 是否接受完整交換仍需實際登入確認；若回覆 `client_secret is missing.`，會停止登入，不能視為登入成功。
-- 真實登入仍要求 Secret 後，已準備 `/auth/google/desktop/exchange` 程式；**尚未部署，Godot 預設仍為 direct**。請依 [人工部署與驗收](Program_Life_Runtime_Flashback/docs/DESKTOP_OAUTH_DEPLOY.md) 部署後再將 `oauth/google/exchange_mode` 改為 `lambda`。完整設計見 [安全修正計畫](Program_Life_Runtime_Flashback/docs/DESKTOP_OAUTH_REPAIR_PLAN.md)。
-- [google_login.gd](Program_Life_Runtime_Flashback/src/ui/login/google_login.gd)：呼叫 AWS 驗證，成功後交給 GameFlow 切換畫面。
-- [auth_manager.gd](Program_Life_Runtime_Flashback/src/core/network/auth_manager.gd)：記憶體中的 ID Token 與本機到期管理；尚無自動刷新。
-- [player_session.gd](Program_Life_Runtime_Flashback/src/ui/login/player_session.gd)：驗證後的 Google `sub`、姓名、email、頭像與登入狀態。
-
-新主線存檔位於 `user://plrf_save.json`；舊 `ProgressManager` 另使用 `user://save_data.json`。`user://` 是 Godot 玩家資料目錄，不是專案根目錄；可用編輯器的「開啟使用者資料資料夾」查看。
-
-目前不同 Google 帳號與訪客可能共用同一份本機進度。未來 DynamoDB 應由後端驗證 Token 後，使用 Google `sub` 辨識資料擁有者；不能只相信前端傳來的玩家 ID。`/save`、雲端同步及玩家資料庫目前尚未實作。
-
-## AI 與 AWS 後端
+## Google 登入與遊戲入口
 
 ```text
-程式錯誤／聊天／劇情 → AiBridge → Lambda /ai/generate
-  → AI Access Policy → ai_service → SSM 讀取金鑰 → Gemini
-  ← 回覆文字；失敗時由 Godot 使用備用台詞
+Desktop：OAuth + PKCE → /auth/google/desktop/exchange → Google ID Token
+Web：GIS 官方按鈕 → JavaScriptBridge → Google ID Token
+  → /auth/google → 玩家 UUID + 遊戲 Access／Refresh Token
+  → /auth/me 驗證 → PlayerSession
+  → 玩家專屬本機存檔 → 雲端查詢／匯入 → GameFlow
 ```
 
-- [AiBridge](Program_Life_Runtime_Flashback/src/core/ai_bridge.gd) 保留 `translate_error()`、`call_openai()`、`ask()` 與 `ai_response_received`。`call_openai` 為歷史介面名稱，實際走 AWS／Gemini。
-- Godot 不讀取 Gemini `API_KEY`，也不需要取得 Google Token 才能使用 AI。
-- [main.py](Program_Life_Runtime_Flashback/backend/main.py) 提供 `GET /health`、`POST /auth/google`、`POST /ai/generate`，並新增待部署的 `POST /auth/google/desktop/exchange`。
-- [ai_service.py](Program_Life_Runtime_Flashback/backend/ai_service.py) 在 Lambda 從既有 SSM Parameter Store `/godot-backend/API_KEY` 取得解密金鑰，不回傳給 Godot。
-- [ai_access_policy.py](Program_Life_Runtime_Flashback/backend/ai_access_policy.py) 將 AI 政策與登入／私人資料驗證分開。
+- [google_auth.gd](Program_Life_Runtime_Flashback/src/ui/login/google_auth.gd) 以 `OS.has_feature("web")` 分流。Desktop 使用 `oauth/google/client_id`、`exchange_mode="lambda"` 與交換服務網址；Godot 不讀取 Client Secret。
+- [google_web.js](Program_Life_Runtime_Flashback/src/ui/login/google_web.js) 載入 GIS 官方按鈕，支援取消、逾時、重開與回呼清理；Web Client ID 由 `oauth/google/web_client_id` 讀取。
+- [google_login.gd](Program_Life_Runtime_Flashback/src/ui/login/google_login.gd) 協調 Google 驗證、遊戲 JWT、玩家身分及雲端進度。
+- [auth_manager.gd](Program_Life_Runtime_Flashback/src/core/network/auth_manager.gd) 分別管理 Google ID Token 與遊戲 JWT，包含自動刷新；後端提供 Refresh Token 輪替及登出撤銷 Session。
+- [player_session.gd](Program_Life_Runtime_Flashback/src/ui/login/player_session.gd) 保存後端玩家 UUID、姓名、email、頭像與登入狀態。Google sub 用於帳號綁定，不再直接當遊戲玩家 UUID。
 
-AI 請求為 `{"prompt":"完整提示詞"}`，成功回覆為 `{"text":"回覆文字"}`。完整 prompt 上限 4000 字元、生成上限 512 Token、回傳文字上限 4000 字元，並有逾時及在途請求保護；沒有自動重試。
+Google 驗證接受明確設定的 Desktop 與 Web audiences；Desktop 授權碼交換仍固定使用 Desktop Client。登入成功且進度有效時從記錄小節開頭繼續，無進度則建立初始狀態並進入章節選擇。雲端查詢失敗會留在登入畫面重試；訪客仍走原有前言流程。
 
-政策環境變數目前預設皆為 `false`：
+## 存檔與錯誤紀錄
 
-- `AI_REQUIRE_LOGIN`：只有設為 `true` 才要求後端驗證 Bearer Google ID Token；目前 Godot 不傳 Token，啟用前須另調整客戶端。
-- `AI_RATE_LIMIT_ENABLED`、`AI_DAILY_QUOTA_ENABLED`：僅預留，尚未實作。設為 `true` 會回 503，不代表已有限流或配額。
+[GameState](Program_Life_Runtime_Flashback/src/game/core/game_state.gd) 預設使用 `user://plrf_save.json`，登入後切換為依玩家 UUID 雜湊命名的 `plrf_save_<雜湊>.json`。舊 ProgressManager 另使用 `user://save_data.json`。`user://` 是玩家資料目錄，可從 Godot 編輯器開啟使用者資料資料夾查看。
 
-匿名 AI 不代表私人資料公開：`/auth/google` 始終驗證 Token，未來存檔／玩家 API 也必須獨立驗證。公開 AI API 可被外部直接呼叫並產生成本；目前的程序內併發保護不是全域限流或預算上限。
+[CloudSaveManager](Program_Life_Runtime_Flashback/src/core/network/cloud_save_manager.gd) 以遊戲 JWT 呼叫 `/players/me/save`。登入時下載雲端進度；匯入前驗證格式並備份本機資料。上傳採精簡格式，不包含劇情回顧 backlog；存檔序列化大小上限為 280 KiB。目前尚無完整的跨裝置版本衝突解決。
+
+DynamoDB 存取由後端負責，Godot 不持有 AWS 長期憑證：
+
+- `Players`：玩家 PROFILE、Google IDENTITY 綁定、SESSION 與主要進度 `SAVE#MAIN`。表名可由 `PLAYERS_TABLE` 設定。
+- `PlayerErrors`：程式例外 `python_exception` 與判題失敗 `check_failed`。表名可由 `PLAYER_ERRORS_TABLE` 設定。
+
+[ErrorLogManager](Program_Life_Runtime_Flashback/src/core/network/error_log_manager.gd) 記錄已登入玩家的關卡、程式碼、錯誤訊息、行號及嘗試次數。失敗先保存本機佇列再重送，後端以條件寫入避免相同紀錄重複；訪客不透過此模組上傳。管理員分析介面尚未實作。
+
+## AI 與 Python 執行
+
+```text
+PythonRunner 執行 → ErrorExplainer 離線解釋
+  → AiBridge → /ai/generate → AI Access Policy → Gemini
+  ← 提示文字；失敗則使用備用說明
+```
+
+[AiBridge](Program_Life_Runtime_Flashback/src/core/ai_bridge.gd) 保留 `translate_error()`、`call_openai()`、`ask()` 與 `ai_response_received`；call_openai 是歷史名稱，實際走 AWS／Gemini。聊天與劇情也共用 AI 介面。
+
+Lambda 從 Parameter Store `/godot-backend/API_KEY` 取得 Gemini Key，不回傳 Godot。AI 請求為 `{"prompt":"..."}`，回應為 `{"text":"..."}`；完整 prompt 上限 4000 字元、生成上限 512 Token、回覆文字上限 4000 字元，有逾時與在途請求保護，不自動重試。
+
+AI 政策預設皆為 false：
+
+- `AI_REQUIRE_LOGIN`：開啟才驗證 Bearer Google ID Token；目前前端 AI 不傳 Token，啟用前需另外調整，不能直接用遊戲 JWT 替代。
+- `AI_RATE_LIMIT_ENABLED`、`AI_DAILY_QUOTA_ENABLED`：預留功能，啟用會回 503，並非已完成限流或配額。
+
+匿名 AI 不影響私人 API 的 JWT 驗證。公開 AI 仍可能被外部呼叫產生成本，程序內併發保護不是全域預算上限。
+
+玩家 Python 在本機／瀏覽器執行，不在 Lambda 執行。目前限制：
+
+- PythonRunner 使用桌面 Python 或 Web Pyodide，桌面約 10 秒逾時。
+- 允許完整 builtins／import，缺少記憶體與輸出量限制，不能稱為完整安全隔離。
+- Web 同步執行，尚無 Worker／可靠中斷，無限迴圈可能卡住頁面。
+- 缺少 Python 時的簡易模式無法真正執行 check，可能誤判通關。
+- 舊 SandboxManager 主要支援單行 print；舊 CodingPanel 同步呼叫本機 Python，AI 分析仍有 TODO。
+
+## Web 設定與驗收
+
+使用既有 Web 匯出預設，包含 `.story` 與 `.js`，目前 thread_support 為 false。重新發布時上傳整份匯出目錄，不能只換 HTML。發布前檢查產物，避免包含 `.env`、後端、虛擬環境或建置資料。
+
+Google Web OAuth Client 的 Authorized JavaScript origins 應對應：
+
+- `http://localhost:8060`
+- `https://main.dopnyv7gaqxh9.amplifyapp.com`
+
+Lambda 的 `GOOGLE_OAUTH_WEB_CLIENT_ID` 須與 Godot 公開 Web Client ID 一致。SAM 已宣告兩個來源的 Function URL CORS：GET／POST／PUT、content-type／authorization、AllowCredentials false。模板內容不代表雲端已套用；避免在 FastAPI 重複添加 CORS 標頭。
+
+需分別驗收 localhost 與 Amplify 的登入、名稱顯示、進遊戲、登出重登、無效 Token 拒絕、雲端存檔及匿名 AI。若 GIS popup 被阻擋，檢查瀏覽器、CSP 與 COOP 設定；不能用桌面登入結果代替 Web 驗收。
+
+## 後端 API
+
+[backend/main.py](Program_Life_Runtime_Flashback/backend/main.py) 提供：
+
+- `GET /health`：應用存活檢查，不代表 SSM／Gemini／DynamoDB 正常。
+- `POST /auth/google/desktop/exchange`：Desktop 授權碼交換與驗證。
+- `POST /auth/google`：驗證 Google 身分，取得遊戲 JWT 與玩家資料。
+- `GET /auth/me`：驗證遊戲 JWT，取得玩家資料。
+- `POST /auth/refresh`、`POST /auth/logout`：更新憑證及撤銷 Session。
+- `GET /players/me/save`、`PUT /players/me/save`：雲端存讀檔。
+- `POST /players/me/errors`：上傳錯誤紀錄。
+- `POST /ai/generate`：依 AI 政策產生提示。
 
 ## 本機啟動後端
 
-以下從內層 Godot 專案目錄執行。建議使用 Python 3.12，與 Lambda runtime 一致：
+從內層專案目錄執行，使用 Python 3.12 對齊 Lambda：
 
 ```powershell
 py -3.12 -m venv .venv-backend
@@ -102,96 +143,44 @@ py -3.12 -m venv .venv-backend
 .\.venv-backend\Scripts\python.exe -m uvicorn main:app --app-dir backend --reload
 ```
 
-若已有 `.venv-backend`，可跳過建立虛擬環境。後端啟動必須提供 `GOOGLE_OAUTH_CLIENT_ID`；本機可透過環境變數或內層 `.env` 設定，且須與前端 Google Client ID 對應。
+提供 `GOOGLE_OAUTH_CLIENT_ID`、需要時的 `GOOGLE_OAUTH_WEB_CLIENT_ID`、`GEMINI_MODEL`、`PLAYERS_TABLE`、`PLAYER_ERRORS_TABLE`。本機可由內層 `.env` 補讀環境設定；遊戲 OAuth 本身不依賴 `.env` Secret。
 
-後端非 Lambda 本機模式可使用 `API_KEY` 環境變數；未提供時會嘗試讀取 SSM。Lambda 一律使用 SSM。`GEMINI_MODEL` 可覆寫模型，預設值與可用性請依實際帳號確認。
+登入、JWT 與資料 API 仍需有效 AWS 憑證及既有 SSM／DynamoDB 權限，本機啟動不會自動建立資料庫。既有 SSM 參數包含 `/godot-backend/API_KEY`、`/godot-backend/GOOGLE_OAUTH_CLIENT_SECRET`、`/godot-backend/JWT_SECRET`。不要在程式、日誌或 Git 放入秘密值。
 
-遊戲目前指向既有 AWS URL，啟動本機後端不會自動切換。若需本機串接，同步修改 `google_login.gd` 的 `BACKEND_URL` 與 `ai_bridge.gd` 的 `api_url`（後者包含 `/ai/generate`）。
+非 Lambda 本機 AI 可使用 API_KEY 環境變數，否則嘗試 SSM；Lambda 一律讀 SSM。遊戲各網路模組目前指向既有 AWS URL，啟動本機後端不會自動切換；若改測本機，需一致調整登入、AuthManager、CloudSaveManager、ErrorLogManager、AiBridge 與 Desktop 交換網址，Web 另需處理測試伺服器 CORS。
 
-不要提交 `.env`、完整 Token、Client Secret、Gemini Key 或 AWS 長期憑證；Web 發佈時也不要將 `.env`、後端與 `.aws-sam` 打包成玩家可下載資產。
+## AWS 手動部署
 
-## 程式執行與目前限制
+正式來源在 `backend/`，不要直接修改 `.aws-sam/build/`。以下在內層專案目錄執行：
 
-程式執行仍在玩家電腦／瀏覽器，**不是在 Lambda 執行玩家程式**。
+```powershell
+sam validate --template-file template.yaml --region ap-southeast-2
+Docker info
+sam build --use-container --template-file template.yaml --region ap-southeast-2
+```
 
-- 新主線使用 [PythonRunner](Program_Life_Runtime_Flashback/src/game/core/python_runner.gd)：桌面系統 Python、Web Pyodide；找不到執行環境時退回簡易模式。
-- 舊章節仍使用 [SandboxManager](Program_Life_Runtime_Flashback/src/core/sandbox_manager.gd)：只解析單行 `print("字串")`，不支援變數、list 或多行 Python。
-- 獨立 [CodingPanel](Program_Life_Runtime_Flashback/src/ui/coding_panel/coding_panel.gd) 仍同步呼叫本機 Python，AI 錯誤分析尚為 TODO，不適合直接用於 Web。
-- 最新 PythonRunner 已取消 builtins／import 白名單，沒有記憶體、步數與輸出量上限；桌面只有 10 秒程序逾時，不能視為完整安全隔離。
-- Web Python 同步執行，尚無 Worker／執行中斷機制；無限迴圈可能卡住頁面。簡易模式也無法真正執行關卡 `check`，可能誤判通關。
+Windows 先啟動 Docker Desktop 的 Linux containers，確認 Server 可連線。建置失敗時不要部署舊產物。
 
-新主線錯誤先由 `ErrorExplainer` 產生離線白話，再由 AI 潤飾；程式能跑但 check 不通過時，目前主要顯示關卡訊息。
+部署前確認既有 stack 名稱、部署 S3 bucket、AWS profile 及目前所有環境變數。SAM 需提供五個參數：GoogleOAuthClientId、GoogleOAuthWebClientId、GeminiModel、PlayersTableName、PlayerErrorsTableName；不能只填 Desktop ID。使用團隊既有部署設定並保留變更確認，例如：
 
-## 關卡測試
+```powershell
+sam deploy --template-file .aws-sam/build/template.yaml --confirm-changeset --region ap-southeast-2 --profile godot-project
+```
 
-從外層 repository 目錄執行：
+此範例需先有正確的 samconfig.toml 或另行提供完整參數；沒有設定檔時不要直接照貼。若採 `--guided`，使用既有 stack，不接受預設名稱建立第二個後端。自動管理部署 bucket 需要 CloudFormation 權限；既有 bucket 可用 `--s3-bucket` 配合 `--no-resolve-s3` 指定。IAM role creation 的確認提示不會自動授予部署者權限。
+
+模板引用既有 execution role 及資料表，沒有宣告建立 DynamoDB。確認變更集不含非預期資源或權限變動後才部署；更新 Lambda 不會自動更新 Amplify 遊戲檔案。
+
+## 測試與協作
+
+從外層 repository 執行既有主線測試：
 
 ```powershell
 godot --headless --path Program_Life_Runtime_Flashback res://tests/full_playthrough_test.tscn
 ```
 
-若 Godot 未加入 PATH，請使用執行檔完整路徑。此測試解析劇本、檢查參考解答並跑自動流程，會關閉 AI 並使用獨立測試存檔。
+若 Godot 未加入 PATH，改用執行檔完整路徑。此測試停用 AI 並使用獨立測試存檔；舊 `ch2_greet_flow_test` 可能呼叫真實 AI。後端另有 Auth、Refresh、Logout 與 Session 測試，測試檔案存在不等於目前版本已通過。
 
-`tests/ch2_greet_flow_test.tscn` 是舊場景流程測試，可能呼叫真實 AI，執行前先確認環境。先前臨時新增的 AI 測試腳本已移除。
+提交前記錄版本、環境、測試步驟與結果。優先驗收 Desktop／Web 登入、帳號存檔隔離、錯誤重送、匿名 AI、各章及兩種結局。測試截圖與日誌不得包含完整 Token。
 
-## AWS 手動部署
-
-正式後端來源在 `backend/`，不要直接修改 `.aws-sam/build/`。從內層 Godot 專案目錄手動執行：
-
-```powershell
-sam validate --template-file template.yaml --region ap-southeast-2
-docker info
-sam build --use-container --template-file template.yaml --region ap-southeast-2
-sam deploy --template-file .aws-sam/build/template.yaml --guided --confirm-changeset --region ap-southeast-2
-```
-
-使用既有 stack、region（目前為 `ap-southeast-2`）與 Google Client ID。確認 change set 後再部署；若出現非預期的新資源或權限變更，先取消檢查。需要先準備 AWS CLI／SAM、有效部署權限及容器建置環境。
-
-Windows 請先開啟 Docker Desktop 並使用 Linux containers，等 `docker info` 能正常連到 Server 後再 build。若 validate 找不到 region，保留指令中的 `--region ap-southeast-2`；`--confirm-changeset` 後不要加句點。build 失敗時先停止，不要部署舊產物；也不要只為繞過 Docker 錯誤而拿掉 `--use-container`，以免將 Windows 原生依賴打包到 Linux Lambda。
-
-目前 template 引用既有 execution role，沒有宣告 DynamoDB；新增資料庫應另行規劃。Web 上線前也需驗收 OAuth 與 CORS，不能以桌面測試結果代替。
-
----
-
-## 後端功能擴充：玩家驗證、雲端存檔與錯誤紀錄
-
-本階段擴充原有的 Google 登入與 AWS FastAPI 後端，新增 JWT 身分驗證、DynamoDB 玩家資料管理、雲端存檔及 Python 程式錯誤紀錄功能。
-
-### Google 登入與 JWT
-
-- Google 登入成功後，由後端建立玩家 UUID，並簽發 Access Token 與 Refresh Token。
-- 支援 Token 自動更新、Refresh Token 輪替及登出時撤銷 Session。
-- 使用 DynamoDB `Players` 儲存玩家帳號、Google 綁定與登入工作階段。
-
-### AWS 雲端存檔
-
-- 使用玩家 UUID 區分不同帳號的遊戲進度。
-- 登入時下載 DynamoDB 雲端存檔，並與該玩家的本機存檔整合。
-- 支援遊戲進度上傳，雲端採用精簡存檔格式，不上傳劇情回顧 `backlog`。
-
-### Python 錯誤紀錄
-
-- 記錄程式執行例外（`python_exception`）與關卡檢查失敗（`check_failed`）。
-- 將玩家、關卡、錯誤訊息與程式碼等資訊儲存至 DynamoDB `PlayerErrors`。
-- 網路異常時先保存在本機佇列，待連線正常後重新上傳。
-
-### 新增 API
-
-| Method | API | 用途 |
-|---|---|---|
-| GET | `/auth/me` | 驗證玩家 JWT |
-| POST | `/auth/refresh` | 更新 Token |
-| POST | `/auth/logout` | 登出並撤銷 Session |
-| GET / PUT | `/players/me/save` | 雲端進度讀取與儲存 |
-| POST | `/players/me/errors` | 上傳 Python 錯誤紀錄 |
-
-主要程式位於 `backend/`、`src/core/network/` 及 `src/ui/login/`。
-
-未來預計增加管理員分析介面，統計玩家在不同關卡的常見程式錯誤與學習狀況。
-
-## 協作方式
-
-1. 更新團隊分支後，在自己的分支修改並測試。
-2. 提交時包含新增腳本、Godot `.uid` 與必要設定；不要提交機密、虛擬環境或不必要的建置產物。
-3. 推送後透過 Pull Request／團隊約定流程合併。
-4. 修改 API、存檔格式或場景入口時，同步通知 AI、登入與資料庫負責人，並更新文件。
+協作時在自己的分支修改，提交必要 `.uid`、劇本與設定；不要提交機密或新增不必要的建置產物。API、存檔格式與場景入口改動需通知 AI、登入及資料庫負責人，並同步文件。
