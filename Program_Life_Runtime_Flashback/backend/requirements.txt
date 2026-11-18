@@ -1,4 +1,4 @@
-fastapi
+fastapi==0.163.2
 uvicorn[standard]
 google-auth
 requests
