@@ -3,12 +3,12 @@
 
 @bg office
 （三十歲那年，你已經是組裡的資深分析師。某天回家吃飯，你突然發現爸媽真的老了：爸爸的白頭髮越來越多，媽媽爬樓梯時要扶著扶手。醫生要爸爸每天量血壓，記錄下來回診時帶給醫生看。）
-（爸爸回診那天，你硬著頭皮去跟 Cindy 請假，手上還有一份報表沒做完。）
-@show Cindy right
-Cindy：家人的事優先，報表我先幫你看。去吧。
-@hide Cindy
-@show Claire left
-Claire：你桌上那盒鳳梨酥我先幫你收著，不會偷吃，大概。
+（爸爸回診那天，你硬著頭皮去跟 Claire 請假，手上還有一份報表沒做完。）
+@show Claire right
+Claire：家人的事優先，報表我先幫你看。去吧。
+@hide Claire
+@show Cindy left
+Cindy：你桌上那盒鳳梨酥我先幫你收著，不會偷吃，大概。
 @hide all
 
 @bg parents_home

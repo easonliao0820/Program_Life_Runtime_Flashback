@@ -144,7 +144,7 @@ def _call_checked(fn, *args):
     return value, capture.getvalue()
 
 assert "say_love" in globals() and callable(say_love), "請保留 say_love(name) 函式。"
-for name in ["派森","媽媽","測試朋友","Claire"]:
+for name in ["派森","媽媽","測試朋友","Cindy"]:
     answer, captured = _call_checked(say_love,name)
     assert answer == f"{name}，謝謝你，我愛你。", "函式必須依傳入姓名回傳完整感謝句，不能寫死派森。"
     assert captured == "", "say_love 請回傳字串，交由外面的 print 印出。"

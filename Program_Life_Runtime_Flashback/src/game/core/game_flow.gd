@@ -23,7 +23,7 @@ signal autopilot_finished
 const DEBUG_DEFAULT_FLAGS := {"gave_gift": true}
 
 
-## 訪客前言動畫播完呼叫：有存檔就讓玩家選「繼續」，沒有就輸入名字。
+## 前言動畫播完呼叫：有存檔就讓玩家選「繼續」，沒有就輸入名字。
 func start_game() -> void:
 	get_tree().change_scene_to_file(NAME_INPUT_SCENE)
 

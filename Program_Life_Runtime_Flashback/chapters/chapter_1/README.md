@@ -30,12 +30,12 @@
 
 ```
 ch1_intro_story（開場劇情，next_interaction = NONE）
-    └─► story_finished 訊號 → 版面展開動畫（Tween）
-            └─► ch1_teach_story（派森教學，next_interaction = WAIT_FOR_SANDBOX）
-                    └─► sandbox_waiting 訊號 → 教材按鈕出現
-                            └─► 玩家執行正確程式碼（Run）
-                                    └─► ch1_success_story（成功結局，next_interaction = NONE）
-                                            └─► 劇情結束
+	└─► story_finished 訊號 → 版面展開動畫（Tween）
+			└─► ch1_teach_story（派森教學，next_interaction = WAIT_FOR_SANDBOX）
+					└─► sandbox_waiting 訊號 → 教材按鈕出現
+							└─► 玩家執行正確程式碼（Run）
+									└─► ch1_success_story（成功結局，next_interaction = NONE）
+											└─► 劇情結束
 ```
 
 ---
@@ -66,8 +66,8 @@ ch1_intro_story（開場劇情，next_interaction = NONE）
 1. **`StoryBox` (劇情對話盒)**
    - 路徑：`res://src/ui/story_box/story_box.tscn`
    - 訊號：
-     - `story_finished`：劇情正常結束時發出（next_interaction = NONE）。
-     - `sandbox_waiting`：進入沙盒等待狀態時發出，用來通知控制器顯示教材按鈕。
+	 - `story_finished`：劇情正常結束時發出（next_interaction = NONE）。
+	 - `sandbox_waiting`：進入沙盒等待狀態時發出，用來通知控制器顯示教材按鈕。
    - 輸入：左鍵點擊透過 MainBox 的 `gui_input` 處理；空白鍵透過 `_unhandled_input` 處理。
 
 2. **`SandboxManager` (沙盒管理器單例)**
@@ -104,7 +104,7 @@ chapter_1/
 │   ├── section_1.tscn            # 第一關主要場景
 │   └── test_level.tscn           # 測試用場景
 └── scripts/
-    └── section_1_controller.gd   # 控制器：對話引導、UI 動畫、沙盒對接
+	└── section_1_controller.gd   # 控制器：對話引導、UI 動畫、沙盒對接
 ```
 
 ---

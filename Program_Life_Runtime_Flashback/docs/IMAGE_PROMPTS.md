@@ -37,13 +37,13 @@
 ### CG（`assets/cg/`）— 12 張
 
 `holding_hands`、`breakfast`、`mrt_gift`、`mrt_alone`、`grandma_prayer`、`lake_promise`、
-`mrt_wave`、`mom_breakfast`、`claire_thumbs_up`、`farewell_party`、`ending1`、`ending2`
+`mrt_wave`、`mom_breakfast`、`cindy_thumbs_up`、`farewell_party`、`ending1`、`ending2`
 （每張的內容見 [CG_PROMPTS.md](CG_PROMPTS.md)）
 
 ### 角色立繪（`assets/characters/`，去背）— 12 張
 
-`倖芳`、`倖芳_老年`、`Cindy`、`Claire`、`媽媽`、`媽媽_老年`、`爸爸`、`爸爸_老年`、`奶奶`、`翊丞`、`翊丞_臉紅`、`老闆娘`
-（`面試官` 不用生：複製一份 `Cindy.png` 改名就好）
+`倖芳`、`倖芳_老年`、`Claire`、`Cindy`、`媽媽`、`媽媽_老年`、`爸爸`、`爸爸_老年`、`奶奶`、`翊丞`、`翊丞_臉紅`、`老闆娘`
+（`面試官` 不用生：複製一份 `Claire.png` 改名就好）
 
 **合計：背景 15～18 張（或 15 張＋1 支影片）、CG 12 張、立繪 12 張。**
 
@@ -395,7 +395,7 @@ city view through the window, cool professional lighting, slightly tense mood.
 ### 第五章：出社會（辦公室的灰藍，搭配家裡的暖色；壓力與溫暖並存）
 
 **`office.png`**｜5.1 報到、5.2、5.3、5.4
-中文：開放式辦公室座位，電腦螢幕、文件，其中一張桌子堆滿零食（Claire 的座位）。
+中文：開放式辦公室座位，電腦螢幕、文件，其中一張桌子堆滿零食（Cindy 的座位）。
 
 ```
 Full view of the open office seen from the aisle, rows of desks fully in frame, the carpet floor visible across the bottom of the image.
@@ -544,23 +544,23 @@ skirt), cherry-blossom pink accents.
 需要的檔案：★`倖芳.png`（高中）、★`倖芳_老年.png`（結局：白髮、溫柔的老奶奶，仍戴淡粉色髮夾）；
 之後可補：國中版、大學版、成人版；表情：微笑、大笑、驚訝、難過、害羞、哭泣。
 
-**Cindy**（酒紅）｜第一位主管，嚴格但護著組員
+**Claire**（酒紅）｜第一位主管，嚴格但護著組員
 
 ```
 A sharp professional woman in her 40s, neat short hair, dark blazer, holding a tablet,
 piercing confident eyes, wine-red accents, strict but trustworthy.
 ```
 
-需要的檔案：★`Cindy.png`；之後可補：`Cindy_退休.png`（柔和的毛衣）、微笑、嚴肅、驚訝。
+需要的檔案：★`Claire.png`；之後可補：`Claire_退休.png`（柔和的毛衣）、微笑、嚴肅、驚訝。
 
-**Claire**（薄荷綠）｜隔壁同事，熱心愛吃零食
+**Cindy**（薄荷綠）｜隔壁同事，熱心愛吃零食
 
 ```
 A cheerful young office woman, hair in a bun, round glasses, holding a snack, very
 expressive face, mint-green accents.
 ```
 
-需要的檔案：★`Claire.png`；之後可補：大笑、驚訝、比讚。
+需要的檔案：★`Cindy.png`；之後可補：大笑、驚訝、比讚。
 
 ### 次要角色
 
@@ -600,9 +600,9 @@ energetic and goofy, orange-yellow accents.
 
 需要的檔案：★`翊丞.png`、★`翊丞_臉紅.png`（4.2 慶功宴喝到臉紅）。
 
-**面試官**（其實就是 Cindy）
+**面試官**（其實就是 Claire）
 
-需要的檔案：★`面試官.png`（直接複製一份 `Cindy.png` 改名即可，或畫成翻履歷、皺眉的 Cindy）。
+需要的檔案：★`面試官.png`（直接複製一份 `Claire.png` 改名即可，或畫成翻履歷、皺眉的 Claire）。
 
 **老闆娘**（早餐店阿姨的女兒，第六章）
 
@@ -630,5 +630,5 @@ A friendly middle-aged woman running a breakfast shop, apron, headscarf, cheerfu
 - [ ] 3.2 快轉：`school`、`library`、`cafe` 三張，或 `study_montage.ogv` 一支影片
 - [ ] （建議）`temple_day`、`living_room` 重生成 16:9
 - [ ] CG 12 張
-- [ ] 立繪 12 張（`面試官` 複製 `Cindy` 即可）
+- [ ] 立繪 12 張（`面試官` 複製 `Claire` 即可）
 - [ ] 全部都是像素風、跟現有的登入畫面／嬰兒房／子宮／派森同一個畫風

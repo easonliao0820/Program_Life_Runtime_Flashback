@@ -133,6 +133,36 @@ static func texture_box(texture_path: String, margin: int, content_pad: int = -1
 	return sb
 
 
+## 四象限的外框圖（assets/ui/split/，已放大 3 倍）。margins = 原圖上左、上、右、下不能拉伸的像素數
+const SPLIT_ART := "res://assets/ui/split/"
+const SPLIT_FRAMES := {
+	"code": [14, 10, 10, 10],
+	"output": [13, 13, 10, 10],
+	"task": [10, 17, 42, 10],
+	"story": [7, 7, 7, 7],
+}
+
+## 四象限外框（九宮格）。圖還沒放進來時，code / output 退回深藍圓角、task 退回米白卡片
+static func split_frame(kind: String, pad: Vector4 = Vector4(-1, -1, -1, -1)) -> StyleBox:
+	var path := SPLIT_ART + "frame_%s.png" % kind
+	if not ResourceLoader.exists(path):
+		if kind == "task":
+			return box(CREAM, 6, GOLD, 2, 22)
+		return navy_panel(10, 18)
+	var m: Array = SPLIT_FRAMES[kind]
+	var sb := StyleBoxTexture.new()
+	sb.texture = load(path)
+	sb.texture_margin_left = m[0] * 3
+	sb.texture_margin_top = m[1] * 3
+	sb.texture_margin_right = m[2] * 3
+	sb.texture_margin_bottom = m[3] * 3
+	sb.content_margin_left = pad.x if pad.x >= 0 else m[0] * 3 + 12
+	sb.content_margin_top = pad.y if pad.y >= 0 else m[1] * 3 + 12
+	sb.content_margin_right = pad.z if pad.z >= 0 else m[2] * 3 + 12
+	sb.content_margin_bottom = pad.w if pad.w >= 0 else m[3] * 3 + 12
+	return sb
+
+
 ## 劇情為主的四象限版面（沿用舊版 section_1 的配置）
 ## 左上：劇情區（場景＋對話框，劇情不中斷）｜右上：程式區
 ## 左下：物件區（任務卡／清單）　　　　　　｜右下：輸出區

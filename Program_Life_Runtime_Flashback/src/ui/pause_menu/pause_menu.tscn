@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://du1kp4ljdikh8"]
 
 [ext_resource type="Script" uid="uid://dpcn5bthgm8lk" path="res://src/ui/pause_menu/pause_menu.gd" id="1_fsbbv"]
-[ext_resource type="Texture2D" uid="uid://dl1hk5q0r1851" path="res://assets/images/gear.png" id="2_u4p1g"]
 
 [node name="PauseMenu" type="CanvasLayer" unique_id=711843813]
 process_mode = 3
@@ -82,17 +81,9 @@ editable = false
 layout_mode = 2
 text = "返回選單"
 
-[node name="GearButton" type="TextureButton" parent="." unique_id=691871227]
-process_mode = 3
-process_priority = 99
-offset_right = 64.0
-offset_bottom = 64.0
-texture_normal = ExtResource("2_u4p1g")
-
 [connection signal="pressed" from="Control/VBoxContainer/MainMenuButtons/ResumeButton" to="." method="_on_resume_button_pressed"]
 [connection signal="pressed" from="Control/VBoxContainer/MainMenuButtons/SettingsButton" to="." method="_on_settings_button_pressed"]
 [connection signal="pressed" from="Control/VBoxContainer/MainMenuButtons/ExitButton" to="." method="_on_exit_button_pressed"]
 [connection signal="value_changed" from="Control/VBoxContainer/SettingsPanel/VolumeSlider" to="." method="_on_volume_slider_value_changed"]
 [connection signal="value_changed" from="Control/VBoxContainer/SettingsPanel/VolumeSlider" to="." method="_on_volume_slider_changed"]
 [connection signal="pressed" from="Control/VBoxContainer/SettingsPanel/BackButton" to="." method="_on_back_button_pressed"]
-[connection signal="pressed" from="GearButton" to="." method="_on_gear_button_pressed"]

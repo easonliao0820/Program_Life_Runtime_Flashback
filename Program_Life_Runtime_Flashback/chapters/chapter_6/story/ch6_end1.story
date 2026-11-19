@@ -73,7 +73,7 @@ title: 回憶三：朋友清單
 goal: 朋友清單裡少了一個人。用 append() 把派森找回來，再印出朋友的人數和名單。
 starter:
 ```python
-friends = ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞", "Cindy", "Claire"]
+friends = ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞", "Claire", "Cindy"]
 
 print(f"我的朋友有 {len(friends)} 個：{friends}")
 ```
@@ -81,7 +81,7 @@ check:
 ```python
 import ast
 from collections import Counter
-expected_friends = ["爸爸","媽媽","奶奶","倖芳","翊丞","Cindy","Claire","派森"]
+expected_friends = ["爸爸","媽媽","奶奶","倖芳","翊丞","Claire","Cindy","派森"]
 assert "friends" in globals() and isinstance(friends,list) and all(isinstance(name,str) for name in friends) and Counter(friends) == Counter(expected_friends), "請保留原本七位朋友並加入派森，不能重複或漏人；順序可以不同。"
 tree = ast.parse(code)
 assert any(isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute)
@@ -99,7 +99,7 @@ assert isinstance(actual_friends, list) and actual_friends == friends, "輸出�
 ```
 solution:
 ```python
-friends = ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞", "Cindy", "Claire"]
+friends = ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞", "Claire", "Cindy"]
 friends.append("派森")
 print(f"我的朋友有 {len(friends)} 個：{friends}")
 ```
@@ -137,14 +137,14 @@ title: 回憶五：人生地圖
 goal: 用字典的 .items() 查出每段回憶發生在哪裡，一行印一段：「事件 → 地點」。
 starter:
 ```python
-places = {"出生": "醫院", "第一次算數": "早餐店", "遇見倖芳": "捷運站", "奶奶的祈禱": "文昌帝君廟", "第一次被說做得好": "Cindy 的會議室"}
+places = {"出生": "醫院", "第一次算數": "早餐店", "遇見倖芳": "捷運站", "奶奶的祈禱": "文昌帝君廟", "第一次被說做得好": "Claire 的會議室"}
 
 ```
 check:
 ```python
 import ast
 from collections import Counter
-expected_places = {"出生":"醫院","第一次算數":"早餐店","遇見倖芳":"捷運站","奶奶的祈禱":"文昌帝君廟","第一次被說做得好":"Cindy 的會議室"}
+expected_places = {"出生":"醫院","第一次算數":"早餐店","遇見倖芳":"捷運站","奶奶的祈禱":"文昌帝君廟","第一次被說做得好":"Claire 的會議室"}
 assert "places" in globals() and isinstance(places,dict) and places == expected_places, "請保留完整的人生地圖，不能刪除或改動地點。"
 expected = [f"{event} → {place}" for event,place in expected_places.items()]
 assert Counter(x.strip() for x in lines if x.strip()) == Counter(expected), "請印出每筆正確事件及地點，不可漏項、重複或印錯地點；順序可以不同。"
@@ -156,11 +156,11 @@ assert any(isinstance(n,ast.For) and any(
 ```
 solution:
 ```python
-places = {"出生": "醫院", "第一次算數": "早餐店", "遇見倖芳": "捷運站", "奶奶的祈禱": "文昌帝君廟", "第一次被說做得好": "Cindy 的會議室"}
+places = {"出生": "醫院", "第一次算數": "早餐店", "遇見倖芳": "捷運站", "奶奶的祈禱": "文昌帝君廟", "第一次被說做得好": "Claire 的會議室"}
 for event, place in places.items():
     print(f"{event} → {place}")
 ```
-success: 從醫院、早餐店、捷運站，一路到 Cindy 的會議室，人生地圖接起來了。
+success: 從醫院、早餐店、捷運站，一路到 Claire 的會議室，人生地圖接起來了。
 @end
 @end
 

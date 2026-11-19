@@ -39,7 +39,7 @@ const SECTIONS: Array = [
 
 	{"id": "ch5_1", "chapter": "第五章　出社會", "title": "5.1 第一份薪水", "stage": "出社會", "age": 22,
 		"concepts": "def 函式、參數、return", "tone": "work", "story": "res://chapters/chapter_5/story/ch5_1.story"},
-	{"id": "ch5_2", "chapter": "第五章　出社會", "title": "5.2 Cindy 的報表", "stage": "出社會", "age": 23,
+	{"id": "ch5_2", "chapter": "第五章　出社會", "title": "5.2 Claire 的報表", "stage": "出社會", "age": 23,
 		"concepts": "函式＋字典＋迴圈、sum()、不把數字寫死", "tone": "work", "story": "res://chapters/chapter_5/story/ch5_2.story"},
 	{"id": "ch5_3", "chapter": "第五章　出社會", "title": "5.3 爸媽的血壓", "stage": "出社會", "age": 30,
 		"concepts": "input()、int()、try / except", "tone": "work_home", "story": "res://chapters/chapter_5/story/ch5_3.story"},
@@ -94,7 +94,7 @@ const ACHIEVEMENTS: Array = [
 	{"id": "考場戰士", "desc": "簡章上的五樣東西一樣都沒少。"},
 	{"id": "成績單守護者", "desc": "陪翊丞 All pass。"},
 	{"id": "第一份薪水", "desc": "用函式分配了人生第一份薪水。"},
-	{"id": "第一次被說「做得好」", "desc": "Cindy 一年說不到三次的那句話。"},
+	{"id": "第一次被說「做得好」", "desc": "Claire 一年說不到三次的那句話。"},
 	{"id": "回憶收藏家", "desc": "用 class 把回憶做成了物件。"},
 	{"id": "了解 Python", "desc": "結局一：派森融進了你的身體裡。"},
 	{"id": "成為 Python", "desc": "結局二：你化成光，融進了 Python。"},
@@ -109,11 +109,11 @@ const CHARACTERS: Dictionary = {
 	"爸爸": {"color": Color("#3f7354")},      # 深綠
 	"奶奶": {"color": Color("#a3456e")},      # 紫紅
 	"翊丞": {"color": Color("#e6a92e")},      # 橘黃
-	"Cindy": {"color": Color("#8a2a3c")},     # 酒紅
-	"Claire": {"color": Color("#6cc4a8")},    # 薄荷綠
+	"Claire": {"color": Color("#8a2a3c")},     # 酒紅
+	"Cindy": {"color": Color("#6cc4a8")},    # 薄荷綠
 	"教授": {"color": Color("#8a8a8a")},
 	"店員": {"color": Color("#8a8a8a")},
-	"面試官": {"color": Color("#8a2a3c")},    # 其實是 Cindy（酒紅）
+	"面試官": {"color": Color("#8a2a3c")},    # 其實是 Claire（酒紅）
 	"老闆娘": {"color": Color("#c9925e")},
 	"早餐店阿姨": {"color": Color("#8a8a8a")},
 	"系統": {"color": Color("#2d529e")},
@@ -227,6 +227,20 @@ const BG_ANIM_FPS: Dictionary = {
 ## 圖還沒生的就自動跳過。背景換成新的 16:9 圖之後，位置要跟著重新對。
 ## ⚠️ 現在的背景是正方形：上方約 28%、下方約 15% 會被裁掉，y 要放在 0.3～0.85 之間才看得到。
 const BG_FX: Dictionary = {
+	# ---- CG（鍵是 "cg:<名稱>"）----
+	"cg:holding_hands": [
+		# 媽媽牽小孩的背影走路循環：從畫面前方慢慢走進巷子深處，越走越小，最後淡出在晨光裡
+		# 腳的位置約在格子中心往下 0.47 個高度：起點腳踩 y≈0.78、終點腳踩 y≈0.64（巷子深處）
+		{"sheet": "mom_child_walk", "pos": Vector2(0.5, 0.63), "h": 0.32,
+			"to": Vector2(0.5, 0.585), "h_to": 0.11, "time": 9.0, "fps": 8.0, "fade_out": true},
+		{"sheet": "dust_motes", "pos": Vector2(0.62, 0.38), "h": 0.45, "fps": 6.0, "alpha": 0.8},
+		{"sheet": "dust_motes", "pos": Vector2(0.36, 0.45), "h": 0.35, "fps": 5.0, "alpha": 0.6, "flip": true},
+	],
+	"cg:breakfast": [
+		# 後面鐵板冒的蒸氣（等 fx/steam.png 生好才會出現）
+		{"sheet": "steam", "pos": Vector2(0.4, 0.3), "h": 0.22, "fps": 8.0, "alpha": 0.8},
+	],
+	# ---- 背景 ----
 	"breakfast_shop": [
 		{"sheet": "steam", "pos": Vector2(0.42, 0.47), "h": 0.18, "fps": 8.0, "alpha": 0.85},
 	],
@@ -234,7 +248,6 @@ const BG_FX: Dictionary = {
 		{"sheet": "incense_smoke", "pos": Vector2(0.58, 0.5), "h": 0.26, "fps": 6.0, "alpha": 0.8},
 	],
 	"living_room": [
-		{"sheet": "dust_motes", "pos": Vector2(0.55, 0.6), "h": 0.4, "fps": 5.0, "alpha": 0.7},
 		{"sheet": "crt_flicker", "pos": Vector2(0.78, 0.53), "h": 0.08, "fps": 6.0},
 	],
 	"convenience_store": [

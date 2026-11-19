@@ -41,8 +41,8 @@ modern-day Taiwan setting, no text, no letters, no watermark, no UI, no border.
 | 媽媽 | `assets/characters/媽媽.png` |
 | 倖芳 | `assets/characters/倖芳.png` |
 | 奶奶 | `assets/characters/奶奶.png` |
-| Cindy | `assets/characters/Cindy.png` |
 | Claire | `assets/characters/Claire.png` |
+| Cindy | `assets/characters/Cindy.png` |
 | 派森 | 新設計 A「光之精靈」，見 [PAISEN_DESIGN.md](PAISEN_DESIGN.md)。等新派森的設定圖生好，再拿它當參考圖生 `ending1`、`ending2` |
 
 ---
@@ -84,12 +84,12 @@ milk tea on the table, warm cozy Taiwanese breakfast shop in the background, mor
 - **劇情**：你到了捷運站，沒找到倖芳。車門關上的瞬間，好像在隔壁車廂看到一個熟悉的背影，但人太多，你沒有擠過去。
 - **畫面**：關上的車門玻璃，倒映出隔壁車廂一個女生的背影。
 - **參考圖**：`倖芳.png`
-- **色調**：冷、藍、有點遺憾
+- **色調**：正常的捷運燈光，遺憾感靠構圖（她遠遠的、被人群擋住）
 
 ```
 Inside a Taiwanese MRT train, the sliding doors have just closed, through the glass
 window a faint figure of a high school girl with long straight black hair and a pink hair
-clip is seen from behind in the next car, crowded commuters, melancholic cool blue tones,
+clip is seen from behind in the next car, crowded commuters, normal bright Taipei MRT interior lighting with natural colors (not tinted blue),
 lonely and quiet mood.
 ```
 
@@ -173,11 +173,11 @@ of her, surprised, eyes glistening with tears, hands near her mouth,
 warm afternoon light in a lived-in family home.
 ```
 
-### 9. `claire_thumbs_up.png`｜5.2 被 Cindy 稱讚
+### 9. `cindy_thumbs_up.png`｜5.2 被 Claire 稱讚
 
-- **劇情**：Cindy 難得說「報表做得好」。她一走遠，隔壁的 Claire 就在桌子底下偷偷對你比讚。
-- **畫面**：辦公桌底下，Claire 偷偷比讚，臉上是調皮的笑。
-- **參考圖**：`Claire.png`
+- **劇情**：Claire 難得說「報表做得好」。她一走遠，隔壁的 Cindy 就在桌子底下偷偷對你比讚。
+- **畫面**：辦公桌底下，Cindy 偷偷比讚，臉上是調皮的笑。
+- **參考圖**：`Cindy.png`
 - **色調**：辦公室、明亮、俏皮
 
 ```
@@ -186,11 +186,11 @@ the next desk, secretly giving a thumbs-up under the desk with a playful grin, a
 her desk, bright office lighting, the shot focuses on the hand and her smiling face.
 ```
 
-### 10. `farewell_party.png`｜5.4 Cindy 退休
+### 10. `farewell_party.png`｜5.4 Claire 退休
 
-- **劇情**：你五十五歲，Cindy 退休，部門替她辦歡送會。她拍拍你的肩膀：「現在換你帶新人了。」
-- **畫面**：辦公室的歡送會，Cindy 抱著花，同事圍著蛋糕。Claire 也在。
-- **參考圖**：`Cindy.png`（改成六十多歲、穿柔和的毛衣）、`Claire.png`（改成中年）
+- **劇情**：你五十五歲，Claire 退休，部門替她辦歡送會。她拍拍你的肩膀：「現在換你帶新人了。」
+- **畫面**：辦公室的歡送會，Claire 抱著花，同事圍著蛋糕。Cindy 也在。
+- **參考圖**：`Claire.png`（改成六十多歲、穿柔和的毛衣）、`Cindy.png`（改成中年）
 - **色調**：傍晚暖光、溫馨
 
 ```
@@ -244,7 +244,7 @@ golden and blue sparkles, ethereal and tender.
 - [ ] `lake_promise`
 - [ ] `mrt_wave`
 - [ ] `mom_breakfast`
-- [ ] `claire_thumbs_up`
+- [ ] `cindy_thumbs_up`
 - [ ] `farewell_party`
 - [ ] `ending1`
 - [ ] `ending2`

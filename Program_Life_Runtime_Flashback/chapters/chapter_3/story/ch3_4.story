@@ -8,7 +8,7 @@
 # 【關卡】required 清單不會直接顯示，只會提示「共有 5 樣」。
 @explore ch3_4_bag
 title: 學測當天・行前檢查
-goal: 把要帶進考場的東西放進 my_bag。簡章上一共有 5 樣。
+goal: 天還沒亮，房間很暗。把抽屜、床底下都翻一翻，找出要帶進考場的東西放進 my_bag（簡章上一共有 5 樣），再走到房門出發。
 list: my_bag
 hidden_count: 5
 confirm: 檢查完畢

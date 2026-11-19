@@ -213,7 +213,7 @@ func _split_speaker(line: String) -> Array:
 	var idx := line.find("：")
 	if idx == -1:
 		idx = line.find(":")
-		# 英文冒號只在名字是英文（Cindy: ……）時才算
+		# 英文冒號只在名字是英文（Claire: ……）時才算
 		if idx != -1 and line.substr(0, idx).find(" ") != -1:
 			idx = -1
 	if idx <= 0 or idx > SPEAKER_MAX_LEN:

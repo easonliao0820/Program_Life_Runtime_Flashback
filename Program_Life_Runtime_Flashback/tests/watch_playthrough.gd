@@ -8,6 +8,7 @@ extends Node
 ##     --from=ch3_2      從某一節開始
 ##     --speed=2         一開始的速度
 ##     --shots=<資料夾>  每換一次背景／CG 自動截一張圖
+##     --every=3         搭配 --shots，另外每 3 秒（遊戲時間）截一張
 
 const STAGE_SCENE := preload("res://src/game/stage/game_stage.tscn")
 
@@ -17,6 +18,8 @@ var _shots := ""
 var _shot_n := 0
 var _last_bg := ""
 var _hud: Label
+var _every := 0.0
+var _every_t := 0.0
 
 
 func _ready() -> void:
@@ -28,8 +31,10 @@ func _ready() -> void:
 			_speed = float(a.substr(8))
 		elif a.begins_with("--shots="):
 			_shots = a.substr(8)
+		elif a.begins_with("--every="):
+			_every = float(a.substr(8))
 
-	GameState.save_path = "user://plrf_watch_save.json"
+	GameState.save_path = "user://plrf_watch_save_%d.json" % OS.get_process_id()
 	GameState.new_game("觀看者")
 	GameState.settings["ai_enabled"] = false
 	GameState.settings["auto_delay"] = 1.6
@@ -63,7 +68,12 @@ func play_section(section_id: String) -> void:
 	_stage.play_section(section_id)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if _shots != "" and _every > 0.0:
+		_every_t += delta
+		if _every_t >= _every:
+			_every_t = 0.0
+			_snap.call_deferred("t")
 	_hud.text = "觀看模式 %s 倍速｜%s｜+/- 調速度　Esc 離開" % [str(_speed), GameState.section_id]
 	if _shots == "" or not _stage.get("bg"):
 		return

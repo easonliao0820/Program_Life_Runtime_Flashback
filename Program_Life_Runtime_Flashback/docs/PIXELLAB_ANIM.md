@@ -13,7 +13,7 @@
 |---|---|---|---|
 | **A. 背景小動畫**（最推薦） | `assets/backgrounds/fx/<名稱>.png` | 一列橫排、每格**正方形**、**去背** | 蒸氣、香煙、窗簾、灰塵、落葉。背景本身不動，只疊一個小動畫上去 |
 | **B. 整張背景動畫** | `assets/backgrounds/<背景>_anim.png` | 一列橫排、每格 **16:9**（例如 640×360 一格） | 捷運車廂窗外隧道燈閃過、湖面波光這類「整張畫面都在變」的 |
-| **C. 角色待機動畫** | `assets/characters/<角色>_idle.png`<br>（有表情：`<角色>_<表情>_idle.png`） | 一列橫排、每格 **1:2**（跟現在的立繪一樣 128×256） | 眨眼、輕微呼吸 |
+| **C. 角色眨眼** | `assets/characters/<角色>_blink.png`<br>（有表情：`<角色>_<表情>_blink.png`） | 一列橫排、每格 **1:2**（跟現在的立繪一樣 128×256） | 只做眨眼，不做整身擺動 |
 
 - **一列橫排**的意思是：第 1 格、第 2 格、第 3 格……從左排到右，排成一張長條圖。
 - 三種都可以只放一部分，沒放的就是靜態圖，不會壞。
@@ -35,7 +35,7 @@ python3 tools/make_sheet.py c1.png c2.png c3.png c4.png --pingpong -o assets/bac
 python3 tools/make_sheet.py export.png --grid 4x2 -o assets/backgrounds/fx/birds.png
 
 # 每格大小不一樣時，統一縮放（最近鄰，不會糊）
-python3 tools/make_sheet.py a.png b.png --size 128x256 -o assets/characters/倖芳_idle.png
+python3 tools/make_sheet.py a.png b.png --size 128x256 -o assets/characters/倖芳_blink.png
 ```
 
 ---
@@ -82,7 +82,6 @@ seamless looping animation, transparent background, isolated effect only, no gro
 |---|---|---|---|
 | `steam.png` | 早餐店煎台、便利商店茶葉蛋、熱炒店火鍋 | 6～8 | `thin wisps of white steam rising and curling upward from a hot pan, semi-transparent, fading out at the top` |
 | `incense_smoke.png` | 文昌帝君廟香爐（白天、夜晚都會用） | 6～8 | `thin grey incense smoke rising in a slow wavy line, curling and fading at the top, calm and sacred mood` |
-| `dust_motes.png` | 客廳午後陽光（爸媽家、晚上的家也會用） | 6 | `tiny glowing dust particles floating slowly in a warm sunbeam, sparse golden specks, gentle drifting` |
 | `crt_flicker.png` | 客廳的舊電視螢幕 | 4 | `the glowing screen of an old CRT television, faint scanlines, subtle brightness flicker, bluish light` |
 | `curtain.png` | 高中房間、大學宿舍的窗簾（宿舍那邊會左右翻轉） | 4（用 `--pingpong`） | `a light teal fabric curtain hanging from a rod, gently swaying in a soft breeze, side view` |
 | `iv_drip.png` | 病房點滴 | 4 | `a hospital IV drip bag with a small clear drop falling into the drip chamber, simple, clinical` |
@@ -113,36 +112,22 @@ seamless looping animation, transparent background, isolated effect only, no gro
 
 ## 4. 角色立繪 — 放 `assets/characters/`
 
-### 4.1 還缺的靜態立繪
+規格：**128×256、去背 PNG、腰上半身**。PixelLab 設定：畫布 128×256、Remove background **打開**。
 
-規格跟現有的一樣：**128×256、去背 PNG、膝上半身**。
-PixelLab 設定：畫布 128×256、Remove background **打開**、Init image 上傳那個角色現有的立繪（強度中等，讓臉和配色保留下來）。
+### 4.1 還可以補的立繪（選做）
 
-先貼**立繪共同風格**：
+| 檔名 | 用在 | Init image | Description |
+|---|---|---|---|
+| `老闆娘_老年.png` | 5.1「阿姨老了許多」（沒有這張時先用一般版） | `老闆娘.png`（強度中等偏高） | `the same breakfast shop owner, now in her 60s, greying hair under the same green floral headscarf, more wrinkles, same apron and spatula, same warm smile, crisp clean pixels, transparent background` |
 
-```
-pixel art character portrait, visual novel sprite, clean outlines, soft shading,
-half-body from the knees up, facing the viewer slightly turned, transparent background,
-same proportions and art style as the reference image, no text, no watermark
-```
+### 4.2 角色眨眼（選做）
 
-| 檔名 | Init image | 接在後面的描述 |
-|---|---|---|
-| `倖芳_老年.png` | `倖芳.png` | `the same woman as an elderly lady in her 70s, white hair in the same straight style, soft wrinkles, gentle crescent-eyed smile, still wearing the pale pink hair clip, beige cardigan, cherry-blossom pink accents` |
-| `媽媽_老年.png` | `媽媽.png` | `the same woman now elderly, white hair in a low bun, slimmer face, soft wrinkles, warm gentle smile, cardigan, warm orange accents` |
-| `爸爸_老年.png` | `爸爸.png` | `the same man now elderly, mostly white hair, wrinkles, same glasses, calm gentle smile, sweater vest over a shirt, dark green accents` |
-| `翊丞_臉紅.png` | `翊丞.png` | `the same young man, tipsy, bright red blushing cheeks and ears, goofy wide grin, same hoodie and hair` |
-| `老闆娘.png`（**重生**） | `老闆娘.png` | `a friendly middle-aged Taiwanese breakfast shop owner, patterned headscarf, apron over a light blue shirt, cheerful smile, half-body from the knees up, same scale as the other portraits` |
-
-> ⚠️ 現在的 `老闆娘.png` 是**全身的小人**，跟其他人的半身立繪比起來會小一號、看起來不協調，建議重生成半身。
-> 生出來如果不像原本那個人：把 Init image 強度調高，或描述只留「改了什麼」（例如只寫 `white hair, older`）。
-
-### 4.2 角色眨眼（C，可選）
+> ⚠️ 只做**眼睛**的眨眼。不要做整個人的呼吸／擺動循環：AI 生的每一格整個人會偏移 1～3 像素，播起來像在抖。
 
 做法：拿現有立繪，用 Inpaint **只框眼睛**，做出「半閉」和「閉眼」兩張，再拼起來：
 
 ```bash
-python3 tools/make_sheet.py 倖芳.png 倖芳_半閉.png 倖芳_閉.png 倖芳_半閉.png -o assets/characters/倖芳_idle.png
+python3 tools/make_sheet.py 倖芳.png 倖芳_半閉.png 倖芳_閉.png 倖芳_半閉.png -o assets/characters/倖芳_blink.png
 ```
 
 | Inpaint 描述 | 用途 |
@@ -150,18 +135,16 @@ python3 tools/make_sheet.py 倖芳.png 倖芳_半閉.png 倖芳_閉.png 倖芳_�
 | `same face, eyes half closed, same eyelashes and eye color` | 第 2、4 格 |
 | `same face, eyes fully closed, relaxed eyelids` | 第 3 格 |
 
-- **第 1 格一定要是睜眼**：遊戲大部分時間會停在第 1 格，每 2.5～5 秒才播一輪（每秒 10 格），看起來就是自然眨眼。
-- 想加呼吸：多做一張「肩膀往上 1 個像素」的格子，排在最後面。
-- 有表情的版本也可以做，例如 `翊丞_臉紅_idle.png`。
+- 存成 `<角色>_blink.png`。**第 1 格一定要是睜眼**：遊戲大部分時間停在第 1 格，每 2.5～5 秒才播一輪。
+- 有表情的版本也可以做，例如 `翊丞_臉紅_blink.png`。
 
 ---
 
-## 5. 檢查清單
+## 5. 檢查清單（都是選做）
 
 **小動畫**（`assets/backgrounds/fx/`）
 - [ ] `steam` — 早餐店、便利商店、熱炒店都會用，最划算，先做這張
 - [ ] `incense_smoke`
-- [ ] `dust_motes`
 - [ ] `crt_flicker`
 - [ ] `curtain`
 - [ ] `iv_drip`
@@ -172,9 +155,8 @@ python3 tools/make_sheet.py 倖芳.png 倖芳_半閉.png 倖芳_閉.png 倖芳_�
 **整張背景動畫**（`assets/backgrounds/`）
 - [ ] `mrt_car_anim`
 - [ ] `lake_sunset_anim`
-- [ ] `star_sky_anim`（可最後做）
+- [ ] `star_sky_anim`
 
 **立繪**（`assets/characters/`）
-- [ ] `倖芳_老年`、`媽媽_老年`、`爸爸_老年`、`翊丞_臉紅`
-- [ ] `老闆娘` 重生成半身
-- [ ] 眨眼（可選）：`倖芳_idle`、`媽媽_idle`、`翊丞_idle`……出場最多的先做
+- [ ] `老闆娘_老年`
+- [ ] 眨眼：`倖芳`、`翊丞`……出場最多的先做

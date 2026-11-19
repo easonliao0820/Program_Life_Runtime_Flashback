@@ -31,19 +31,6 @@ func _ready() -> void:
 	if return_map_btn:
 		return_map_btn.pressed.connect(_on_return_map_button_pressed)
 
-func _process(_delta: float) -> void:
-	# 自動偵測當前場景，若是選單、登入或前言則隱藏齒輪設定按鈕
-	var current_scene = get_tree().current_scene
-	if current_scene:
-		var scene_path = current_scene.scene_file_path
-		var is_menu = (
-			scene_path.contains("login_screen") or 
-			scene_path.contains("prologue") or 
-			scene_path.contains("level_select") or
-			scene_path.contains("res://src/game/")
-		)
-		$GearButton.visible = not is_menu
-
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		# 新架構的遊戲畫面有合併後的「設定」（含原本齒輪的功能），ESC 交給它
@@ -71,9 +58,6 @@ func reset_menu_view() -> void:
 	settings_panel.hide()
 
 # ==================== 訊號連接函式 ====================
-
-func _on_gear_button_pressed() -> void:
-	toggle_pause()
 
 func _on_resume_button_pressed() -> void:
 	toggle_pause()

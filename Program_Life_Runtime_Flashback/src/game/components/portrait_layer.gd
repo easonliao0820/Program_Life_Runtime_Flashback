@@ -7,8 +7,11 @@ extends Control
 
 const CHAR_DIR := "res://assets/characters/"
 const SheetAnim := preload("res://src/game/components/sheet_anim.gd")
-## 待機動畫（<角色>_idle.png 或 <角色>_<表情>_idle.png）：一列橫排，每格跟立繪一樣 1:2（例如 128×256 一格）
-const IDLE_FPS := 10.0
+## 待機動畫：一列橫排，每格跟立繪一樣 1:2（例如 128×256 一格）。有表情時檔名是 <角色>_<表情>_idle.png
+##   <角色>_idle.png  → 一直循環播（呼吸、身體輕輕擺動）
+##   <角色>_blink.png → 大部分時間停在第一格，每 2.5～5 秒播一輪（眨眼）
+const IDLE_FPS := 6.0
+const BLINK_FPS := 10.0
 const SLOTS := {"left": 0.27, "right": 0.73, "center": 0.5}
 
 ## 角色名 -> {node, slot}
@@ -105,14 +108,20 @@ func _make_portrait(char_name: String, expression: String) -> Control:
 func _set_texture(holder: Control, char_name: String, expression: String) -> void:
 	for c in holder.get_children():
 		c.queue_free()
-	var idle := _find_idle(char_name, expression)
+	var blink := false
+	var idle := _find_idle(char_name, expression, "idle")
+	if idle.is_empty():
+		idle = _find_idle(char_name, expression, "blink")
+		blink = true
 	var tex: Texture2D = idle[0] if not idle.is_empty() else _find_texture(char_name, expression)
 	if tex:
 		var tr: TextureRect
 		if idle.size() > 1:
-			# 待機動畫：大部分時間停在第一格（睜眼），每 2.5～5 秒播一輪（眨眼／呼吸）
 			var sa := SheetAnim.new()
-			sa.setup(idle, IDLE_FPS, 2.5, 5.0)
+			if blink:
+				sa.setup(idle, BLINK_FPS, 2.5, 5.0)
+			else:
+				sa.setup(idle, IDLE_FPS)
 			tr = sa
 		else:
 			tr = TextureRect.new()
@@ -144,8 +153,8 @@ func _find_texture(char_name: String, expression: String) -> Texture2D:
 
 
 ## 有表情時只找那個表情的待機動畫（找不到就用靜態的表情圖，不會退回一般表情的動畫）
-func _find_idle(char_name: String, expression: String) -> Array[Texture2D]:
-	var base := CHAR_DIR + char_name + ("_" + expression if expression != "" else "") + "_idle.png"
+func _find_idle(char_name: String, expression: String, kind: String) -> Array[Texture2D]:
+	var base := CHAR_DIR + char_name + ("_" + expression if expression != "" else "") + "_" + kind + ".png"
 	if not ResourceLoader.exists(base):
 		var none: Array[Texture2D] = []
 		return none

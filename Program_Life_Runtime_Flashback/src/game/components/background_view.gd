@@ -186,6 +186,8 @@ func show_cg(key: String, caption: String) -> void:
 	var layer := _make_layer("cg:" + key, tone_id, caption)
 	add_child(layer)
 	move_child(layer, _current.get_index() + 1)
+	if _has_cg_art("cg:" + key):
+		_animate_cg(layer, key)
 	layer.modulate.a = 0.0
 	var old := _current
 	_current = layer
@@ -225,6 +227,14 @@ func _make_layer(key: String, tone_name: String, caption: String = "") -> Contro
 		vp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		holder.add_child(vp)
 		return holder
+	# CG 還沒有正式的圖：沿用當下的背景，調暗、偏暖，像回憶，再寫上說明（不要整片純色）
+	if key.begins_with("cg:") and not _has_cg_art(key) \
+			and bg_key not in ["", "black", "white"] and not bg_key.begins_with("cg:"):
+		var base := _make_layer(bg_key, tone_name)
+		base.modulate = Color(0.74, 0.67, 0.6)
+		if caption != "":
+			base.add_child(_cg_caption(caption))
+		return base
 	var tex: Texture2D = null
 	# 動態背景：assets/backgrounds/<key>_anim.png（一列橫排、每格 16:9），有的話優先用
 	var anim: Array[Texture2D] = []
@@ -232,7 +242,10 @@ func _make_layer(key: String, tone_name: String, caption: String = "") -> Contro
 	if ChapterRegistry.ART.has(key) and ResourceLoader.exists(ChapterRegistry.ART[key]):
 		tex = load(ChapterRegistry.ART[key])
 	elif key.begins_with("cg:"):
-		tex = _try_texture(CG_DIR + key.substr(3))
+		# CG 也可以是動畫：assets/cg/<名稱>_anim.png（一列橫排、每格 16:9）
+		anim = _try_anim(key.substr(3), CG_DIR)
+		if anim.is_empty():
+			tex = _try_texture(CG_DIR + key.substr(3))
 	else:
 		anim = _try_anim(key)
 		if anim.is_empty():
@@ -280,8 +293,12 @@ func _make_layer(key: String, tone_name: String, caption: String = "") -> Contro
 			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		if not grade.is_empty():
 			tr.material = _grade_material(grade)
-		if not key.begins_with("cg:"):
-			_add_fx(tr, key if ChapterRegistry.BG_FX.has(key) else art_key, grade)
+		# 小動畫：背景照 BG_FX[背景鍵]，CG 照 BG_FX["cg:<名稱>"]
+		_add_fx(tr, key if ChapterRegistry.BG_FX.has(key) else art_key, grade)
+		if key.begins_with("cg:"):
+			# CG 不走 _fit_cover，小動畫的位置在這裡跟著畫面大小排
+			tr.resized.connect(_layout_fx.bind(tr))
+			_layout_fx.call_deferred(tr)
 		holder.add_child(tr)
 		if caption != "":
 			holder.add_child(_cg_caption(caption))
@@ -371,23 +388,49 @@ func _add_fx(tr: TextureRect, key: String, grade: Dictionary) -> void:
 		fx.set_meta("fx_h", float(spec.get("h", 0.2)))
 		fx.set_meta("fx_aspect", fsz.x / maxf(fsz.y, 1.0))
 		tr.add_child(fx)
+		if spec.has("to"):
+			_move_fx.call_deferred(tr, fx, spec)
 
 
 ## pos = 小動畫「中心」在背景圖上的位置（0～1），h = 高度佔背景圖的比例
 func _layout_fx(tr: TextureRect) -> void:
 	for c in tr.get_children():
-		if not c.has_meta("fx_pos"):
-			continue
-		var h: float = tr.size.y * float(c.get_meta("fx_h"))
-		var sz := Vector2(h * float(c.get_meta("fx_aspect")), h)
-		var p: Vector2 = c.get_meta("fx_pos")
-		c.size = sz
-		c.position = p * tr.size - sz / 2.0
+		if c.has_meta("fx_pos"):
+			_place_fx(tr, c)
+
+
+func _place_fx(tr: TextureRect, c: Control) -> void:
+	var h: float = tr.size.y * float(c.get_meta("fx_h"))
+	var sz := Vector2(h * float(c.get_meta("fx_aspect")), h)
+	var p: Vector2 = c.get_meta("fx_pos")
+	c.size = sz
+	c.position = p * tr.size - sz / 2.0
+
+
+## 會移動的小動畫（例如人慢慢往前走）：BG_FX 裡寫 to（終點）、h_to（終點高度，走遠會變小）、
+## time（幾秒走完）、fade_out（走到之後淡出）。速度是等速，腳步才不會像在滑。
+func _move_fx(tr: TextureRect, fx: Control, spec: Dictionary) -> void:
+	if not is_instance_valid(fx):
+		return
+	var p0: Vector2 = spec.get("pos", Vector2(0.5, 0.5))
+	var p1: Vector2 = spec["to"]
+	var h0 := float(spec.get("h", 0.2))
+	var h1 := float(spec.get("h_to", h0))
+	var t := fx.create_tween()
+	t.tween_method(_move_fx_step.bind(tr, fx, p0, p1, h0, h1), 0.0, 1.0, float(spec.get("time", 12.0)))
+	if spec.get("fade_out", false):
+		t.tween_property(fx, "modulate:a", 0.0, 1.5)
+
+
+func _move_fx_step(k: float, tr: TextureRect, fx: Control, p0: Vector2, p1: Vector2, h0: float, h1: float) -> void:
+	fx.set_meta("fx_pos", p0.lerp(p1, k))
+	fx.set_meta("fx_h", lerpf(h0, h1, k))
+	_place_fx(tr, fx)
 
 
 ## 動態背景的 sprite sheet：<key>_anim.png，一列橫排，每格都是 16:9（例如 640×360 一格）
-func _try_anim(key: String) -> Array[Texture2D]:
-	var path := BG_DIR + key + "_anim.png"
+func _try_anim(key: String, dir: String = BG_DIR) -> Array[Texture2D]:
+	var path := dir + key + "_anim.png"
 	if not ResourceLoader.exists(path):
 		var none: Array[Texture2D] = []
 		return none
@@ -409,6 +452,62 @@ func _grade_material(g: Dictionary) -> ShaderMaterial:
 	m.set_shader_parameter("vig", g.get("vig", 0.0))
 	m.set_shader_parameter("tame", g.get("tame", 0.0))
 	return m
+
+
+## CG 的動態感：細小光點往上飄（不推鏡頭，畫面保持固定）。
+## 結局的 CG 用派森的藍、金光點，其他用暖白色。
+const CG_SPARKLE_KEYS := ["ending1", "ending2"]
+
+
+func _animate_cg(holder: Control, key: String) -> void:
+	holder.clip_contents = true
+	var tr: TextureRect = null
+	for c in holder.get_children():
+		if c is TextureRect:
+			tr = c
+	if tr == null:
+		return
+	# 高解析度的圖（聊天 AI 生的）用線性過濾，慢慢放大才不會像素抖動；小的像素圖維持最近鄰
+	if tr.texture and tr.texture.get_width() >= 1000:
+		tr.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	var dots := CPUParticles2D.new()
+	dots.amount = 46 if key in CG_SPARKLE_KEYS else 28
+	dots.lifetime = 5.0
+	dots.preprocess = 5.0
+	dots.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	dots.emission_rect_extents = Vector2(960, 540)
+	dots.position = Vector2(960, 540)
+	dots.direction = Vector2(0, -1)
+	dots.spread = 25.0
+	dots.gravity = Vector2.ZERO
+	dots.initial_velocity_min = 20.0
+	dots.initial_velocity_max = 45.0
+	dots.scale_amount_min = 2.0
+	dots.scale_amount_max = 5.0
+	var ramp := Gradient.new()
+	if key in CG_SPARKLE_KEYS:
+		ramp.set_color(0, Color(0.55, 0.8, 1.0, 0.0))
+		ramp.add_point(0.3, Color(1.0, 0.9, 0.45, 0.8))
+		ramp.add_point(0.7, Color(0.55, 0.8, 1.0, 0.7))
+		ramp.set_color(ramp.get_point_count() - 1, Color(1.0, 0.9, 0.45, 0.0))
+	else:
+		ramp.set_color(0, Color(1.0, 0.95, 0.82, 0.0))
+		ramp.add_point(0.4, Color(1.0, 0.95, 0.82, 0.45))
+		ramp.set_color(ramp.get_point_count() - 1, Color(1.0, 0.95, 0.82, 0.0))
+	dots.color_ramp = ramp
+	holder.add_child(dots)
+	await get_tree().process_frame
+	if not is_instance_valid(tr):
+		return
+	dots.position = holder.size / 2.0
+	dots.emission_rect_extents = holder.size / 2.0
+
+
+## 這張 CG（key = "cg:<名稱>"）有沒有正式的圖
+func _has_cg_art(key: String) -> bool:
+	if ChapterRegistry.ART.has(key) and ResourceLoader.exists(ChapterRegistry.ART[key]):
+		return true
+	return ResourceLoader.exists(CG_DIR + key.substr(3) + "_anim.png") or _try_texture(CG_DIR + key.substr(3)) != null
 
 
 ## 有沒有這個背景的影片版（assets/backgrounds/<key>.ogv）

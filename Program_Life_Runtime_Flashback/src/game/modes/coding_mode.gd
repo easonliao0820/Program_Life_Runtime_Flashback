@@ -10,8 +10,6 @@ extends Control
 
 signal _continue_pressed
 
-const CODE_FRAME := "res://chapters/chapter_1/images/code_bg.png"
-const OUTPUT_FRAME := "res://chapters/chapter_1/images/codeoutput_bg.png"
 const RUN_ICON := "res://src/ui/coding_panel/run.png"
 
 ## GameStage 提供：func(text: String, mood: String) —— 讓派森在劇情區的對話框裡說話
@@ -63,10 +61,10 @@ func _ready() -> void:
 	_task_panel = PanelContainer.new()
 	_task_panel.position = UIKit.SPLIT_OBJECT.position
 	_task_panel.size = UIKit.SPLIT_OBJECT.size
-	_task_panel.add_theme_stylebox_override("panel", UIKit.navy_panel(10, 18))
+	_task_panel.add_theme_stylebox_override("panel", UIKit.split_frame("task", Vector4(44, 42, 44, 36)))
 	add_child(_task_panel)
 	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", UIKit.box(UIKit.CREAM, 6, UIKit.GOLD, 2, 22))
+	card.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	_task_panel.add_child(card)
 	var card_v := VBoxContainer.new()
 	card_v.add_theme_constant_override("separation", 12)
@@ -92,7 +90,7 @@ func _ready() -> void:
 	_code_panel = PanelContainer.new()
 	_code_panel.position = UIKit.SPLIT_CODE.position
 	_code_panel.size = UIKit.SPLIT_CODE.size
-	_code_panel.add_theme_stylebox_override("panel", UIKit.texture_box(CODE_FRAME, 28, 30))
+	_code_panel.add_theme_stylebox_override("panel", UIKit.split_frame("code", Vector4(40, 40, 36, 30)))
 	add_child(_code_panel)
 	_editor = UIKit.code_editor()
 	_code_panel.add_child(_editor)
@@ -101,7 +99,7 @@ func _ready() -> void:
 	_out_panel = PanelContainer.new()
 	_out_panel.position = UIKit.SPLIT_FEEDBACK.position
 	_out_panel.size = UIKit.SPLIT_FEEDBACK.size
-	_out_panel.add_theme_stylebox_override("panel", UIKit.texture_box(OUTPUT_FRAME, 64, 58))
+	_out_panel.add_theme_stylebox_override("panel", UIKit.split_frame("output", Vector4(44, 40, 40, 30)))
 	add_child(_out_panel)
 	var out_v := VBoxContainer.new()
 	out_v.add_theme_constant_override("separation", 10)
@@ -134,7 +132,7 @@ func _ready() -> void:
 
 	var out_bg := PanelContainer.new()
 	out_bg.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	out_bg.add_theme_stylebox_override("panel", UIKit.box(Color(0.06, 0.05, 0.04, 0.82), 8, Color.TRANSPARENT, 0, 14))
+	out_bg.add_theme_stylebox_override("panel", UIKit.box(Color("#0A0F17"), 8, Color.TRANSPARENT, 0, 14))
 	out_v.add_child(out_bg)
 	var out_scroll := ScrollContainer.new()
 	out_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -161,8 +159,10 @@ func play_level(level: Dictionary, ctx: Dictionary) -> Dictionary:
 	_attempt = 0
 	_passed = false
 	_memory_theme = ctx.get("theme", level.get("theme", "default")) == "memory"
-	var editor_bg := Color(0.05, 0.09, 0.22, 0.9) if _memory_theme else Color(0.07, 0.1, 0.14, 0.88)
+	var editor_bg := Color(0.05, 0.09, 0.22, 0.9) if _memory_theme else Color("#161F2B")
 	_editor.add_theme_stylebox_override("normal", UIKit.box(editor_bg, 8, Color.TRANSPARENT, 0, 14))
+	# 不畫焦點外框：輸入框直接融進程式區的外框裡（游標閃爍就看得出可以打字）
+	_editor.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	_update_progress()
 
 	_task_title.text = GameState.format_text(str(level.get("title", "")))

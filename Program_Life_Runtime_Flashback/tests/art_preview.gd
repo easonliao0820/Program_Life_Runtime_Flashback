@@ -8,13 +8,19 @@ extends Control
 const BackgroundView := preload("res://src/game/components/background_view.gd")
 const PortraitLayer := preload("res://src/game/components/portrait_layer.gd")
 
-## [背景, 左邊角色, 右邊角色]
+## [背景, 左邊角色, 右邊角色]；角色可以寫「名字:表情」
 const PAGES := [
+	["breakfast_shop", "", "老闆娘"],
+	["lake_dawn", "倖芳", "倖芳:老年"],
+	["living_room", "媽媽", "爸爸"],
+	["parents_home", "媽媽:老年", "爸爸:老年"],
+	["stir_fry", "", "翊丞:臉紅"],
+	["lake_dawn", "倖芳:老年", ""],
 	["photo_room", "媽媽", "爸爸"],
 	["school", "倖芳", ""],
 	["library", "倖芳", "翊丞"],
 	["cafe", "倖芳", ""],
-	["meeting_room", "Cindy", "Claire"],
+	["meeting_room", "Claire", "Cindy"],
 	["temple_day", "奶奶", ""],
 ]
 
@@ -61,10 +67,10 @@ func _show(i: int, instant: bool = false) -> void:
 	_bg.show_bg(page[0], "", instant)
 	_portraits.hide_character("all")
 	if _show_chars:
-		if page[1] != "":
-			_portraits.show_character(page[1], "left")
-		if page[2] != "":
-			_portraits.show_character(page[2], "right")
+		for slot in [[page[1], "left"], [page[2], "right"]]:
+			if slot[0] != "":
+				var parts: PackedStringArray = str(slot[0]).split(":")
+				_portraits.show_character(parts[0], slot[1], parts[1] if parts.size() > 1 else "")
 	_hint.text = "%d/%d　%s　　← → 換背景　空白鍵 立繪開關　Esc 離開" % [_i + 1, PAGES.size(), page[0]]
 
 

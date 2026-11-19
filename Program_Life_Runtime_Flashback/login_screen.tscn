@@ -5,7 +5,6 @@
 [ext_resource type="Texture2D" uid="uid://1nufnbe7pu4h" path="res://src/ui/login/google-logo.png" id="4_v7w4v"]
 [ext_resource type="Texture2D" uid="uid://dy5chklj5a3is" path="res://src/ui/login/text-logo.png" id="5_8xvqn"]
 [ext_resource type="Script" uid="uid://dgdyl504o6l1" path="res://src/ui/login/google_login.gd" id="5_pajja"]
-[ext_resource type="Script" uid="uid://clmdlgf414ar3" path="res://src/ui/login/guest_login_button.gd" id="6_guest"]
 [ext_resource type="Script" uid="uid://di7qb66l7jfqd" path="res://src/ui/login/google_auth.gd" id="7_pajja"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
@@ -95,32 +94,6 @@ grow_vertical = 2
 texture = ExtResource("5_8xvqn")
 expand_mode = 1
 stretch_mode = 5
-
-[node name="GuestLoginButton" type="Button" parent="." unique_id=999888777]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 0.77
-anchor_right = 0.5
-anchor_bottom = 0.77
-offset_left = -140.0
-offset_top = -25.0
-offset_right = 140.0
-offset_bottom = 25.0
-grow_horizontal = 2
-grow_vertical = 2
-pivot_offset = Vector2(140, 25)
-theme_override_colors/font_color = Color(0.156863, 0.156863, 0.156863, 1)
-theme_override_colors/font_focus_color = Color(0.156863, 0.156863, 0.156863, 1)
-theme_override_colors/font_pressed_color = Color(0.117647, 0.117647, 0.117647, 1)
-theme_override_colors/font_hover_color = Color(0.156863, 0.156863, 0.156863, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
-text = "訪客登入 (暫時)"
-script = ExtResource("6_guest")
 
 [node name="GoogleLogin" type="Control" parent="." unique_id=1660782732]
 anchors_preset = 0

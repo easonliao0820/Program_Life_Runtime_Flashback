@@ -42,12 +42,12 @@ const PERSONAS := {
 	"爸爸": "你是主角的爸爸：戴眼鏡、看起來有點嚴肅，話不多，但笑起來很溫和，很疼孩子；不太會用手機打字。",
 	"奶奶": "你是主角的奶奶：小捲髮、花襯衫、側背包，平常不是在菜市場就是在家看劇，很虔誠、會去廟裡拜拜。說話親切、帶一點台語口吻，很疼孫子。",
 	"翊丞": "你是翊丞：主角的大學同學兼室友，頭髮有點亂、常穿帽 T，表情誇張、常忘記考試，但很講義氣；叫主角「兄弟」。",
-	"Cindy": "你是 Cindy：主角出社會後的第一位主管，俐落短髮、深色西裝外套、拿平板。說話直、要求高，同一個問題不想聽兩次，但其實很護著自己的組員。",
-	"Claire": "你是 Claire：坐主角隔壁的同事，比主角早進公司兩年，綁丸子頭、戴圓框眼鏡，桌上永遠有零食。熱心、愛吃、表情豐富，是主角職場上的第一個戰友。",
+	"Claire": "你是 Claire：主角出社會後的第一位主管，俐落短髮、深色西裝外套、拿平板。說話直、要求高，同一個問題不想聽兩次，但其實很護著自己的組員。",
+	"Cindy": "你是 Cindy：坐主角隔壁的同事，比主角早進公司兩年，綁丸子頭、戴圓框眼鏡，桌上永遠有零食。熱心、愛吃、表情豐富，是主角職場上的第一個戰友。",
 	"教授": "你是主角大學的教授：上課會畫重點、期末考會提早考，嚴格但願意給認真的學生機會。",
 	"早餐店阿姨": "你是巷口早餐店的阿姨：親切、記性好，認得每個常客，會叫小朋友「弟弟」「妹妹」。",
 	"店員": "你是便利商店的店員：有禮貌、動作快，偶爾會算錯錢，被指出來會不好意思地道歉。",
-	"面試官": "你是一間業務分析公司的面試官：短髮、穿深色西裝外套，看履歷時眉頭不太鬆開，說話直接、只問重點，欣賞會思考的人。（你其實就是之後的主管 Cindy，但現在還沒自我介紹。）",
+	"面試官": "你是一間業務分析公司的面試官：短髮、穿深色西裝外套，看履歷時眉頭不太鬆開，說話直接、只問重點，欣賞會思考的人。（你其實就是之後的主管 Claire，但現在還沒自我介紹。）",
 	"老闆娘": "你是巷口早餐店的老闆娘，當年那位早餐店阿姨的女兒。親切、愛聊天，認得每天都來點一樣早餐的老客人。",
 }
 ## 不能用輸入框聊天的「說話者」
@@ -73,6 +73,8 @@ var popup: Control
 var chat: Control
 var _flash_rect: ColorRect
 var _split_backdrop: ColorRect
+## 四象限時套在劇情區外面的相框（assets/ui/split/frame_story.png）
+var _story_frame: Panel
 var _split: bool = false
 ## 最後一句「劇情」台詞（不含跟派森聊天的內容），進入四象限時留在劇情區
 var _last_story: Dictionary = {}
@@ -101,9 +103,26 @@ func _ready() -> void:
 	_split_backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_split_backdrop.visible = false
 	add_child(_split_backdrop)
+	var backdrop_path := UIKit.SPLIT_ART + "split_backdrop.png"
+	if ResourceLoader.exists(backdrop_path):
+		var tex := TextureRect.new()
+		tex.texture = load(backdrop_path)
+		tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		tex.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		UIKit.full_rect(tex)
+		_split_backdrop.add_child(tex)
 
 	bg = _add(BackgroundView.new())
 	portraits = _add(PortraitLayer.new())
+	_story_frame = Panel.new()
+	_story_frame.add_theme_stylebox_override("panel", UIKit.split_frame("story"))
+	_story_frame.position = UIKit.SPLIT_STORY.position - Vector2(6, 6)
+	_story_frame.size = UIKit.SPLIT_STORY.size + Vector2(12, 12)
+	_story_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_story_frame.visible = false
+	add_child(_story_frame)
 	orb = PysonOrb.new()
 	add_child(orb)
 	orb.place(ORB_FULL, ORB_FULL_SCALE)
@@ -579,12 +598,17 @@ func enter_split() -> void:
 	if not _last_story.is_empty():
 		dialogue.show_status(_last_story["speaker"], _last_story["text"], _last_story["kind"])
 	await bg.set_view_rect(UIKit.SPLIT_STORY, 0.9)
+	if _split and ResourceLoader.exists(UIKit.SPLIT_ART + "frame_story.png"):
+		_story_frame.visible = true
+		_story_frame.modulate.a = 0.0
+		create_tween().tween_property(_story_frame, "modulate:a", 1.0, 0.25)
 
 
 func exit_split() -> void:
 	if not _split:
 		return
 	_split = false
+	_story_frame.visible = false
 	hide_dialogue()
 	dialogue.set_full()
 	chat.set_split(false)
@@ -696,7 +720,9 @@ func _pyson_speak(text: String, mood: String) -> void:
 const MONTAGE_VIDEO := "study_montage"
 
 ## @montage stop=倒數第 25 天 | 學校=school | 圖書館=library | 家裡=home | 咖啡廳=cafe
-## 把上一關印出的每一行快速播過：背景依關鍵字切換、左上角日期快速倒數、遇到 ===== 停頓一下。
+## 把上一關印出的結果，挑出每 25 天的段落（100、75、50、25）慢慢播：
+## 一段一張背景淡入，左上角日期從上一個數字倒數到這一段，停一下再換下一張。
+## 背景照那一天印出來的地點決定（找不到就照順序輪流）。
 func montage(arg: String) -> void:
 	hide_dialogue()
 	code_card.hide_card()
@@ -712,43 +738,70 @@ func montage(arg: String) -> void:
 		else:
 			places[k] = kv[1].strip_edges()
 
+	# 整理出每 25 天的段落：{day, caption, bg}
+	var rx := RegEx.new()
+	rx.compile("倒數第 (\\d+) 天")
+	var lines := str(GameState.get_value("last_output", "")).split("\n")
+	var beats: Array = []
+	var seen := {}
+	for line in lines:
+		var m := rx.search(line)
+		if m == null:
+			continue
+		var day := int(m.get_string(1))
+		if day % 25 != 0 or seen.has(day):
+			continue
+		seen[day] = true
+		var caption := line.replace("=", "").strip_edges()
+		var bg_key := ""
+		for l2 in lines:   # 同一天印出來的那幾行裡找地點
+			if l2.find("倒數第 %d 天" % day) == -1:
+				continue
+			for p in places:
+				if l2.find(p) != -1:
+					bg_key = places[p]
+		if bg_key == "" and not places.is_empty():
+			bg_key = places.values()[beats.size() % places.size()]
+		beats.append({"day": day, "caption": caption, "bg": bg_key})
+		if stop != "" and line.find(stop) != -1:
+			break
+
 	var date := UIKit.label("", 64, Color.WHITE)
-	date.position = Vector2(60, 40)
+	date.position = Vector2(48, 88)   # 場景名牌下面，不要疊在一起
 	date.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
 	date.add_theme_constant_override("outline_size", 10)
 	_montage_layer.add_child(date)
-	var caption := UIKit.label("", 30, Color.WHITE)
-	caption.position = Vector2(160, 900)
-	caption.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	caption.add_theme_constant_override("outline_size", 8)
-	_montage_layer.add_child(caption)
+	var cap := UIKit.label("", 34, Color.WHITE)
+	cap.position = Vector2(160, 900)
+	cap.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+	cap.add_theme_constant_override("outline_size", 8)
+	_montage_layer.add_child(cap)
 
-	var rx := RegEx.new()
-	rx.compile("倒數第 (\\d+) 天")
-	var current := ""
-	# 有影片版（assets/backgrounds/study_montage.ogv）就整段播影片，不切四張圖；
-	# 日期與字幕一樣跟著玩家程式印出來的每一行跑
-	if bg.has_video(MONTAGE_VIDEO):
+	# 有影片版（assets/backgrounds/study_montage.ogv）就整段用影片當背景，只跑日期和字幕
+	var video: bool = bg.has_video(MONTAGE_VIDEO)
+	if video:
 		bg.show_bg(MONTAGE_VIDEO, "", true)
-		places.clear()
-	for line in str(GameState.get_value("last_output", "")).split("\n"):
-		var m := rx.search(line)
-		if m:
-			date.text = "D-%s" % m.get_string(1)
-		caption.text = line
-		for k in places:
-			if line.find(k) != -1 and places[k] != current:
-				current = places[k]
-				bg.show_bg(current, "", true)
-		if line.find("=====") != -1:
-			await get_tree().create_timer(2.0).timeout
-		else:
-			await get_tree().create_timer(0.14).timeout
-		if stop != "" and line.find(stop) != -1:
-			await get_tree().create_timer(2.5).timeout
-			break
+
+	var prev_day := 0
+	for beat in beats:
+		var day: int = beat["day"]
+		var from_day := prev_day if prev_day > 0 else day
+		prev_day = day
+		cap.modulate.a = 0.0
+		cap.text = beat["caption"]
+		if not video and beat["bg"] != "":
+			bg.show_bg(beat["bg"])   # 淡入（約 1.2 秒）
+		var t := create_tween().set_parallel(true)
+		t.tween_method(func(v: float): date.text = "D-%d" % roundi(v), float(from_day), float(day), 1.4) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		t.tween_property(cap, "modulate:a", 1.0, 0.8).set_delay(0.6)
+		await t.finished
+		await get_tree().create_timer(2.6).timeout
+		var out := create_tween()
+		out.tween_property(cap, "modulate:a", 0.0, 0.4)
+		await out.finished
 	date.queue_free()
-	caption.queue_free()
+	cap.queue_free()
 
 
 ## 結尾：畫面全白，浮現「hello python」，接著是工作人員名單。
