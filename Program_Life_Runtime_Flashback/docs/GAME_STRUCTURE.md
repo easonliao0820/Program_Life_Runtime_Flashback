@@ -235,7 +235,10 @@ cg: 第一片完成後顯示的說明
 | CG | `assets/cg/<名稱>.png` | 名稱是劇本 `@cg` 的第一個字，例如 `birth.png` |
 | 立繪 | `assets/characters/<角色>.png` 或 `<角色>_<表情>.png` | 例如 `倖芳_微笑.png` |
 | 派森動圖 | `src/actors/npc/paisen_float_sparkle_sheet.png` | 一列 24 格、每秒 12 格循環播放（格數與速度在 `pyson_orb.gd` 的 `SHEET_FRAMES`、`SHEET_FPS`）；沒有這張圖時退回程式畫的光球 |
+| 探索模式 | `assets/explore/` | 背景、角色／貓的 sprite（一列橫排、面向右）、`items/<物品名稱>.png`；位置對齊在 `src/game/core/explore_layouts.gd` |
+| 四象限外框 | `assets/ui/split/` | `frame_code`／`frame_output`／`frame_task`／`frame_story`（九宮格，已放大 3 倍）、`split_backdrop`；不能拉伸的邊寬在 `UIKit.SPLIT_FRAMES` |
 | 音效／音樂 | `assets/audio/<名稱>.ogg` | 例如 `heartbeat.ogg`、`baby_cry.ogg` |
+| （工具） | `tools/make_sheet.py` | 把 GIF、分開的 PNG 或多列 sheet 轉成遊戲要的一列 sprite sheet：`python3 tools/make_sheet.py 檔案 -o 輸出.png`（多列加 `--grid 4x2`） |
 | 字型 | `assets/fonts/NotoSansTC-Regular.ttf`、`JetBrainsMono-Regular.ttf` | **網頁版一定要放中文字型**，不然中文會變方塊 |
 
 ## Python 執行環境
@@ -281,6 +284,6 @@ godot --headless --path Program_Life_Runtime_Flashback res://tests/full_playthro
 
 ## 還沒做的事
 
-- 正式美術、音效、字型（目前是色調漸層＋剪影佔位）。
-- Google 登入與 MongoDB 雲端存檔（目前存在本機 `user://plrf_save.json`）。
+- 還缺的圖（CG 小動畫）見 [IMAGE_TODO.md](IMAGE_TODO.md)。
+- 雲端存檔：AWS 資料庫已建好，但遊戲存檔仍是本機 `user://plrf_save.json`，還沒接上、也還沒依 Google 帳號分開。
 - 網頁版的 Pyodide 還沒有實際匯出測試過。

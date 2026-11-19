@@ -1,7 +1,7 @@
 extends Control
 
 ## 派森（畫面設定書 第三節）
-## 正式美術（docs/PAISEN_DESIGN.md，新設計 A「光之精靈」）：
+## 正式美術（新設計 A「光之精靈」）：
 ##   1. src/actors/npc/paisen.png：單張靜止圖，飄浮、彈跳、光點都由程式做（優先使用）
 ##   2. src/actors/npc/paisen_float_sparkle_sheet.png：舊版一列 24 格的動圖（沒有 paisen.png 時用）
 ## 都沒有就退回用程式畫的藍黃光球。

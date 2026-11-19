@@ -6,7 +6,7 @@ extends Control
 ## - 挑戰：3.1 書包越重走越慢＋貓會絆人＋倒數；2.1 推板凳搆高處；3.4 房間很暗、東西藏在抽屜裡
 ## - 走到門口按 E 出發（2.1 全部找到就自動結束）
 ## - 左下面板即時顯示 Python 的 list，拿東西時自動長出一行 bag.append(...)
-## 美術：assets/explore/ 底下有圖就用圖，沒有就畫色塊（檔名見 docs/EXPLORE_ART.md）
+## 美術：assets/explore/ 底下有圖就用圖，沒有就畫色塊（檔名與座標見 src/game/core/explore_layouts.gd）
 ## 結果：GameState 的 <list 名稱> 變數存放最後的清單，explore_code 存放整段產生的程式碼。
 
 signal _done
