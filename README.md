@@ -14,7 +14,7 @@
 - **玩家與資料**：已有遊戲 JWT、Token 自動更新、Session 撤銷、DynamoDB 玩家資料、雲端存檔與錯誤紀錄。
 - **AI 提示**：訪客與登入玩家皆可使用 AWS Gemini，預設無每日配額及玩家冷卻時間。
 - **Web 發布**：已由開發者確認成功匯出並部署 [Amplify 展示網站](https://main.dopnyv7gaqxh9.amplifyapp.com)。網站發布成功不代表所有功能都已驗收。
-- **待完善**：Web Python 中斷、執行資源限制、新舊場景整合、跨裝置存檔衝突處理及完整流程測試。
+- **待完善**：完整記憶體／權限隔離、新舊場景整合、跨裝置存檔衝突處理及完整流程測試。
 
 ## 專案目錄
 
@@ -101,11 +101,13 @@ AI 政策預設皆為 false：
 
 玩家 Python 在本機／瀏覽器執行，不在 Lambda 執行。目前限制：
 
-- PythonRunner 使用桌面 Python 或 Web Pyodide，桌面約 10 秒逾時。
-- 允許完整 builtins／import，缺少記憶體與輸出量限制，不能稱為完整安全隔離。
-- Web 同步執行，尚無 Worker／可靠中斷，無限迴圈可能卡住頁面。
-- 缺少 Python 時的簡易模式無法真正執行 check，可能誤判通關。
+- PythonRunner 使用桌面獨立 Python 程序或 Web Pyodide Worker；執行上限 10 秒，Web 載入另限 40 秒，程式關卡可按「停止」。
+- 每次請求限制 128 KiB、輸出收集限制 16384 字元、回應限制 1 MiB；仍允許完整 builtins／import，沒有硬性記憶體或 OS 權限隔離。
+- Web 每次建立獨立 Worker；逾時、取消、失敗及完成後釋放。需允許 CSP 的 `worker-src blob:` 與 Pyodide CDN，無需開啟 Godot threads／SharedArrayBuffer。
+- 缺少 Python 時的簡易模式只預覽 print；有 check 的題目明確回報無法驗證，不放行。Web 載入失敗直接回報可重試的環境錯誤。
 - 舊 SandboxManager 主要支援單行 print；舊 CodingPanel 同步呼叫本機 Python，AI 分析仍有 TODO。
+
+執行限制、測試結果與 Web 發布條件見 [Python 執行保護說明](Program_Life_Runtime_Flashback/docs/PYTHON_EXECUTION.md)。
 
 ## Web 設定與驗收
 
