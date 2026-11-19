@@ -5,6 +5,18 @@ Parameters:
   GoogleOAuthClientId:
     Type: String
     Description: Google OAuth Client ID
+  GoogleOAuthWebClientId:
+    Type: String
+    Description: Google Web OAuth Client ID
+  GeminiModel:
+    Type: String
+    Description: Gemini model used by the AI service
+  PlayersTableName:
+    Type: String
+    Description: Existing DynamoDB players table name
+  PlayerErrorsTableName:
+    Type: String
+    Description: Existing DynamoDB player errors table name
 Resources:
   GodotBackendFunction:
     Type: AWS::Serverless::Function
@@ -22,8 +34,29 @@ Resources:
         Variables:
           GOOGLE_OAUTH_CLIENT_ID:
             Ref: GoogleOAuthClientId
+          GOOGLE_OAUTH_WEB_CLIENT_ID:
+            Ref: GoogleOAuthWebClientId
+          GEMINI_MODEL:
+            Ref: GeminiModel
+          PLAYERS_TABLE:
+            Ref: PlayersTableName
+          PLAYER_ERRORS_TABLE:
+            Ref: PlayerErrorsTableName
       FunctionUrlConfig:
         AuthType: NONE
+        Cors:
+          AllowOrigins:
+          - http://localhost:8060
+          - https://main.dopnyv7gaqxh9.amplifyapp.com
+          AllowMethods:
+          - GET
+          - POST
+          - PUT
+          AllowHeaders:
+          - content-type
+          - authorization
+          AllowCredentials: false
+          MaxAge: 300
     Metadata:
       SamResourceId: GodotBackendFunction
 Outputs:

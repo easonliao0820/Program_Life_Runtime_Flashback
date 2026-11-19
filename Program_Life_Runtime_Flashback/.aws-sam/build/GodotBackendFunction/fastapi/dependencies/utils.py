@@ -27,6 +27,7 @@ from typing import (
     get_origin,
 )
 
+from anyio import CancelScope
 from fastapi import params
 from fastapi._compat import (
     ModelField,
@@ -52,6 +53,9 @@ from fastapi._compat import (
 )
 from fastapi.background import BackgroundTasks
 from fastapi.concurrency import (
+    _asynccontextmanager_with_shielded_exit,
+    _contextmanager_with_concurrency_limit,
+    _DependencyConcurrency,
     asynccontextmanager,
     contextmanager_in_threadpool,
 )
@@ -152,6 +156,7 @@ def get_parameterless_sub_dependant(*, depends: params.Depends, path: str) -> De
         path=path,
         call=depends.dependency,
         scope=depends.scope,
+        concurrency=depends._concurrency,
         own_oauth_scopes=own_oauth_scopes,
     )
 
@@ -306,6 +311,7 @@ def get_dependant(
     parent_oauth_scopes: list[str] | None = None,
     use_cache: bool = True,
     scope: Literal["function", "request"] | None = None,
+    concurrency: _DependencyConcurrency | None = None,
 ) -> Dependant:
     dependant = Dependant(
         call=call,
@@ -313,6 +319,7 @@ def get_dependant(
         path=path,
         use_cache=use_cache,
         scope=scope,
+        concurrency=concurrency,
         own_oauth_scopes=own_oauth_scopes,
         parent_oauth_scopes=parent_oauth_scopes,
     )
@@ -355,6 +362,7 @@ def get_dependant(
                 parent_oauth_scopes=current_scopes,
                 use_cache=param_details.depends.use_cache,
                 scope=param_details.depends.scope,
+                concurrency=param_details.depends._concurrency,
             )
             dependant.dependencies.append(sub_dependant)
             continue
@@ -621,13 +629,33 @@ def add_param_to_fields(*, field: ModelField, dependant: Dependant) -> None:
 
 
 async def _solve_generator(
-    *, dependant: Dependant, stack: AsyncExitStack, sub_values: dict[str, Any]
+    *,
+    dependant: Dependant,
+    stack: AsyncExitStack,
+    sub_values: dict[str, Any],
+    request: Request | WebSocket,
 ) -> Any:
     assert dependant.call
     if _is_async_gen_callable(dependant.call):
         cm = asynccontextmanager(dependant.call)(**sub_values)
+        cleanup_scopes: dict[AsyncExitStack, CancelScope] = request.scope.setdefault(
+            "fastapi_async_cleanup_scopes", {}
+        )
+        request_stack = cast(AsyncExitStack, request.scope["fastapi_inner_astack"])
+        cleanup_scope = cleanup_scopes.get(request_stack)
+        if cleanup_scope is None:
+            # The request stack outlives both dependency scopes. Enter this
+            # before the first async generator so it encloses their own scopes.
+            cleanup_scope = request_stack.enter_context(CancelScope())
+            cleanup_scopes[request_stack] = cleanup_scope
+            request_stack.callback(cleanup_scopes.pop, request_stack)
+        cm = _asynccontextmanager_with_shielded_exit(cm, cleanup_scope)
     elif _is_gen_callable(dependant.call):
         cm = contextmanager_in_threadpool(contextmanager(dependant.call)(**sub_values))
+    if dependant.concurrency is not None:
+        cm = _contextmanager_with_concurrency_limit(
+            cm, dependant.concurrency.get_semaphore()
+        )
     return await stack.enter_async_context(cm)
 
 
@@ -692,6 +720,7 @@ async def solve_dependencies(
                 name=sub_dependant.name,
                 parent_oauth_scopes=_get_oauth_scopes(dependant=sub_dependant),
                 scope=sub_dependant.scope,
+                concurrency=sub_dependant.concurrency,
             )
 
         solved_result = await solve_dependencies(
@@ -723,14 +752,23 @@ async def solve_dependencies(
             if sub_dependant.scope == "function":
                 use_astack = function_astack
             solved = await _solve_generator(
+                request=request,
                 dependant=use_sub_dependant,
                 stack=use_astack,
                 sub_values=solved_result.values,
             )
         elif _is_coroutine_callable(use_sub_dependant.call):
-            solved = await call(**solved_result.values)
+            if use_sub_dependant.concurrency is None:
+                solved = await call(**solved_result.values)
+            else:
+                async with use_sub_dependant.concurrency.get_semaphore():
+                    solved = await call(**solved_result.values)
         else:
-            solved = await run_in_threadpool(call, **solved_result.values)
+            if use_sub_dependant.concurrency is None:
+                solved = await run_in_threadpool(call, **solved_result.values)
+            else:
+                async with use_sub_dependant.concurrency.get_semaphore():
+                    solved = await run_in_threadpool(call, **solved_result.values)
         if sub_dependant.name is not None:
             values[sub_dependant.name] = solved
         if sub_dependant_cache_key not in dependency_cache:
@@ -843,6 +881,30 @@ def _get_multidict_value(
     return value
 
 
+def _get_multidict_extras(
+    received_params: Mapping[str, Any], processed_keys: set[str]
+) -> Iterator[tuple[str, Any]]:
+    if isinstance(received_params, ImmutableMultiDict):
+        # Unlike items(), multi_items() preserves duplicate query and form keys.
+        items = received_params.multi_items()
+    elif isinstance(received_params, Headers):
+        # Headers.items() already includes every occurrence of each header.
+        items = received_params.items()
+    else:
+        for key in received_params:
+            if key not in processed_keys:
+                yield key, received_params.get(key)
+        return
+
+    # Group repeated values once instead of scanning all entries for every key.
+    grouped: dict[str, list[Any]] = {}
+    for key, value in items:
+        if key not in processed_keys:
+            grouped.setdefault(key, []).append(value)
+    for key, values in grouped.items():
+        yield key, values[0] if len(values) == 1 else values
+
+
 def _request_param_model_to_args(
     model_field: ModelField,
     model: type[BaseModel],
@@ -887,16 +949,7 @@ def _request_param_model_to_args(
             processed_keys.add(request_alias)
 
     # Let each model apply its extra policy to all remaining inputs.
-    for key in received_params.keys():
-        if key not in processed_keys:
-            if isinstance(received_params, (ImmutableMultiDict, Headers)):
-                value = received_params.getlist(key)
-                if isinstance(value, list) and (len(value) == 1):
-                    params_to_process[key] = value[0]
-                else:
-                    params_to_process[key] = value
-            else:
-                params_to_process[key] = received_params.get(key)
+    params_to_process.update(_get_multidict_extras(received_params, processed_keys))
 
     field_info = model_field.field_info
     assert isinstance(field_info, params.Param), "Params must be subclasses of Param"
@@ -1078,13 +1131,8 @@ def _extract_form_items(
                 yield alias, value, field
                 # Leave later aliases unchanged for other fields or extra validation.
                 break
-    for key in received_body.keys():
-        if key not in field_aliases:
-            param_values = received_body.getlist(key)
-            if len(param_values) == 1:
-                yield key, param_values[0], None
-            else:
-                yield key, param_values, None
+    for key, value in _get_multidict_extras(received_body, field_aliases):
+        yield key, value, None
 
 
 async def _read_file_bytes(file: UploadFile) -> bytes:
@@ -1176,14 +1224,15 @@ async def request_body_to_args(
             field for field in body_fields if not _get_form_models(field)
         ]
         body_to_process = {}
-        async for alias, value, field in _extract_form_body(
-            fields_to_extract,
-            received_body,
-        ):
-            body_to_process[alias] = value
-            if field is not None:
-                # Keep each parameter's selected alias and scalar/list shape.
-                form_values[field.name] = (alias, value)
+        if fields_to_extract:
+            async for alias, value, field in _extract_form_body(
+                fields_to_extract,
+                received_body,
+            ):
+                body_to_process[alias] = value
+                if field is not None:
+                    # Keep each parameter's selected alias and scalar/list shape.
+                    form_values[field.name] = (alias, value)
 
     if single_not_embedded_field:
         loc: tuple[str, ...] = ("body",)

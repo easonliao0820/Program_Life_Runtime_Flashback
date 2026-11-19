@@ -38,6 +38,7 @@ var _errors: int = 0
 var _hint_used: bool = false
 var _hint_index: int = 0
 var _attempt: int = 0
+var _running := false
 var _passed: bool = false
 var _memory_theme: bool = false
 var _last_said: String = ""
@@ -261,15 +262,33 @@ func _say(text: String, mood: String) -> void:
 
 
 func _on_run() -> void:
+	if _running:
+		PythonRunner.cancel()
+		return
 	if _passed:
 		return
 	_attempt += 1
 	var attempt := _attempt
 	var code := _editor.text
-	_run_btn.disabled = true
-	_output.text = "[color=#a89c86]執行中……[/color]"
+	_running = true
+	_run_btn.text = "停止"
+	_hint_btn.disabled = true
+	_reset_btn.disabled = true
+	_skip_btn.disabled = true
+	_output.text = "[color=#a89c86]準備／執行中……可按停止取消[/color]"
 	var result: Dictionary = await PythonRunner.run(code, fill_code(str(_level.get("check", ""))), _level.get("stdin", []))
+	if not is_inside_tree():
+		return
+	_running = false
+	_run_btn.text = "執行"
 	_run_btn.disabled = false
+	_hint_btn.disabled = false
+	_reset_btn.disabled = false
+	_skip_btn.disabled = false
+	var failure: Dictionary = result.get("error") if result.get("error") is Dictionary else {}
+	if failure.get("type", "") in ["CancelledError", "BusyError", "EnvironmentError", "InternalError", "InputLimitError"]:
+		_output.text = _escape(str(failure.get("message", "無法執行，請重試。")))
+		return  # 操作取消／環境問題不列為學習錯誤，也不送 AI。
 	var stdout := _escape(str(result.get("stdout", "")))
 
 	if not result.get("ok", false):
@@ -399,3 +418,8 @@ func _flash_success() -> void:
 
 func _escape(t: String) -> String:
 	return t.replace("[", "[lb]")
+
+
+func _exit_tree() -> void:
+	if _running:
+		PythonRunner.cancel()

@@ -3,7 +3,7 @@ extends Node
 
 ## Google OAuth 桌面流程：瀏覽器授權 → 本機 TCP 回呼 → 授權碼交換 Token。
 ## 這裡只取得憑證，真正的玩家身分由 google_login.gd 送 AWS 驗證。
-## Web 版不能直接使用本機 TCP 監聽，需另接瀏覽器登入流程。
+## Web 使用 GIS 官方按鈕，取得 ID Token 後共用後端 JWT 登入流程。
 signal login_status_changed(message: String)
 signal authorization_received(code: String)
 signal login_failed(message: String)
@@ -17,6 +17,8 @@ const CLIENT_ID_SETTING := "oauth/google/client_id"
 const EXCHANGE_MODE_SETTING := "oauth/google/exchange_mode"
 const EXCHANGE_URL_SETTING := "oauth/google/desktop_exchange_url"
 
+var _web_callback: JavaScriptObject
+var _web_pending := false
 var server := TCPServer.new()
 var peer: StreamPeerTCP
 
@@ -43,6 +45,9 @@ func _ready() -> void:
 	
 
 func start_google_login() -> void:
+	if OS.has_feature("web"):
+		_start_web_login()
+		return
 	if waiting_for_callback or exchanging_token:
 		return
 
@@ -269,6 +274,9 @@ func _reject_callback_request() -> void:
 
 
 func _exit_tree() -> void:
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("window.PLGoogleLogin && window.PLGoogleLogin.close();")
+		_web_pending = false
 	# 離開登入場景就停止監聽，避免本機回呼服務殘留。
 	stop_callback_server()
 	if is_instance_valid(token_request):
@@ -423,3 +431,32 @@ func _on_token_request_completed(
 	login_status_changed.emit("已取得 Token，等待身分驗證")
 
 	token_received.emit(data)
+
+
+## 保留 callback 引用，避免 JavaScriptBridge 回呼被釋放。
+func _start_web_login() -> void:
+	if _web_pending:
+		return
+	var web_id := str(ProjectSettings.get_setting("oauth/google/web_client_id", "")).strip_edges()
+	if web_id.is_empty():
+		login_failed.emit("尚未設定 Google Web Client ID")
+		return
+	JavaScriptBridge.eval(FileAccess.get_file_as_string("res://src/ui/login/google_web.js"), true)
+	var bridge = JavaScriptBridge.get_interface("PLGoogleLogin")
+	if bridge == null:
+		login_failed.emit("無法載入 Web 登入元件")
+		return
+	_web_callback = JavaScriptBridge.create_callback(_on_web_result)
+	_web_pending = true
+	bridge.show(web_id, _web_callback)
+
+
+func _on_web_result(args: Array) -> void:
+	if not _web_pending or args.size() != 2:
+		return
+	_web_pending = false
+	# 離開 JS 呼叫堆疊後才操作 Godot UI/HTTP；不解析 Token 作為身分依據。
+	if str(args[0]) == "token":
+		token_received.emit.call_deferred({"id_token": str(args[1]), "expires_in": 0})
+	else:
+		login_failed.emit.call_deferred(str(args[1]))

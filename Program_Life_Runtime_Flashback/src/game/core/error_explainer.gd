@@ -66,6 +66,8 @@ static func explain(error: Dictionary, code: String) -> String:
 			return "%s用了一個不存在的方法%s，檢查一下拼字。" % [where, "「%s」" % attr if attr != "" else ""]
 		"ZeroDivisionError":
 			return "%s除以 0 了。什麼數字都不能除以 0 喔。" % where
+		"OutputLimitError":
+			return "輸出的內容太多了。先檢查 print 是否放在重複太多次的迴圈裡，再縮小輸出範圍。"
 		"TimeoutError":
 			return "程式跑了很久都停不下來（%s），可能是迴圈的條件永遠成立。檢查 while 的條件會不會改變。" % msg
 		"ImportError", "ModuleNotFoundError":

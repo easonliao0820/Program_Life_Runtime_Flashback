@@ -117,6 +117,7 @@ func ask(prompt: String, fallback: String, timeout_sec: float = 10.0) -> String:
 	var err := req.request(api_url, PackedStringArray(["Content-Type: application/json"]),
 		HTTPClient.METHOD_POST, JSON.stringify({"prompt": prompt}))
 	if err != OK:
+		print("AI 請求無法啟動，錯誤碼：", err)
 		_active_prompts.erase(key)
 		req.queue_free()
 		return fallback
@@ -125,6 +126,9 @@ func ask(prompt: String, fallback: String, timeout_sec: float = 10.0) -> String:
 	_active_prompts.erase(key)
 	req.queue_free()
 	if res[0] != HTTPRequest.RESULT_SUCCESS or res[1] != 200:
+		print("AI HTTP 請求失敗")
+		print("Godot 請求結果：", res[0])
+		print("HTTP 狀態碼：", res[1])
 		return fallback
 	# 後端合約是 {"text": "..."}，不再解析 Gemini 原始 candidates 格式。
 	var data = JSON.parse_string((res[3] as PackedByteArray).get_string_from_utf8())
@@ -132,4 +136,5 @@ func ask(prompt: String, fallback: String, timeout_sec: float = 10.0) -> String:
 		var answer: String = data["text"].strip_edges()
 		if not answer.is_empty():
 			return answer.left(4000)
+	print("AI 回應格式錯誤或 text 為空")
 	return fallback
