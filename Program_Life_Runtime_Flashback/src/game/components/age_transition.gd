@@ -99,7 +99,7 @@ func play_chapter(chapter: String, title: String, age: int, quote: Dictionary) -
 		_en.modulate.a = 0.0
 		# 打字（可以跳過）
 		var typing := create_tween()
-		typing.tween_property(_zh, "visible_characters", _zh.text.length(), _zh.text.length() * TYPE_SPEED)
+		typing.tween_method(_type_to.bind(_zh), 0, _zh.text.length(), _zh.text.length() * TYPE_SPEED)
 		typing.tween_property(_source, "modulate:a", 1.0, 1.0)
 		typing.tween_interval(0.4)
 		typing.tween_property(_en, "modulate:a", 1.0, 1.5)
@@ -186,3 +186,10 @@ func _press() -> void:
 	if _waiting:
 		_waiting = false
 		_skip.emit()
+
+
+## 打字：每多一個字就響一聲打字聲
+func _type_to(n: int, label: Label) -> void:
+	if n > label.visible_characters and n > 0:
+		GameFlow.type_tick(label.text[n - 1])
+	label.visible_characters = n

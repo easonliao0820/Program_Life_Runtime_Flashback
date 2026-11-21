@@ -3,6 +3,7 @@
 # 回憶修復完成後，你變成半透明的靈魂，與派森面對面。
 # 結局二 CG：你第一次擁抱派森，整個人化成光點，被派森的光吸收。
 
+@bgm hope
 @if gave_gift
 @bg lake_dawn
 @else

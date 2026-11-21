@@ -3,6 +3,7 @@
 # 場景：主角房間 → 大學宿舍。
 
 @bg my_room
+@bgm school
 （兩個月後，放榜。你盯著手機，手指一直不敢按下「查詢」。）
 
 @if gave_gift
@@ -24,6 +25,7 @@
 @endif
 
 @bg dorm
+@bgm campus
 （八月底，搬家的日子到了。）
 @show 爸爸 left
 @show 媽媽 right

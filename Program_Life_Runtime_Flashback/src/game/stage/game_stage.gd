@@ -477,6 +477,10 @@ func orb_command(args: Array) -> void:
 
 
 func play_audio(kind: String, audio_name: String) -> void:
+	# 背景音樂交給 GameFlow（常駐），換場景也不會斷；同一首在播就不重來
+	if kind == "bgm":
+		GameFlow.play_bgm(audio_name)
+		return
 	var player := _bgm if kind == "bgm" else _sfx
 	if audio_name == "" or audio_name == "off":
 		player.stop()

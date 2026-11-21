@@ -3,6 +3,7 @@
 # 改好後，會議室大螢幕投影出報表。Claire 說「做得好」時，畫面短暫停格，背景音樂換成溫暖的版本。
 
 @bg office_dusk
+@bgm office
 （進公司半年後，你已經慢慢習慣了這裡的節奏。某個星期五下午五點，大家正準備下班，Claire 走到你們座位旁。）
 @show Claire right
 Claire：Cindy、{userName}，星期一早上九點的會議，我要三個區的季度業績報表：每一區的總業績、月平均，還有本季冠軍是哪一區。
@@ -33,6 +34,7 @@ for region, months in sales.items():
 
 @hide all
 @bg meeting_room
+@bgm tension
 @tone work
 @sfx clock_tick
 （星期一早上，會議開始前十分鐘，Claire 把你叫進會議室。）
@@ -45,6 +47,8 @@ Claire：面試的時候，你跟我說「數字寫死的話，資料一變，�
 Claire：還有十分鐘，改好再拿進來。
 @hide all
 @bg office
+@bgm office
+@sfx typing
 @show Cindy left
 （你回到座位，手指一直發抖。Cindy 默默把椅子滑了過來。）
 Cindy：沒事的，每個人第一年都會被 Claire 退件，我第一次被退了四次。來，我幫你對數字，你改程式。

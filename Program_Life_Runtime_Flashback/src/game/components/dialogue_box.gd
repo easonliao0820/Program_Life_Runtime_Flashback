@@ -196,8 +196,13 @@ func _process(delta: float) -> void:
 	if _typing:
 		var speed: float = GameState.settings.get("text_speed", 40.0)
 		var fast: bool = skip_mode or (GameFlow.autopilot and not GameFlow.autopilot_watch)
+		var before := _text.visible_characters
 		_shown_chars += delta * (speed * 20.0 if fast else speed)
 		_text.visible_characters = int(_shown_chars)
+		if not fast and _text.visible_characters > before:
+			var parsed := _text.get_parsed_text()
+			var idx := _text.visible_characters - 1
+			GameFlow.type_tick(parsed[idx] if idx < parsed.length() else "x")
 		if _shown_chars >= _text.get_total_character_count():
 			_finish_typing()
 		return

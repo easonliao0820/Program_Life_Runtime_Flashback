@@ -23,6 +23,109 @@ signal autopilot_finished
 const DEBUG_DEFAULT_FLAGS := {"gave_gift": true}
 
 
+## 背景音樂放在常駐節點上，換場景（前言 → 輸入名字 → 第一章）也不會中斷。
+const AUDIO_DIR := "res://assets/audio/"
+const BGM_VOLUME := -12.0  # 背景音樂音量（dB），越小越安靜
+## 每首原檔大小聲不一樣，這裡補成差不多大聲（dB，正數＝放大）
+const BGM_GAIN := {
+	"prologue": -4.0, "school": -1.0, "tension": 4.0, "campus": 0.0, "romance": -3.0,
+	"office": -2.0, "nostalgia": 2.0, "farewell": 0.0, "hope": 10.0,
+	"childhood": 3.0, "warm": -4.0,
+}
+const BGM_FADE_IN := 1.2
+var _bgm: AudioStreamPlayer
+var _bgm_name := ""
+var _bgm_fade: Tween
+
+
+func _ready() -> void:
+	_bgm = AudioStreamPlayer.new()
+	_bgm.volume_db = BGM_VOLUME
+	# 播完從頭再播，直到 stop_bgm()
+	_bgm.finished.connect(func(): if _bgm_name != "": _bgm.play())
+	add_child(_bgm)
+	if ResourceLoader.exists(TYPE_SOUND):
+		var st: AudioStream = load(TYPE_SOUND)
+		for i in 4:
+			var p := AudioStreamPlayer.new()
+			p.stream = st
+			p.volume_db = TYPE_VOLUME
+			add_child(p)
+			_type_players.append(p)
+
+
+## 打字聲：對話框、黑幕文字每跳出一個字呼叫一次。
+## 有節流（太快時跳過幾個字）、音高稍微隨機，聽起來不會像機關槍。
+const TYPE_SOUND := "res://assets/audio/type_blip.wav"
+const TYPE_VOLUME := -16.0
+const TYPE_GAP_MS := 55
+var _type_players: Array[AudioStreamPlayer] = []
+var _type_last := 0
+var _type_i := 0
+
+
+func type_tick(ch: String = "x") -> void:
+	if _type_players.is_empty() or (autopilot and not autopilot_watch):
+		return
+	if ch.strip_edges() == "" or "，。、！？：；…—「」『』（）,.!?:;()\"'".contains(ch):
+		return
+	var now := Time.get_ticks_msec()
+	if now - _type_last < TYPE_GAP_MS:
+		return
+	_type_last = now
+	var p := _type_players[_type_i]
+	_type_i = (_type_i + 1) % _type_players.size()
+	p.pitch_scale = randf_range(0.85, 1.15)
+	p.play()
+
+
+func _bgm_target(audio_name: String) -> float:
+	return BGM_VOLUME + float(BGM_GAIN.get(audio_name, 0.0))
+
+
+## 播背景音樂：同一首已經在播就不重來（前言開始的音樂接到第一章）；
+## 換別首時先淡出再淡入；檔案還沒放進來就把目前的音樂淡出，不要讓上一首的氣氛延續下去。
+func play_bgm(audio_name: String) -> void:
+	if audio_name == "" or audio_name == "off":
+		stop_bgm()
+		return
+	if audio_name == _bgm_name and _bgm.playing:
+		return
+	var path := ""
+	for ext in [".ogg", ".mp3", ".wav"]:
+		if ResourceLoader.exists(AUDIO_DIR + audio_name + ext):
+			path = AUDIO_DIR + audio_name + ext
+			break
+	if path == "":
+		print("[GameFlow] 音樂尚未放入：", AUDIO_DIR + audio_name)
+		stop_bgm()
+		return
+	var was_playing := _bgm.playing and _bgm_name != ""
+	_bgm_name = audio_name
+	if _bgm_fade:
+		_bgm_fade.kill()
+	_bgm_fade = create_tween()
+	if was_playing:
+		_bgm_fade.tween_property(_bgm, "volume_db", -40.0, 0.8)
+	_bgm_fade.tween_callback(func():
+		_bgm.stream = load(path)
+		_bgm.volume_db = -40.0
+		_bgm.play())
+	_bgm_fade.tween_property(_bgm, "volume_db", _bgm_target(audio_name), BGM_FADE_IN)
+
+
+## 背景音樂淡出
+func stop_bgm(fade: float = 1.5) -> void:
+	if _bgm_name == "":
+		return
+	_bgm_name = ""
+	if _bgm_fade:
+		_bgm_fade.kill()
+	_bgm_fade = create_tween()
+	_bgm_fade.tween_property(_bgm, "volume_db", -40.0, fade)
+	_bgm_fade.tween_callback(_bgm.stop)
+
+
 ## 前言動畫播完呼叫：有存檔就讓玩家選「繼續」，沒有就輸入名字。
 func start_game() -> void:
 	get_tree().change_scene_to_file(NAME_INPUT_SCENE)
@@ -108,6 +211,7 @@ func finish_game() -> void:
 	# 破關後保留成就與名字，下一輪從第一章（含序章）開始
 	GameState.section_id = ChapterRegistry.first_section_id()
 	GameState.save_game()
+	stop_bgm()
 	get_tree().change_scene_to_file(TITLE_SCENE)
 
 
@@ -137,6 +241,7 @@ func play_from_map(section_id: String) -> void:
 
 func back_to_title() -> void:
 	GameState.save_game()
+	stop_bgm()
 	get_tree().change_scene_to_file(TITLE_SCENE)
 
 

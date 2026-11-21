@@ -155,13 +155,16 @@ func _ready() -> void:
 			_input.placeholder_text = "輸入新名字，重新開始"
 
 	_input.grab_focus.call_deferred()
-	var hb := "res://assets/audio/heartbeat.ogg"
-	if ResourceLoader.exists(hb):
-		var p := AudioStreamPlayer.new()
-		p.stream = load(hb)
-		p.volume_db = -14
-		add_child(p)
-		p.play()
+	for ext in [".ogg", ".mp3", ".wav"]:
+		var hb := "res://assets/audio/heartbeat" + ext
+		if ResourceLoader.exists(hb):
+			var p := AudioStreamPlayer.new()
+			p.stream = load(hb)
+			p.volume_db = -14
+			add_child(p)
+			p.finished.connect(p.play)  # 在輸入名字的畫面一直跳
+			p.play()
+			break
 
 
 ## 心跳：「咚、咚」兩下一組，背景圖跟著輕輕放大、變亮，像在呼吸

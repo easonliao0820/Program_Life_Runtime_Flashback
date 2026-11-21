@@ -2,6 +2,8 @@
 # 場景：公司辦公室（開放式座位），Cindy 的桌上堆滿零食。存摺特寫。之後回到家裡的餐桌。
 
 @bg office
+@bgm office
+@sfx typing
 （報到第一天。你穿著新買的襯衫，站在業務分析部的門口，緊張得手心冒汗。）
 （會議室的門打開，一位穿著深色西裝外套、手裡拿著平板的女人走了出來。）
 @show Claire right
@@ -125,6 +127,7 @@ success: 給爸媽 {family_share} 元。函式寫好一次，以後每個月發�
 
 @hide all
 @bg parents_home
+@bgm warm
 @show 媽媽 left
 （週末，你回家吃飯。你把 {family_share} 元的紅包塞給媽媽，她推了好幾次才收下，轉身走進房間時，你看到她偷偷擦了一下眼睛。）
 @hide all

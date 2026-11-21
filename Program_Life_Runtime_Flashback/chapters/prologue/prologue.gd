@@ -15,6 +15,7 @@ var fade_tween: Tween
 var waiting_for_start = true
 
 func _ready():
+	GameFlow.play_bgm("prologue")  # 第一章的音樂從前言黑畫面就開始，一路接到產房
 	chinese_body.visible_characters = 0
 	chinese_source.visible_characters = 0
 	english_act.modulate.a = 0
@@ -43,14 +44,14 @@ func animate_chinese_body():
 	current_step = 0
 	main_tween = create_tween()
 	var duration = chinese_body.text.length() * typing_speed
-	main_tween.tween_property(chinese_body, "visible_characters", chinese_body.text.length(), duration)
+	main_tween.tween_method(_type_to.bind(chinese_body), 0, chinese_body.text.length(), duration)
 	main_tween.finished.connect(animate_chinese_source)
 
 func animate_chinese_source():
 	current_step = 1
 	main_tween = create_tween()
 	var duration = chinese_source.text.length() * typing_speed
-	main_tween.tween_property(chinese_source, "visible_characters", chinese_source.text.length(), duration)
+	main_tween.tween_method(_type_to.bind(chinese_source), 0, chinese_source.text.length(), duration)
 	main_tween.finished.connect(animate_english_fade)
 
 func animate_english_fade():
@@ -97,3 +98,9 @@ func skip_animation():
 	english_act.modulate.a = 1.0
 
 	finish_sequence()
+
+## 打字：每多一個字就響一聲打字聲
+func _type_to(n: int, label) -> void:
+	if n > label.visible_characters and n > 0:
+		GameFlow.type_tick(label.text[n - 1])
+	label.visible_characters = n
