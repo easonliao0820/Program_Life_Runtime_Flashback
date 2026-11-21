@@ -21,7 +21,7 @@ const ART_DIR := "res://assets/explore/"
 ## 角色數值（單位：背景圖像素）。speed 每秒走幾像素、h 身高、w 寬、climb 能爬上多高、reach 手能伸到頭上多高
 const PLAYERS := {
 	"teen": {"speed": 115.0, "h": 64.0, "w": 26.0, "climb": 48.0, "reach": 24.0, "idle": "player_teen_idle", "walk": "player_teen_walk"},
-	"baby": {"speed": 70.0, "h": 36.0, "w": 34.0, "climb": 60.0, "reach": 40.0, "idle": "player_baby_idle", "walk": "player_baby_crawl"},
+	"baby": {"speed": 70.0, "h": 36.0, "w": 34.0, "climb": 70.0, "reach": 40.0, "idle": "player_baby_idle", "walk": "player_baby_crawl"},
 }
 const REACH_X := 40.0          ## 左右離物品多近才能按 E
 const WEIGHT_STEP := 0.06      ## 書包每多一樣東西，速度少幾成
