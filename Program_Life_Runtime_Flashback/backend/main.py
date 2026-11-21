@@ -36,9 +36,9 @@ from session_repository import (
 	revoke_session,
 )
 from game_data_repository import (
-    get_character,
-    get_knowledge,
-    get_story,
+	get_character,
+	get_knowledge,
+	get_story,
 )
 
 # 本機開發才從專案根目錄補讀設定；既有環境變數不會被覆蓋。
@@ -70,16 +70,16 @@ class GameSaveRequest(BaseModel):
 
 
 class GameAIRequest(BaseModel):
-    player_message: str = Field(
-        min_length=1,
-        max_length=1000
-    )
-    character_id: str = Field(
-        min_length=1,
-        max_length=100
-    )
-    knowledge_id: str | None = None
-    story_id: str | None = None
+	player_message: str = Field(
+		min_length=1,
+		max_length=1000
+	)
+	character_id: str = Field(
+		min_length=1,
+		max_length=100
+	)
+	knowledge_id: str | None = None
+	story_id: str | None = None
 
 
 
@@ -497,112 +497,112 @@ def ai_generate(
 
 @app.post("/ai/generate")
 def ai_generate(
-    payload: AIRequest,
-    authorization: str | None = Header(default=None),
+	payload: AIRequest,
+	authorization: str | None = Header(default=None),
 ):
-    authorize_ai(authorization, verify_google_token)
+	authorize_ai(authorization, verify_google_token)
 
-    if not payload.prompt.strip():
-        raise HTTPException(status_code=422, detail="Prompt 不可為空白")
+	if not payload.prompt.strip():
+		raise HTTPException(status_code=422, detail="Prompt 不可為空白")
 
-    return {"text": generate(payload.prompt)}
+	return {"text": generate(payload.prompt)}
 
 
 @app.get("/characters/{character_id}")
 def read_character(character_id: str):
-    try:
-        character = get_character(character_id)
-    except (ClientError, BotoCoreError) as exc:
-        print(f"角色資料讀取失敗：{type(exc).__name__}")
-        raise HTTPException(
-            status_code=503,
-            detail="角色資料服務暫時無法使用"
-        ) from exc
+	try:
+		character = get_character(character_id)
+	except (ClientError, BotoCoreError) as exc:
+		print(f"角色資料讀取失敗：{type(exc).__name__}")
+		raise HTTPException(
+			status_code=503,
+			detail="角色資料服務暫時無法使用"
+		) from exc
 
-    if character is None:
-        raise HTTPException(
-            status_code=404,
-            detail="找不到角色資料"
-        )
+	if character is None:
+		raise HTTPException(
+			status_code=404,
+			detail="找不到角色資料"
+		)
 
-    return {
-        "success": True,
-        "character": character
-    }
+	return {
+		"success": True,
+		"character": character
+	}
 
 @app.get("/knowledge/{knowledge_id}")
 def read_knowledge(knowledge_id: str):
-    try:
-        knowledge = get_knowledge(knowledge_id)
-    except (ClientError, BotoCoreError) as exc:
-        print(f"教學知識讀取失敗：{type(exc).__name__}")
-        raise HTTPException(
-            status_code=503,
-            detail="教學知識服務暫時無法使用"
-        ) from exc
+	try:
+		knowledge = get_knowledge(knowledge_id)
+	except (ClientError, BotoCoreError) as exc:
+		print(f"教學知識讀取失敗：{type(exc).__name__}")
+		raise HTTPException(
+			status_code=503,
+			detail="教學知識服務暫時無法使用"
+		) from exc
 
-    if knowledge is None:
-        raise HTTPException(
-            status_code=404,
-            detail="找不到教學知識"
-        )
+	if knowledge is None:
+		raise HTTPException(
+			status_code=404,
+			detail="找不到教學知識"
+		)
 
-    return {
-        "success": True,
-        "knowledge": knowledge
-    }
+	return {
+		"success": True,
+		"knowledge": knowledge
+	}
 
 
 @app.get("/stories/{story_id}")
 def read_story(story_id: str):
-    try:
-        story = get_story(story_id)
-    except (ClientError, BotoCoreError) as exc:
-        print(f"劇情資料讀取失敗：{type(exc).__name__}")
-        raise HTTPException(
-            status_code=503,
-            detail="劇情資料服務暫時無法使用"
-        ) from exc
+	try:
+		story = get_story(story_id)
+	except (ClientError, BotoCoreError) as exc:
+		print(f"劇情資料讀取失敗：{type(exc).__name__}")
+		raise HTTPException(
+			status_code=503,
+			detail="劇情資料服務暫時無法使用"
+		) from exc
 
-    if story is None:
-        raise HTTPException(
-            status_code=404,
-            detail="找不到劇情資料"
-        )
+	if story is None:
+		raise HTTPException(
+			status_code=404,
+			detail="找不到劇情資料"
+		)
 
-    return {
-        "success": True,
-        "story": story
-    }
+	return {
+		"success": True,
+		"story": story
+	}
 
 
 @app.post("/ai/game-reply")
 def ai_game_reply(
-    payload: GameAIRequest,
-    authorization: str | None = Header(default=None),
+	payload: GameAIRequest,
+	authorization: str | None = Header(default=None),
 ):
-    # 沿用原本的 AI 存取政策
-    authorize_ai(authorization, verify_google_token)
+	# 沿用原本的 AI 存取政策
+	authorize_ai(authorization, verify_google_token)
 
-    if not payload.player_message.strip():
-        raise HTTPException(
-            status_code=422,
-            detail="玩家問題不可為空白"
-        )
+	if not payload.player_message.strip():
+		raise HTTPException(
+			status_code=422,
+			detail="玩家問題不可為空白"
+		)
 
-    try:
-        text = generate_game_reply(
-            player_message=payload.player_message,
-            character_id=payload.character_id,
-            knowledge_id=payload.knowledge_id,
-            story_id=payload.story_id,
-        )
+	try:
+		text = generate_game_reply(
+			player_message=payload.player_message,
+			character_id=payload.character_id,
+			knowledge_id=payload.knowledge_id,
+			story_id=payload.story_id,
+		)
 
-    except (ClientError, BotoCoreError) as exc:
-        print(f"遊戲 AI 資料讀取失敗：{type(exc).__name__}")
-        raise HTTPException(
-            status_code=503,
-            detail="遊戲資料暫時無法讀取"
-        ) from exc
+	except (ClientError, BotoCoreError) as exc:
+		print(f"遊戲 AI 資料讀取失敗：{type(exc).__name__}")
+		raise HTTPException(
+			status_code=503,
+			detail="遊戲資料暫時無法讀取"
+		) from exc
 
-    return {"text": text}
+	return {"text": text}
