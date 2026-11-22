@@ -396,7 +396,11 @@ func _on_skip() -> void:
 ## 自動駕駛：用 solution 跑一次，確認每一關的參考解答真的能過關
 func _autopilot() -> void:
 	await get_tree().create_timer(1.5 if GameFlow.autopilot_watch else 0.1).timeout
-	_editor.text = fill_code(str(_level.get("solution", "")))
+	var answer := fill_code(str(_level.get("solution", "")))
+	if GameFlow.autopilot_watch:
+		await _type_out(answer)
+	else:
+		_editor.text = answer
 	await _on_run()
 	if _passed:
 		print("[autopilot] ✔ ", _level.get("id", ""), "　", _last_said)
@@ -406,6 +410,31 @@ func _autopilot() -> void:
 	else:
 		push_error("[autopilot] ✘ %s：%s" % [_level.get("id", ""), _last_said])
 		_on_skip()
+
+
+## 觀看模式：把解答一個字一個字打進編輯器（跟著倍速；空白和縮排打得比較快）
+const WATCH_TYPE_SPEED := 14.0   ## 每秒幾個字
+func _type_out(code: String) -> void:
+	_editor.text = ""
+	_editor.grab_focus()
+	var shown := ""
+	for i in code.length():
+		if not is_inside_tree():
+			return
+		var ch := code[i]
+		shown += ch
+		_editor.text = shown
+		_editor.set_caret_line(_editor.get_line_count() - 1)
+		_editor.set_caret_column(_editor.get_line(_editor.get_line_count() - 1).length())
+		if ch == " " or ch == "\t":
+			continue
+		GameFlow.type_tick(ch)
+		var wait := 1.0 / WATCH_TYPE_SPEED
+		if ch == "\n":
+			wait *= 4.0   # 換行停一下，像在想下一行
+		await get_tree().create_timer(wait).timeout
+	_editor.release_focus()
+	await get_tree().create_timer(0.6).timeout
 
 
 func _flash_success() -> void:

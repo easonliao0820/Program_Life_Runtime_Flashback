@@ -1,6 +1,7 @@
 extends Control
 
-## 系統選單（畫面設定書 2.1）：右上角固定四顆按鈕：回顧、存檔、成就、設定。
+## 系統選單（畫面設定書 2.1）：右上角固定五顆按鈕：筆記、回顧、存檔、成就、設定。
+## 筆記：學過的程式觀念整理（內容在 src/game/core/code_notes.gd），走到該小節才解鎖。
 ## 回顧：這次遊玩看過的對話紀錄；存檔：記錄目前所在的小節（讀檔時從該小節開頭開始）；
 ## 成就：已解鎖／未解鎖列表；設定：文字速度、自動速度、AI、音量、記憶地圖（章節選擇）、回標題。
 ## 「設定」合併了原本左上角齒輪（PauseMenu）的功能：打開時遊戲暫停、繼續遊戲、主音量、
@@ -17,6 +18,7 @@ var _content: VBoxContainer
 var _title: Label
 
 
+const CodeNotes := preload("res://src/game/core/code_notes.gd")
 const GEAR_ICON := "res://assets/images/gear.png"
 const BACKEND_URL := "https://oj3wxp63b5ttx6sfklndqcrccq0nnxwq.lambda-url.ap-southeast-2.on.aws"
 
@@ -32,14 +34,14 @@ func _ready() -> void:
 	var row := HBoxContainer.new()
 	row.anchor_left = 1.0
 	row.anchor_right = 1.0
-	row.offset_left = -560
+	row.offset_left = -690
 	row.offset_right = -30
 	row.offset_top = 24
 	row.offset_bottom = 80
 	row.alignment = BoxContainer.ALIGNMENT_END
 	row.add_theme_constant_override("separation", 10)
 	add_child(row)
-	for spec in [["回顧", _open_backlog], ["存檔", _save], ["成就", _open_achievements], ["設定", _open_settings]]:
+	for spec in [["筆記", _open_notes], ["回顧", _open_backlog], ["存檔", _save], ["成就", _open_achievements], ["設定", _open_settings]]:
 		var b := UIKit.button(spec[0], UIKit.NAVY, Color.WHITE, UIKit.SMALL_SIZE)
 		b.custom_minimum_size = Vector2(110, 52)
 		b.pressed.connect(spec[1])
@@ -135,6 +137,56 @@ func _open_backlog() -> void:
 	await get_tree().process_frame
 	var scroll := _content.get_parent() as ScrollContainer
 	scroll.scroll_vertical = int(scroll.get_v_scroll_bar().max_value)
+
+
+## 筆記：學過的程式觀念。還沒走到的小節只顯示「？？？」
+func _open_notes() -> void:
+	var learned := 0
+	for n in CodeNotes.NOTES:
+		if _note_unlocked(n["section"]):
+			learned += 1
+	_open("程式筆記（%d / %d）" % [learned, CodeNotes.NOTES.size()])
+	var cur := ChapterRegistry.get_section(GameState.section_id)
+	if not cur.is_empty():
+		_content.add_child(UIKit.label("現在學到：%s　%s（%s）" % [cur.get("chapter", ""), cur.get("title", ""), cur.get("concepts", "")], 24, Color("#556877")))
+	for n in CodeNotes.NOTES:
+		var sec := ChapterRegistry.get_section(n["section"])
+		var got := _note_unlocked(n["section"])
+		var card := PanelContainer.new()
+		var is_now: bool = n["section"] == GameState.section_id
+		card.add_theme_stylebox_override("panel", UIKit.box(Color("#fbf3dc") if got else Color("#e3e0da"), 8,
+			UIKit.PY_BLUE if is_now else Color.TRANSPARENT, 3 if is_now else 0, 18))
+		var v := VBoxContainer.new()
+		v.add_theme_constant_override("separation", 8)
+		card.add_child(v)
+		var head := "%s　%s" % [sec.get("title", n["section"]), n["title"]]
+		if not got:
+			v.add_child(UIKit.label("？？？　—　%s還沒學到" % sec.get("chapter", ""), 26, Color("#8a939c")))
+			_content.add_child(card)
+			continue
+		v.add_child(UIKit.label(head, 28, UIKit.INK))
+		for p in n["points"]:
+			var l := UIKit.label("・" + p, 23, Color("#3b4652"))
+			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(l)
+		var code_box := PanelContainer.new()
+		code_box.add_theme_stylebox_override("panel", UIKit.box(Color("#161F2B"), 8, Color.TRANSPARENT, 0, 14))
+		var code := Label.new()
+		code.text = n["code"]
+		code.add_theme_font_override("font", UIKit.mono_font())
+		code.add_theme_font_size_override("font_size", 22)
+		code.add_theme_color_override("font_color", Color("#e6edf3"))
+		code_box.add_child(code)
+		v.add_child(code_box)
+		_content.add_child(card)
+
+
+## 走過的小節，或是排在目前小節之前的小節（從記憶地圖跳關也看得到前面的筆記）
+func _note_unlocked(section_id: String) -> bool:
+	if GameState.reached_sections.has(section_id):
+		return true
+	var idx := ChapterRegistry.index_of(section_id)
+	return idx >= 0 and idx <= ChapterRegistry.index_of(GameState.section_id)
 
 
 func _save() -> void:

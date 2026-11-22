@@ -67,6 +67,15 @@ var _fall_sup: int = 0
 var _busy: bool = false        ## 正在爬上家具的動畫
 var _face: int = 1
 var _moving: bool = false
+## 觀看模式的自動示範：用「虛擬按鍵」照一般規則走路、爬、上下樓梯
+var _bot_dir: int = 0
+var _bot_v: int = 0
+var _demo_mode: bool = false
+## 自動示範要撿的東西（沒寫的關卡：全部回憶盒子都打開）
+const DEMO_PICKS := {
+	"ch3_1_bag": ["漫畫", "悠遊卡", "手作巧克力"],
+	"ch3_4_bag": ["准考證", "身分證", "2B鉛筆", "橡皮擦", "手錶"],
+}
 var _stun: float = 0.0
 var _anim_t: float = 0.0
 var _cam_x: float = 0.0
@@ -232,10 +241,24 @@ func play(def: Dictionary) -> Dictionary:
 	_running = true
 	modulate.a = 0.0
 	UIKit.fade(self, 1.0, 0.3)
-	if GameFlow.autopilot:
+	_demo_mode = false
+	_bot_dir = 0
+	_bot_v = 0
+	if GameFlow.autopilot and GameFlow.autopilot_watch:
+		# 觀看模式：真的走一遍給人看
+		_demo_mode = true
+		_demo.call_deferred()
+	elif GameFlow.autopilot:
 		_done.emit.call_deferred()
 	await _done
 	_running = false
+	_bot_dir = 0
+	_bot_v = 0
+	if _demo_mode:
+		# 示範只是給人看：結果跟自動測試一樣（沒撿任何東西），後面的關卡才不會跟著變
+		_items = (def.get("start", []) as Array).duplicate()
+		_code_lines = []
+		_found = {}
 	_prompt.visible = false
 	var t := UIKit.fade(self, 0.0, 0.25)
 	await t.finished
@@ -472,7 +495,7 @@ func _move_player(delta: float) -> void:
 			_sup = _fall_sup
 		return
 
-	var dir := 0
+	var dir := _bot_dir
 	if _key(KEY_LEFT, KEY_A):
 		dir -= 1
 	if _key(KEY_RIGHT, KEY_D):
@@ -516,7 +539,7 @@ func _walk_stairs(dir: int, speed: float, delta: float) -> void:
 	var st: Dictionary = _lay["stairs"][_stair]
 	var top: Vector2 = st["top"]
 	var bottom: Vector2 = st["bottom"]
-	var v := 0.0
+	var v := float(_bot_v)
 	if _key(KEY_UP, KEY_W):
 		v += 1.0
 	if _key(KEY_DOWN, KEY_S):
@@ -1018,3 +1041,190 @@ func _text(v: Control, font: Font, t: String, center: Vector2, fsize: int, col: 
 	if outline:
 		v.draw_string_outline(font, pos, t, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize, 5, Color(0, 0, 0, 0.75))
 	v.draw_string(font, pos, t, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize, col)
+
+
+# ------------------------------------------------------------------
+# 觀看模式：自動示範
+# ------------------------------------------------------------------
+
+func _demo() -> void:
+	var deadline := Time.get_ticks_msec() + 120000
+	await get_tree().create_timer(1.0).timeout
+	var picks: Array = []
+	if _uses_custom_code():
+		for e in _def.get("items", []):
+			picks.append(e["name"])
+	else:
+		picks = (DEMO_PICKS.get(str(_def.get("id", "")), []) as Array).duplicate()
+	# 由近到遠一個一個拿
+	while not picks.is_empty() and _running and Time.get_ticks_msec() < deadline:
+		var best := 0
+		var best_d := INF
+		for i in picks.size():
+			var d := _p.distance_to(_demo_spot_pos(str(picks[i])))
+			if d < best_d:
+				best_d = d
+				best = i
+		var key: String = picks.pop_at(best)
+		if not _spots.has(key):
+			continue
+		var sp: Dictionary = _spots[key]
+		if not sp["visible"] and sp.has("in"):
+			var ckey: String = "#c:" + str(sp["in"])
+			if _spots.has(ckey) and not _spots[ckey]["opened"]:
+				await _demo_go(_spots[ckey]["pos"])
+				await _demo_use(ckey)
+		await _demo_go(sp["pos"])
+		await _demo_use(key)
+	if not _running:
+		return
+	if _spots.has("#exit"):
+		await _demo_go(_spots["#exit"]["pos"])
+		await get_tree().create_timer(0.6).timeout
+		if _running:
+			_done.emit()
+	elif not _finishing:
+		await get_tree().create_timer(1.0).timeout
+		if _running:
+			_done.emit()
+
+
+func _demo_spot_pos(key: String) -> Vector2:
+	if not _spots.has(key):
+		return _p
+	var sp: Dictionary = _spots[key]
+	if not sp["visible"] and sp.has("in") and _spots.has("#c:" + str(sp["in"])):
+		return _spots["#c:" + str(sp["in"])]["pos"]
+	return sp["pos"]
+
+
+func _demo_use(key: String) -> void:
+	await get_tree().create_timer(0.35).timeout
+	if not _running:
+		return
+	_nearest = key
+	_interact()
+	await get_tree().create_timer(0.6).timeout
+
+
+## 走到搆得到 target 的地方：先找能站的地方，再沿著「爬上／跳下／樓梯」一步一步過去
+func _demo_go(target: Vector2) -> void:
+	var goal := _demo_goal_support(target)
+	for _step in 12:
+		if not _running:
+			return
+		if _sup == goal or goal == -1:
+			await _demo_walk_to(target.x)
+			return
+		var path := _demo_path(_sup, goal)
+		if path.is_empty():
+			await _demo_walk_to(target.x)
+			return
+		var edge: Dictionary = path[0]
+		await _demo_walk_to(float(edge["x"]))
+		match str(edge["act"]):
+			"up":
+				_go_up()
+				while _busy and _running:
+					await get_tree().process_frame
+			"down":
+				_go_down()
+				while _falling and _running:
+					await get_tree().process_frame
+			"stair_up", "stair_down":
+				if edge["act"] == "stair_up":
+					_go_up()
+				else:
+					_go_down()
+				_bot_v = 1 if edge["act"] == "stair_up" else -1
+				var t0 := Time.get_ticks_msec()
+				while _stair >= 0 and _running and Time.get_ticks_msec() - t0 < 15000:
+					await get_tree().process_frame
+				_bot_v = 0
+
+
+func _demo_walk_to(x: float) -> void:
+	var s: Dictionary = _supports()[_sup]
+	var half: float = _pl["w"] / 2.0
+	var margin: float = half if s.get("wall", false) else 3.0
+	x = clampf(x, float(s["x0"]) + margin, float(s["x1"]) - margin)
+	var last := _p.x
+	var still := 0.0
+	while _running and absf(_p.x - x) > 3.0:
+		_bot_dir = 1 if x > _p.x else -1
+		await get_tree().process_frame
+		var dt := get_process_delta_time()
+		still = still + dt if absf(_p.x - last) < 0.01 and _stun <= 0.0 and not _busy else 0.0
+		last = _p.x
+		if still > 1.5:
+			break
+	_bot_dir = 0
+
+
+## 能搆到 target 的站立處（不含板凳），越低越好
+func _demo_goal_support(target: Vector2) -> int:
+	var sups := _supports()
+	var best := -1
+	for i in _stool_index():
+		var s: Dictionary = sups[i]
+		var y := float(s["y"])
+		if target.x < float(s["x0"]) - 2.0 or target.x > float(s["x1"]) + 2.0:
+			continue
+		if target.y > y + 12.0 or target.y < y - float(_pl["h"]) - float(_pl["reach"]):
+			continue
+		if best == -1 or y > float(sups[best]["y"]):
+			best = i
+	if best == -1:
+		best = _support_below(target.x, target.y - 1.0)
+	return best
+
+
+## 在站立處之間找路（廣度優先）：每一步是 {act, x, to}
+func _demo_path(from: int, goal: int) -> Array:
+	var sups := _supports()
+	var n := _stool_index()
+	var edges := {}
+	for a in n:
+		edges[a] = []
+	for a in n:
+		var A: Dictionary = sups[a]
+		for b in n:
+			if a == b:
+				continue
+			var B: Dictionary = sups[b]
+			var lo := maxf(float(A["x0"]), float(B["x0"]))
+			var hi := minf(float(A["x1"]), float(B["x1"]))
+			if lo > hi:
+				continue
+			var mid := (lo + hi) / 2.0
+			var dy := float(A["y"]) - float(B["y"])
+			if dy > 2.0 and dy <= float(_pl["climb"]):
+				edges[a].append({"act": "up", "x": mid, "to": b})
+			elif dy < -2.0 and not A.get("wall", false) and _support_below(mid, float(A["y"])) == b:
+				edges[a].append({"act": "down", "x": mid, "to": b})
+	for st in _lay.get("stairs", []):
+		var bi := _support_at(st["bottom"].x, st["bottom"].y)
+		var ti := _support_at(st["top"].x, st["top"].y)
+		if bi >= 0 and ti >= 0 and bi < n and ti < n:
+			edges[bi].append({"act": "stair_up", "x": st["bottom"].x, "to": ti})
+			edges[ti].append({"act": "stair_down", "x": st["top"].x, "to": bi})
+	if from < 0 or from >= n:
+		return []
+	var prev := {from: null}
+	var queue := [from]
+	while not queue.is_empty():
+		var cur: int = queue.pop_front()
+		if cur == goal:
+			break
+		for e in edges[cur]:
+			if not prev.has(e["to"]):
+				prev[e["to"]] = [cur, e]
+				queue.append(e["to"])
+	if not prev.has(goal):
+		return []
+	var path := []
+	var c = goal
+	while prev[c] != null:
+		path.push_front(prev[c][1])
+		c = prev[c][0]
+	return path
