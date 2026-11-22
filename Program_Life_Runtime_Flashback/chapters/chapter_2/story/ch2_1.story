@@ -15,6 +15,15 @@
 （回家的路上，你在爸爸的肩膀上昏昏欲睡。你還不會說話，但派森聽得見你心裡的聲音。）
 派森：你來到這裡也有一年了吧？還習慣嗎？
 
+派森：還記得你出生時說的第一句話嗎？用 print() 就能把心裡的話說出來。引號裡想寫什麼都可以，中文也沒問題。
+
+```python
+print("我好想睡覺")
+print("爸爸的肩膀好寬")
+```
+
+系統：一個 print() 印出一行。引號裡的字會原封不動地出現在畫面上，上面的程式會印出兩行。
+
 @level ch2_1_feeling
 title: 說說你的感想
 goal: 用 print("") 說出你現在的感想。
@@ -22,7 +31,7 @@ tags: print("……")
 hint: 把感想寫在引號裡面，例如 print("這裡好溫暖")。
 starter:
 ```python
-print("")
+print("")   # ← 在引號裡寫下你現在的感想
 ```
 check:
 ```python
@@ -30,7 +39,7 @@ assert out.strip() != "", "在引號裡寫下你的感想吧。"
 ```
 solution:
 ```python
-print("這裡好溫暖")
+print("這裡好溫暖")   # ← 在引號裡寫下你現在的感想
 ```
 success: 「{last_output}」——這是你第一次用 print 說出自己的心情。
 @end
@@ -62,7 +71,7 @@ hint: 第一行寫 love = "爸爸媽媽"，引號裡也可以換成你想放進�
 hint: 第二行的 f 要放在引號前面，盒子的名字放進 { } 裡。
 starter:
 ```python
-love = 
+love =    # ← 在這裡放進你愛的人（文字要加引號）
 print(f"我愛我的{love}")
 ```
 check:
@@ -72,7 +81,7 @@ assert out.strip() == "我愛我的" + love, "請完整印出「我愛我的」�
 ```
 solution:
 ```python
-love = "爸爸媽媽"
+love = "爸爸媽媽"    # ← 在這裡放進你愛的人（文字要加引號）
 print(f"我愛我的{love}")
 ```
 success: 「{last_output}」——這份愛被存進 love 這個盒子了，以後叫它的名字就能拿出來。
@@ -94,6 +103,19 @@ confirm: 都找到了！
 
 派森：盒子裡裝的東西有不同的「種類」。沒有小數點的數字是 int，有小數點的是 float，用引號包起來的文字是 str。用 type() 就能看出盒子裡裝的是哪一種。
 
+系統：type() 會告訴你盒子裡裝的是哪一種資料，常常和 print() 一起用：
+
+```python
+age = 7
+height = 120.5
+name = "小明"
+print(type(age))      # <class 'int'>
+print(type(height))   # <class 'float'>
+print(type(name))     # <class 'str'>
+```
+
+系統：int 是整數、float 是有小數點的數、str 是文字。剛剛打開的盒子已經變成 mom_age、my_age、my_name，這關就用 print(type(…)) 把它們各印出來。
+
 @level ch2_1_types
 title: 盒子裡裝的是什麼？
 goal: 剛剛打開的回憶盒子都變成了程式。用 type() 印出 mom_age、my_age、my_name 各是哪一種資料。
@@ -105,6 +127,7 @@ starter:
 
 print(type(mom_age))
 print(type(my_age))
+# ← 在這裡照上面的樣子，再印出 my_name 的種類
 ```
 check:
 ```python
@@ -182,11 +205,11 @@ assert [x.strip() for x in captured.splitlines() if x.strip()] == ["<class 'str'
 ```
 solution:
 ```python
-mom_age = 30
-my_age = 1.5
-my_name = "小艾"
+<<explore_code>>
+
 print(type(mom_age))
 print(type(my_age))
+# ← 在這裡照上面的樣子，再印出 my_name 的種類
 print(type(my_name))
 ```
 success: int、float、str，三個盒子的種類都認出來了：媽媽的年齡、你的歲數、你的名字，各有各的樣子。

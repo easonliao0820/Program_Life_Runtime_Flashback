@@ -33,16 +33,35 @@ print(f"已記錄：{value}")
 @phone off
 派森：int() 看不懂國字，程式就當機了。這時候可以用 try 和 except：先「試試看」，如果出錯，就改做另一件事，而不是整個當掉。
 
+系統：try / except 的寫法：
+
+```python
+text = "abc"
+try:
+    num = int(text)         # 先試試看
+    print("轉好了", num)
+except ValueError:
+    print("這不是數字喔")    # 上面出錯，就改做這裡
+```
+
+系統：int("abc") 會發生 ValueError（數值錯誤）。放在 try 裡面時，程式不會當掉，而是跳到 except 底下。上面的例子會印出「這不是數字喔」。
+系統：try 和 except 要對齊，它們底下的程式都要往內縮。在函式裡，except 底下寫 return None，代表「這次沒有結果」，函式就在這裡結束，不會往下跑到 if。
+派森：所以這關要把 value = int(text) 搬進 try 裡面；except 底下印出提醒（記得提到「數字」），再 return None。
+
 @level ch5_3_pressure
 title: 爸爸的血壓紀錄
 goal: 修改 record_pressure()，讓爸爸輸入國字時不會當機，並給出貼心的提示；輸入數字時照常記錄。
+step: 在 value = int(text) 上面加一行 try:，並把它往內縮
+step: 和 try 對齊寫 except ValueError:，底下印出提示，再 return None
+step: 下面的 if / else 不用動
 tags: try: | except ValueError: | 140 以上偏高
 hint: 把 value = int(text) 放進 try: 底下；except ValueError: 底下印出提示，然後 return None。
 hint: try 和 except 要對齊，底下的程式各自往內縮。
+hint: 提示文字裡要有「數字」或「輸入」，例如：請輸入阿拉伯數字喔，像是 120。
 starter:
 ```python
 def record_pressure(text):
-    value = int(text)
+    value = int(text)   # ← 把這行放進 try 裡；出錯時在 except 底下提醒並 return None
     if value >= 140:
         print(f"記錄 {value}，有點偏高，記得跟醫生說。")
     else:
@@ -100,7 +119,7 @@ solution:
 ```python
 def record_pressure(text):
     try:
-        value = int(text)
+        value = int(text)   # ← 把這行放進 try 裡；出錯時在 except 底下提醒並 return None
     except ValueError:
         print("要輸入阿拉伯數字喔，像是 120。")
         return None

@@ -25,6 +25,21 @@
 系統：while 迴圈會在條件成立的期間一直重複，直到條件不成立才停下。跟 for 不同，你不需要事先知道要重複幾次。
 派森：真實的筊杯，兩個杯子一正一反就是聖杯，所以聖杯出現的機率大約是一半，笑杯和陰杯各約四分之一。我們可以在 list 裡放兩個 "聖杯" 來模擬。
 
+系統：「連續」的寫法：成功就加 1，失敗就歸零，等到數字夠了，while 就停下來。
+
+```python
+import random
+coin = ["正面", "反面"]
+streak = 0
+while streak < 2:                     # 還沒連續兩次就繼續丟
+    if random.choice(coin) == "正面":
+        streak += 1                   # 連續次數加 1
+    else:
+        streak = 0                    # 斷掉了，從 0 重新數
+print("連續兩次正面！")
+```
+
+系統：streak += 1 是「加 1 再放回去」；streak = 0 是「歸零」。每丟一次，while 都會重新檢查 streak < 2 還成不成立。
 系統：這裡的函式外框已經準備好了。draw() 代表擲一次筊，你只需要完成兩個 pass：聖杯時加1，其他結果歸零。
 @level ch3_3_divination
 title: 奶奶的三個聖杯
@@ -49,9 +64,9 @@ def divine(draw):
         print(f"第 {total_attempts} 次：{outcome}")
 
         if outcome == "聖杯":
-            pass  # 聖杯：連續次數加1
+            pass  # ← 把 pass 換掉：聖杯時，連續次數加 1
         else:
-            pass  # 其他：連續次數歸零
+            pass  # ← 把 pass 換掉：其他結果，連續次數歸零
 
     return total_attempts
 
@@ -234,11 +249,11 @@ solution:
 ```python
 import random
 
-results = ["聖杯", "聖杯", "笑杯", "陰杯"]
+results = ["聖杯", "聖杯", "笑杯", "陰杯"]# 聖杯的機率約 1/2
 
 def divine(draw):
-    consecutive_holy = 0
-    total_attempts = 0
+    consecutive_holy = 0 # 紀錄連續聖杯的次數
+    total_attempts = 0 # 紀錄總共擲了幾次
 
     while consecutive_holy < 3:
         outcome = draw()
@@ -246,9 +261,9 @@ def divine(draw):
         print(f"第 {total_attempts} 次：{outcome}")
 
         if outcome == "聖杯":
-            consecutive_holy += 1
+            consecutive_holy += 1  # ← 把 pass 換掉：聖杯時，連續次數加 1
         else:
-            consecutive_holy = 0
+            consecutive_holy = 0  # ← 把 pass 換掉：其他結果，連續次數歸零
 
     return total_attempts
 

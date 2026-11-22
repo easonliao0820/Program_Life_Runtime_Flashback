@@ -53,13 +53,35 @@ Claire：還有十分鐘，改好再拿進來。
 （你回到座位，手指一直發抖。Cindy 默默把椅子滑了過來。）
 Cindy：沒事的，每個人第一年都會被 Claire 退件，我第一次被退了四次。來，我幫你對數字，你改程式。
 派森：不要把會變的數字寫死。有幾個月，就讓程式自己用 len() 去數。
+派森：至於找冠軍，就像打擂台。一開始讓 best_total = 0 站在台上；每一區輪流上台比，總業績比台上的大，就換它站上去，順便把名字記在 best_region。全部比完，台上的就是冠軍。
+
+系統：sum([1, 2, 3]) 是 6，len([1, 2, 3]) 是 3，平均就是 sum ÷ len。中區只有兩個月，還除以 3 就錯了。
+系統：「打擂台」找最大值的寫法長這樣：
+
+```python
+scores = {"小明": 70, "小華": 92, "小美": 85}
+best_name = ""
+best_score = 0
+for name, score in scores.items():
+    if score > best_score:   # 比台上的大，就換人
+        best_score = score
+        best_name = name
+print(best_name, best_score)   # 小華 92
+```
+
+系統：注意縮排：if 在 for 裡面，所以每一個人都會比一次；if 底下的兩行再往內縮，只有「比較大」的時候才會更新。
 
 @level ch5_2_report
 title: Claire 的報表（還有十分鐘）
 goal: 找出第一版程式的錯誤，修正 summarize()；再加上找出「本季冠軍」的程式，印出冠軍和它的總業績。
+intro: 先修平均，再用「打擂台」找冠軍。
+step: summarize() 裡的 3 改成 len(months)
+step: 在「找出本季冠軍」底下寫 if：這區的 total 比 best_total 大，就更新 best_total 和 best_region
+step: 執行，最後一行會印出冠軍
 tags: 北區 120・98・143 | 中區 88・102 | 南區 130・125・160 | 不要把 3 寫死
 hint: 月平均應該除以 len(months)，而不是 3。
 hint: 用 best_region、best_total 兩個盒子記住目前最高的一區：if total > best_total 就更新。
+hint: if 要和上面的 print 對齊（在 for 裡面），if 底下的兩行再往內縮一格。
 starter:
 ```python
 sales = {
@@ -70,7 +92,7 @@ sales = {
 
 def summarize(months):
     total = sum(months)
-    average = round(total / 3, 1)   # 第一版：直接除以 3
+    average = round(total / 3, 1)   # ← 錯在這裡：不要寫死 3
     return total, average
 
 best_region = ""
@@ -78,7 +100,7 @@ best_total = 0
 for region, months in sales.items():
     total, average = summarize(months)
     print(f"{region}：總業績 {total} 萬，月平均 {average} 萬")
-    # 找出本季冠軍
+    # ← 在這裡找出本季冠軍：比 best_total 大，就更新 best_total 和 best_region
 
 print(f"本季冠軍：{best_region}，總業績 {best_total} 萬")
 ```
@@ -181,11 +203,15 @@ for data in [{"北區":[500,10],"中區":[10,20],"南區":[1]}, {"北區":[1],"�
 ```
 solution:
 ```python
-sales = {"北區": [120, 98, 143], "中區": [88, 102], "南區": [130, 125, 160]}
+sales = {
+    "北區": [120, 98, 143],
+    "中區": [88, 102],        # 中區這一季第二個月才成立
+    "南區": [130, 125, 160],
+}
 
 def summarize(months):
     total = sum(months)
-    average = round(total / len(months), 1)
+    average = round(total / len(months), 1)   # ← 錯在這裡：不要寫死 3
     return total, average
 
 best_region = ""
@@ -193,9 +219,11 @@ best_total = 0
 for region, months in sales.items():
     total, average = summarize(months)
     print(f"{region}：總業績 {total} 萬，月平均 {average} 萬")
+    # ← 在這裡找出本季冠軍：比 best_total 大，就更新 best_total 和 best_region
     if total > best_total:
         best_total = total
         best_region = region
+
 print(f"本季冠軍：{best_region}，總業績 {best_total} 萬")
 ```
 success: 中區月平均 95.0 萬，本季冠軍是南區 415 萬。不再把 3 寫死，十分鐘內趕上了！

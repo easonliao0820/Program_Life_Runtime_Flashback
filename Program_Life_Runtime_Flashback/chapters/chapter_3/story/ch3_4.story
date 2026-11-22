@@ -25,6 +25,30 @@ confirm: 檢查完畢
 
 系統：for 迴圈裡面還可以再放一個 for 迴圈，叫做「雙層迴圈」。break 可以提早結束最內層的迴圈。
 
+系統：先看一個小例子。外層的 for 每走一步，內層的 for 就會從頭跑完一輪：
+
+```python
+for a in ["A", "B"]:
+    for n in [1, 2]:
+        print(a, n)
+# 依序印出：A 1、A 2、B 1、B 2
+```
+
+系統：break 會立刻跳出「它所在的那一層」迴圈。在內層找到東西之後 break，就不用再翻剩下的，直接回到外層拿下一樣。
+
+```python
+count = 0
+for want in ["筆", "尺"]:
+    for item in ["橡皮擦", "筆", "尺"]:
+        if item == want:
+            count += 1
+            break
+print(count)   # 2
+```
+
+系統：count += 1 的意思是「把 count 加 1 再放回去」，和 count = count + 1 一樣。
+派森：這關也是一樣的做法：外層拿出簡章上的每一樣，內層翻你的書包，找到就 count += 1，然後 break。最後 count 是 5，就代表五樣都帶齊了。
+
 @level ch3_4_check
 title: 簡章上的五樣東西
 goal: 用雙層 for 迴圈檢查：外層拿出簡章上的每一樣，內層翻書包裡的每一樣，找到就 count += 1，然後 break。五樣都要帶齊！
@@ -40,7 +64,7 @@ count = 0   # 用來計算帶對的物品數量
 for req in required:          # 外層：拿出簡章上的每一樣
     for item in my_bag:       # 內層：翻書包裡的每一樣
         if item == req:       # 找到了
-            pass              # 把這行換成 count += 1 和 break
+            pass              # ← 把這行換成兩行：count 加 1，然後 break
 
 if count == len(required):
     print("（你檢查了一下背包，簡章要求的五樣物品都帶齊了！）")
@@ -187,13 +211,15 @@ for test_bag, expected_count in cases:
 solution:
 ```python
 required = ["准考證", "身分證", "2B鉛筆", "橡皮擦", "手錶"]
-my_bag = ["身分證", "2B鉛筆", "水壺", "准考證", "橡皮擦", "手錶"]
-count = 0
-for req in required:
-    for item in my_bag:
-        if item == req:
+<<explore_code>>
+count = 0   # 用來計算帶對的物品數量
+
+for req in required:          # 外層：拿出簡章上的每一樣
+    for item in my_bag:       # 內層：翻書包裡的每一樣
+        if item == req:       # 找到了
             count += 1
             break
+
 if count == len(required):
     print("（你檢查了一下背包，簡章要求的五樣物品都帶齊了！）")
 else:

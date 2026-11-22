@@ -30,9 +30,24 @@ cg: 人生地圖
 @level end1_voice
 title: 回憶一：第一聲
 goal: 讓派森聽見你的聲音：用 print() 說出「別走，派森」。
+intro: 還記得第一章學的 print() 嗎？
+step: 把「別走，派森」放進引號
+step: 再放進 print( ) 的括號裡，按執行
+tags: print("……")
+hint: 文字要用英文半形的引號包起來，再放進 print( ) 裡。
+hint: 寫法：print("別走，派森")
+lesson: 派森：……還記得嗎？我們最早學的那一句。
+lesson: 系統：print() 會把括號裡的東西印出來；文字要用英文半形的引號包起來。
+lesson: @example
+lesson: 系統：所以要說「別走，派森」，就把這句話放進引號，再放進 print( ) 的括號裡。
+example:
+```python
+print("你好")          # 印出：你好
+print("今天天氣很好")   # 印出：今天天氣很好
+```
 starter:
 ```python
-print()
+print()   # ← 在括號裡說出：別走，派森
 ```
 check:
 ```python
@@ -43,7 +58,7 @@ assert any(isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id 
 ```
 solution:
 ```python
-print("別走，派森")
+print("別走，派森")   # ← 在括號裡說出：別走，派森
 ```
 success: 「別走，派森」——你的聲音，派森聽見了。
 @end
@@ -51,9 +66,24 @@ success: 「別走，派森」——你的聲音，派森聽見了。
 @level end1_love
 title: 回憶二：愛的盒子
 goal: 找回剛出生時存下的那個變數：建立 love，再用 f-string 印出「我愛我的○○」。
+intro: 變數就是貼了名字的盒子。
+step: 在 love = 後面放進你愛的人，記得加引號
+step: 第二行不用改，按執行
+tags: love = "文字" | f-string
+hint: 文字要加引號，例如 "爸爸媽媽"。
+hint: 寫法：love = "爸爸媽媽"
+lesson: 系統：變數是貼了名字的盒子：名字 = 值。放文字時要加引號。
+lesson: 系統：f-string 是在引號前面加一個 f，大括號裡寫變數的名字，印出來時就會換成盒子裡的東西。
+lesson: @example
+lesson: 系統：這關只要在 love = 後面放進你愛的人（記得加引號），第二行不用改。
+example:
+```python
+food = "布丁"
+print(f"我喜歡{food}")   # 我喜歡布丁
+```
 starter:
 ```python
-love = 
+love =    # ← 在這裡放進你愛的人（文字要加引號）
 print(f"我愛我的{love}")
 ```
 check:
@@ -63,7 +93,7 @@ assert ("我愛我的" + love) in out, "要印出「我愛我的" + love + "」�
 ```
 solution:
 ```python
-love = "爸爸媽媽"
+love = "爸爸媽媽"    # ← 在這裡放進你愛的人（文字要加引號）
 print(f"我愛我的{love}")
 ```
 success: 愛的盒子找回來了：{last_output}
@@ -72,10 +102,25 @@ success: 愛的盒子找回來了：{last_output}
 @level end1_friends
 title: 回憶三：朋友清單
 goal: 朋友清單裡少了一個人。用 append() 把派森找回來，再印出朋友的人數和名單。
+intro: list 加東西用 append()。
+step: 在中間空白那一行，用 append() 把 "派森" 加進 friends
+step: 執行，人數會從 7 變成 8
+tags: friends.append("派森") | len(friends)
+hint: 要寫在 friends 建立之後、print 之前。
+hint: 寫法：friends.append("派森")
+lesson: 系統：list 用中括號裝很多東西。append() 會把東西加到最後面，len() 會算出有幾樣。
+lesson: @example
+lesson: 系統：這關要在朋友清單建立之後、print 之前，用 append() 把 "派森" 加回去。人數會從 7 變成 8。
+example:
+```python
+fruits = ["蘋果", "香蕉"]
+fruits.append("葡萄")         # 加到最後面
+print(len(fruits), fruits)    # 3 ['蘋果', '香蕉', '葡萄']
+```
 starter:
 ```python
 friends = ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞", "Claire", "Cindy"]
-
+# ← 在這裡把派森加回朋友清單
 print(f"我的朋友有 {len(friends)} 個：{friends}")
 ```
 check:
@@ -101,6 +146,7 @@ assert isinstance(actual_friends, list) and actual_friends == friends, "輸出�
 solution:
 ```python
 friends = ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞", "Claire", "Cindy"]
+# ← 在這裡把派森加回朋友清單
 friends.append("派森")
 print(f"我的朋友有 {len(friends)} 個：{friends}")
 ```
@@ -110,10 +156,27 @@ success: 朋友清單又是 8 個人了，派森也在裡面。
 @level end1_days
 title: 回憶四：那 100 天
 goal: 用迴圈和 if，找出倒數時每一個「撐過一段」的日子（可以被 25 整除的那幾天）。
+intro: 「可以被 25 整除」就是除以 25 的餘數是 0。
+step: 在 if 和冒號中間，寫出「day 可以被 25 整除」的條件
+step: 執行，會印出 100、75、50、25 四天
+tags: range(100, 0, -1) | day % 25 == 0
+hint: % 是取餘數：day % 25 就是 day 除以 25 的餘數。
+hint: 條件寫法：day % 25 == 0
+lesson: 系統：range(100, 0, -1) 會從 100 開始，每次減 1，數到 1 為止。
+lesson: 系統：% 是取餘數。day % 25 是 day 除以 25 剩下多少；剩 0 就代表剛好整除。
+lesson: @example
+lesson: 系統：if 後面、冒號前面，要寫的是「條件」。條件成立，底下那行才會執行。
+example:
+```python
+for n in range(10, 0, -1):
+    if n % 5 == 0:      # n 可以被 5 整除
+        print(n)
+# 印出：10、5
+```
 starter:
 ```python
 for day in range(100, 0, -1):
-    if :
+    if :   # ← 在 if 和冒號中間寫條件：day 可以被 25 整除
         print(f"倒數第 {day} 天，我還在。")
 ```
 check:
@@ -127,7 +190,7 @@ assert any(isinstance(n,ast.For) and any(isinstance(child,ast.If) for child in a
 solution:
 ```python
 for day in range(100, 0, -1):
-    if day % 25 == 0:
+    if day % 25 == 0:   # ← 在 if 和冒號中間寫條件：day 可以被 25 整除
         print(f"倒數第 {day} 天，我還在。")
 ```
 success: 倒數 100、75、50、25 天——那 100 天，你一直都在。
@@ -135,11 +198,28 @@ success: 倒數 100、75、50、25 天——那 100 天，你一直都在。
 
 @level end1_places
 title: 回憶五：人生地圖
-goal: 用字典的 .items() 查出每段回憶發生在哪裡，一行印一段：「事件 → 地點」。
+goal: 用字典的 .items() 查出每段回憶發生在哪裡，一行印一段：「事件 -> 地點」。
+intro: .items() 可以一次拿出字典的鍵和值。
+step: 在空白處寫 for，用 .items() 一次拿出事件 event 和地點 place
+step: 在 for 裡面（往內縮）用 print 印出「事件 -> 地點」
+tags: for event, place in places.items() | ->（減號＋大於）
+hint: 第一行：for event, place in places.items():
+hint: 第二行往內縮，用 f-string 印出：大括號放 event、中間是 -> 、再一個大括號放 place。-> 是「減號」加「大於」兩個符號。
+lesson: 系統：字典的 .items() 會一次拿出每一筆的「鍵」和「值」，for 後面用兩個名字接住。
+lesson: @example
+lesson: 系統：for 那一行最後要有冒號，底下的 print 要往內縮四格。這關請用 event 接事件、place 接地點，印成「事件 -> 地點」。
+example:
+```python
+price = {"吐司": 35, "奶茶": 25}
+for food, money in price.items():
+    print(f"{food} -> {money}")
+# 吐司 -> 35
+# 奶茶 -> 25
+```
 starter:
 ```python
 places = {"出生": "醫院", "第一次算數": "早餐店", "遇見倖芳": "捷運站", "奶奶的祈禱": "文昌帝君廟", "第一次被說做得好": "Claire 的會議室"}
-
+# ← 在這裡寫 for 迴圈，一行印出一段「事件 -> 地點」
 ```
 check:
 ```python
@@ -147,7 +227,7 @@ import ast
 from collections import Counter
 expected_places = {"出生":"醫院","第一次算數":"早餐店","遇見倖芳":"捷運站","奶奶的祈禱":"文昌帝君廟","第一次被說做得好":"Claire 的會議室"}
 assert "places" in globals() and isinstance(places,dict) and places == expected_places, "請保留完整的人生地圖，不能刪除或改動地點。"
-expected = [f"{event} → {place}" for event,place in expected_places.items()]
+expected = [f"{event} -> {place}" for event,place in expected_places.items()]
 assert Counter(x.strip() for x in lines if x.strip()) == Counter(expected), "請印出每筆正確事件及地點，不可漏項、重複或印錯地點；順序可以不同。"
 assert any(isinstance(n,ast.For) and any(
            isinstance(call,ast.Call) and isinstance(call.func,ast.Attribute)
@@ -158,8 +238,9 @@ assert any(isinstance(n,ast.For) and any(
 solution:
 ```python
 places = {"出生": "醫院", "第一次算數": "早餐店", "遇見倖芳": "捷運站", "奶奶的祈禱": "文昌帝君廟", "第一次被說做得好": "Claire 的會議室"}
+# ← 在這裡寫 for 迴圈，一行印出一段「事件 -> 地點」
 for event, place in places.items():
-    print(f"{event} → {place}")
+    print(f"{event} -> {place}")
 ```
 success: 從醫院、早餐店、捷運站，一路到 Claire 的會議室，人生地圖接起來了。
 @end

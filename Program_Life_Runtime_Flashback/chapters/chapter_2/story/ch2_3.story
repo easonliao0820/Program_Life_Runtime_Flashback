@@ -41,7 +41,7 @@ starter:
 soy_milk = 25
 strawberry_toast = 60
 clerk_total = 72
-my_answer =    # 算算看：打 85 折之後是多少？
+my_answer =    # ← 在這裡算：打 85 折之後是多少？（記得用 round）
 if my_answer == clerk_total:
     print(f"沒問題！總共是 {my_answer} 元。")
 else:
@@ -73,7 +73,7 @@ solution:
 soy_milk = 25
 strawberry_toast = 60
 clerk_total = 72
-my_answer = round((soy_milk + strawberry_toast) * 0.85)
+my_answer = round((soy_milk + strawberry_toast) * 0.85)    # ← 在這裡算：打 85 折之後是多少？（記得用 round）
 if my_answer == clerk_total:
     print(f"沒問題！總共是 {my_answer} 元。")
 else:
@@ -81,6 +81,20 @@ else:
 ```
 success: 85 折之後是 72 元，跟結帳螢幕上一樣。店員算對了，可以放心付錢。
 @end
+
+派森：這次換「第二件打折」。重點是：只有第二瓶要乘上折數，第一瓶還是原價。
+系統：6 折就是乘上 0.6，8 折就是乘上 0.8。打折只會作用在你乘上去的那一項。
+
+```python
+bread = 40
+juice = 20
+total = bread + juice + juice * 0.5   # 第二瓶果汁半價
+print(round(total))                    # 70
+```
+
+系統：電腦會先算乘法：juice * 0.5 是 10，再加上麵包 40 和第一瓶果汁 20，總共 70。
+系統：一個等號 = 是「把東西放進盒子」；兩個等號 == 才是「比較兩邊一不一樣」，結果是 True 或 False。千萬別搞混。
+派森：所以這關要做兩件事：先把 my_answer 算出來，再把 if 後面的 False 換成「my_answer 和店員收的錢一樣嗎」的比較。
 
 @level ch2_3_onigiri
 title: 關卡二：第二件 6 折
@@ -95,10 +109,10 @@ milk_tea = 30
 clerk_total = 95
 
 # ① 把 0 換成正確的計算式
-my_answer = 0
+my_answer = 0          # ← 把 0 換成計算式
 
 # ② 把 False 換成兩個金額是否相等的比較式
-if False:
+if False:              # ← 把 False 換成比較式
     print("店員算對了！")
 else:
     print("店員算錯了，請再確認金額。")
@@ -191,9 +205,11 @@ onigiri = 35
 milk_tea = 30
 clerk_total = 95
 
-my_answer = round(onigiri + milk_tea + milk_tea * 0.6)
+# ① 把 0 換成正確的計算式
+my_answer = round(onigiri + milk_tea + milk_tea * 0.6)          # ← 把 0 換成計算式
 
-if my_answer == clerk_total:
+# ② 把 False 換成兩個金額是否相等的比較式
+if my_answer == clerk_total:              # ← 把 False 換成比較式
     print("店員算對了！")
 else:
     print("店員算錯了，請再確認金額。")
@@ -208,6 +224,19 @@ success: 第二瓶6折，應付83元！你用程式發現店員多收了12元。
 （店員一臉忙碌，後面的人已經排成一條長龍。那個女生急得臉都紅了。）
 派森：你剛剛練習的東西，現在派得上用場了。
 
+系統：「全部打 9 折」跟上一題不一樣：要先把全部加起來，再一起乘上 0.9。這時候一定要用括號，因為電腦會「先乘除、後加減」。
+
+```python
+cookie = 20
+milk = 30
+wrong = cookie * 2 + milk * 0.9      # 沒括號：只有牛奶打到折
+right = (cookie * 2 + milk) * 0.9    # 有括號：先加總，再整筆打折
+print(round(wrong), round(right))    # 67 63
+```
+
+系統：沒加括號時，0.9 只乘到最後一項；加了括號，括號裡會先算完，再一起打折。
+系統：round() 會四捨五入成整數，例如 99.9 會變成 100。算好 my_answer 之後，下面的 if 會自動幫你跟店員收的錢比對。
+
 @level ch2_3_noodles
 title: 關卡三：幫她算算看
 goal: 三明治49元兩個＋茶葉蛋13元，全部打9折，店員收111元。使用 round() 計算金額，保留原本的 if / else 判斷及輸出格式，只補上 my_answer 的計算式。只輸出判斷結果那一句。
@@ -219,7 +248,7 @@ starter:
 sandwich = 49
 tea_egg = 13
 clerk_total = 111
-my_answer = 
+my_answer =    # ← 在這裡算：全部加起來再打 9 折（記得括號和 round）
 if my_answer == clerk_total:
     print(f"沒問題！總共是 {my_answer} 元。")
 else:
@@ -273,7 +302,7 @@ solution:
 sandwich = 49
 tea_egg = 13
 clerk_total = 111
-my_answer = round((sandwich * 2 + tea_egg) * 0.9)
+my_answer = round((sandwich * 2 + tea_egg) * 0.9)    # ← 在這裡算：全部加起來再打 9 折（記得括號和 round）
 if my_answer == clerk_total:
     print(f"沒問題！總共是 {my_answer} 元。")
 else:

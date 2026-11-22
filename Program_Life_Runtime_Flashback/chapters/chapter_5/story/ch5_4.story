@@ -60,9 +60,34 @@
 派森：那我們把每一段回憶，都做成一個「物件」吧。每一段回憶都有一樣的格式：發生了什麼、幾歲、當時的心情。我們先寫一張「設計圖」，再照著設計圖做出一段一段的回憶。
 系統：class 就是設計圖，用它做出來的東西叫做「物件」。__init__ 會在物件被做出來時執行，用 self. 把資料存進物件裡；寫在 class 裡的函式，叫做這個物件的「方法」。
 
+系統：先看一個小例子：
+
+```python
+class Pet:
+    def __init__(self, name, age):
+        self.name = name      # 把資料存進物件
+        self.age = age
+
+    def hello(self):
+        print(f"我是{self.name}，{self.age} 歲")
+
+dog = Pet("小白", 3)          # 照設計圖做出一個物件
+dog.hello()                  # 我是小白，3 歲
+pets = [dog]
+pets.append(Pet("咪咪", 2))  # 物件也可以放進 list
+```
+
+系統：Pet("小白", 3) 會執行 __init__，把 "小白" 存進 self.name、把 3 存進 self.age。之後用「物件.方法()」叫它做事。
+系統：括號裡的資料要照 __init__ 的順序填：Memory 的順序是「發生了什麼、幾歲、心情」，文字要加引號，年齡是數字不用加。
+派森：相簿裡已經有四段回憶了。你要用 Memory( ) 做出一段你自己的回憶，再用 album.append() 放進去。
+
 @level ch5_4_album
 title: 回憶相簿
 goal: 用 Memory 這張設計圖，建立一段屬於你自己的回憶，加進 album，然後印出整本相簿。
+intro: 相簿裡已經有 4 段回憶，再加 1 段你自己的就完成了。
+step: 在「加入一段你自己的回憶」底下寫 album.append( )
+step: 括號裡放 Memory( )，依序填：發生了什麼（加引號）、幾歲（數字）、心情（加引號）
+step: 執行，相簿會多印出你的那一段
 tags: class Memory | Memory("發生了什麼", 幾歲, "心情") | album.append(...) | memory.recall()
 hint: 在 album 的中括號裡加一行：Memory("你的回憶", 年齡, "心情"),
 hint: 也可以在 album 建立之後寫 album.append(Memory("……", 30, "……"))。
@@ -83,7 +108,7 @@ album = [
     Memory("把第一份薪水分給爸媽", 23, "幸福"),
     Memory("Claire 第一次說「做得好」", 23, "想哭"),
 ]
-# 在這裡加入一段你自己的回憶
+# ← 在這裡加入一段你自己的回憶：album 加上 Memory(發生了什麼, 幾歲, 心情)
 
 
 for memory in album:
@@ -153,10 +178,13 @@ class Memory:
 album = [
     Memory("第一次自己算早餐錢", 5, "驕傲"),
     Memory("奶奶擲出三個聖杯", 18, "感動"),
+    Memory("把第一份薪水分給爸媽", 23, "幸福"),
+    Memory("Claire 第一次說「做得好」", 23, "想哭"),
 ]
+# ← 在這裡加入一段你自己的回憶：album 加上 Memory(發生了什麼, 幾歲, 心情)
 album.append(Memory("在湖邊看日出", 30, "平靜"))
-album.append(Memory("第一次帶新人", 35, "緊張"))
-album.append(Memory("整理回憶相簿", 50, "溫暖"))
+
+
 for memory in album:
     memory.recall()
 ```

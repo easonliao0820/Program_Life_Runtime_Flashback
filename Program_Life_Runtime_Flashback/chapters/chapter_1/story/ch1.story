@@ -34,6 +34,9 @@ print("Hello, World!")
 ```
 
 ……：這是一句很古老的咒語。很久很久以前，每個第一次來到這個語言世界的人，說出的第一句話都是它，意思是：「哈囉，世界！」
+……：print 是「印出來」的意思。括號裡放的東西，會出現在畫面上。
+……：文字要用引號 " " 包起來，電腦才知道那是一句話，不是指令。
+……：還有，括號和引號都要用英文半形的 ( ) 和 " "。全形的（ ）和「 」，這個世界的語言看不懂。
 ……：輪到你了。把這句話放進引號裡，再用 print() 包起來，跟這個世界打聲招呼吧。
 
 # 【判定】大小寫、逗號和驚嘆號不同也算通過（例如 print("hello world")）；
@@ -46,7 +49,7 @@ hint: 括號和引號都要用英文半形：( ) 與 " "。全形的（ ）是 P
 hint: 完整的寫法是：print("Hello, World!")
 starter:
 ```python
-print("")
+print("")   # ← 在引號裡打上 Hello, World!
 ```
 check:
 ```python
@@ -57,7 +60,7 @@ assert said == "helloworld", "這句古老的咒語是 Hello, World! 喔，把�
 ```
 solution:
 ```python
-print("Hello, World!")
+print("Hello, World!")   # ← 在引號裡打上 Hello, World!
 ```
 success: Hello, World! 你的第一句話傳出去了——嬰兒的哭聲響徹了整個產房。
 @end

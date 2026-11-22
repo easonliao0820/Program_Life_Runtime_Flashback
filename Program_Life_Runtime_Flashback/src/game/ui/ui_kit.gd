@@ -35,8 +35,11 @@ const RUN_GREEN := Color("#3aa564")
 const HINT_YELLOW := Color("#f0b429")
 const RESET_GRAY := Color("#8a939c")
 
-const BODY_FONT_FILES := ["res://assets/fonts/NotoSansTC-Regular.ttf", "res://assets/fonts/NotoSansTC-Regular.otf",
+## 一定要用專案裡的字型檔：網頁版沒有系統字型，找不到時中文會變成方塊或整片特粗體
+const BODY_FONT_FILES := ["res://assets/fonts/NotoSansTC-VariableFont_wght.ttf",
+	"res://assets/fonts/NotoSansTC-Regular.ttf", "res://assets/fonts/NotoSansTC-Regular.otf",
 	"res://assets/fonts/SourceHanSansTC-Regular.otf"]
+const BODY_WEIGHT := 400   ## 可變字型的粗細（400 = 一般）
 const MONO_FONT_FILES := ["res://assets/fonts/JetBrainsMono-Regular.ttf", "res://assets/fonts/Consolas.ttf"]
 
 static var _body: Font
@@ -47,6 +50,12 @@ static var _italic: Font
 static func body_font() -> Font:
 	if _body == null:
 		_body = _load_first(BODY_FONT_FILES)
+		if _body != null and str(_body.resource_path).contains("VariableFont"):
+			# 可變字型預設可能是最細的，固定成一般粗細
+			var fv := FontVariation.new()
+			fv.base_font = _body
+			fv.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): BODY_WEIGHT}
+			_body = fv
 		if _body == null:
 			var sf := SystemFont.new()
 			sf.font_names = PackedStringArray(["Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", "sans-serif"])
@@ -237,8 +246,8 @@ static func python_highlighter() -> CodeHighlighter:
 		h.add_keyword_color(k, kw)
 	for b in ["print", "len", "range", "int", "float", "str", "round", "sum", "type", "input", "list", "dict"]:
 		h.add_keyword_color(b, Color("#6cb6ff"))
-	h.add_color_region("\"", "\"", Color("#7ee787"), true)
-	h.add_color_region("'", "'", Color("#7ee787"), true)
+	h.add_color_region("\"", "\"", Color("#7ee787"), false)
+	h.add_color_region("'", "'", Color("#7ee787"), false)
 	h.add_color_region("#", "", Color("#8b98a5"), true)
 	return h
 

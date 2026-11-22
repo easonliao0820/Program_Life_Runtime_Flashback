@@ -57,6 +57,21 @@
 系統：for 迴圈可以讓同一段程式重複執行。range(100, 0, -1) 會從 100 開始，每次減 1，數到 1 為止。
 系統：% 是「取餘數」。day % 4 會得到 0、1、2、3 其中一個，剛好可以當作索引；如果 day % 25 == 0，就代表 day 可以被 25 整除。
 
+系統：把這三個放在一起，看一個小例子：
+
+```python
+places = ["家", "學校", "公園"]
+for day in range(6, 0, -1):
+    where = places[day % 3]      # day % 3 只會是 0、1、2
+    if day % 3 == 0:
+        print("== 又過了三天 ==")
+    print(f"第 {day} 天在{where}")
+```
+
+系統：第 6 天：6 % 3 是 0，先印「又過了三天」，再印「第 6 天在家」；第 5 天：5 % 3 是 2，印「第 5 天在公園」……一直數到第 1 天。
+系統：if 要和 where 那行對齊（都在 for 裡面），而且要放在 print 前面，里程碑才會先印出來。
+派森：這關就是在「如果 day 可以被 25 整除」那行註解底下，補上 if 和要印的那一句。
+
 @level ch3_2_countdown
 title: 快轉 100 天
 goal: 用 for 迴圈從第 100 天倒數到第 1 天，每天用 day % 4 決定你在哪裡讀書；每撐過 25 天，多印出一行「又撐過了一段」。請沿用起始程式的輸出文字；第100、75、50、25天，先印里程碑，再印當天的讀書紀錄。
@@ -68,7 +83,7 @@ starter:
 locations = ["學校", "圖書館", "家裡", "咖啡廳"]
 for day in range(100, 0, -1):
     current_location = locations[day % len(locations)]
-    # 如果 day 可以被 25 整除，印出：===== 倒數第 {day} 天，又撐過了一段！=====
+    # ← 在這裡加 if：如果 day 可以被 25 整除，印出：===== 倒數第 {day} 天，又撐過了一段！=====
 
     print(f"倒數第 {day} 天，你在{current_location}瘋狂刷題中……")
 ```
@@ -116,8 +131,10 @@ solution:
 locations = ["學校", "圖書館", "家裡", "咖啡廳"]
 for day in range(100, 0, -1):
     current_location = locations[day % len(locations)]
+    # ← 在這裡加 if：如果 day 可以被 25 整除，印出：===== 倒數第 {day} 天，又撐過了一段！=====
     if day % 25 == 0:
         print(f"===== 倒數第 {day} 天，又撐過了一段！=====")
+
     print(f"倒數第 {day} 天，你在{current_location}瘋狂刷題中……")
 ```
 success: 從第 100 天倒數到第 1 天，每撐過 25 天就喘口氣——for 迴圈幫你把一百天快轉過去了。

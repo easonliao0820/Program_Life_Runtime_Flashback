@@ -249,16 +249,13 @@ func play(def: Dictionary) -> Dictionary:
 		_demo_mode = true
 		_demo.call_deferred()
 	elif GameFlow.autopilot:
+		# 自動測試：不走路，直接把示範要拿的東西拿好（結果跟觀看模式一樣）
+		_demo_instant()
 		_done.emit.call_deferred()
 	await _done
 	_running = false
 	_bot_dir = 0
 	_bot_v = 0
-	if _demo_mode:
-		# 示範只是給人看：結果跟自動測試一樣（沒撿任何東西），後面的關卡才不會跟著變
-		_items = (def.get("start", []) as Array).duplicate()
-		_code_lines = []
-		_found = {}
 	_prompt.visible = false
 	var t := UIKit.fade(self, 0.0, 0.25)
 	await t.finished
@@ -1050,12 +1047,7 @@ func _text(v: Control, font: Font, t: String, center: Vector2, fsize: int, col: 
 func _demo() -> void:
 	var deadline := Time.get_ticks_msec() + 120000
 	await get_tree().create_timer(1.0).timeout
-	var picks: Array = []
-	if _uses_custom_code():
-		for e in _def.get("items", []):
-			picks.append(e["name"])
-	else:
-		picks = (DEMO_PICKS.get(str(_def.get("id", "")), []) as Array).duplicate()
+	var picks: Array = _demo_picks()
 	# 由近到遠一個一個拿
 	while not picks.is_empty() and _running and Time.get_ticks_msec() < deadline:
 		var best := 0
@@ -1087,6 +1079,22 @@ func _demo() -> void:
 		await get_tree().create_timer(1.0).timeout
 		if _running:
 			_done.emit()
+
+
+## 自動測試用：瞬間拿好示範要拿的東西（容器裡的也算）
+func _demo_instant() -> void:
+	for key in _demo_picks():
+		if _entries.has(key):
+			_on_item(_entries[key])
+
+
+func _demo_picks() -> Array:
+	if _uses_custom_code():
+		var all: Array = []
+		for e in _def.get("items", []):
+			all.append(e["name"])
+		return all
+	return (DEMO_PICKS.get(str(_def.get("id", "")), []) as Array).duplicate()
 
 
 func _demo_spot_pos(key: String) -> Vector2:

@@ -38,9 +38,28 @@ Cindy：第一份薪水耶，記得請我喝飲料喔。
 派森：那第一份薪水，你想怎麼用？
 你：我想先存一些，自己留一些，然後……分一些給爸媽。
 
+系統：函式可以一次 return 好幾個值，用逗號隔開；接的時候也用逗號，依序放進好幾個盒子。
+
+```python
+def split_snack(money):
+    cake = round(money * 0.5)   # 五成買蛋糕
+    tea = money - cake          # 剩下的買茶
+    return cake, tea
+
+cake, tea = split_snack(100)
+print(cake, tea)   # 50 50
+```
+
+系統：round(money * 0.5) 是「money 的五成，再四捨五入」。最後一份用 money 減掉前面幾份，加起來就一定剛好等於 money，不會多一塊或少一塊。
+派森：等一下你只要改 split_budget() 裡的兩個比例，例如 0.2 代表兩成。me 那一行會自動算出剩下的錢。
+
 @level ch5_1_budget
 title: 第一份薪水
 goal: 修改 split_budget() 裡的比例，決定第一份薪水要怎麼分：給爸媽、存起來、自己用。三份加起來要剛好等於實際拿到的錢。
+intro: 函式像一台機器：放進 money，return 吐出三份金額。
+step: 找到 split_budget() 裡面的兩個 0.3
+step: 改成你想要的比例（加起來不要超過 1）
+step: me 那行不用改，按執行看三份金額
 tags: 月薪 32000 元 | 勞健保約 4% | def split_budget(money) | return family, saving, me
 hint: 只要改 0.3 這兩個數字就好，例如給爸媽 0.2、存起來 0.4。
 hint: me 用 money 減掉另外兩份，這樣三份加起來一定剛好。
@@ -51,9 +70,9 @@ def calc_take_home(salary):
     return salary - insurance
 
 def split_budget(money):
-    family = round(money * 0.3)    # 給爸媽
-    saving = round(money * 0.3)    # 存起來
-    me = money - family - saving   # 留給自己
+    family = round(money * 0.3)    # ← 改這個比例：給爸媽
+    saving = round(money * 0.3)    # ← 改這個比例：存起來
+    me = money - family - saving   # 留給自己（不用改，會自動算剩下的）
     return family, saving, me
 
 pay = calc_take_home(32000)
@@ -113,13 +132,14 @@ def calc_take_home(salary):
     return salary - insurance
 
 def split_budget(money):
-    family = round(money * 0.3)
-    saving = round(money * 0.3)
-    me = money - family - saving
+    family = round(money * 0.2)    # ← 改這個比例：給爸媽
+    saving = round(money * 0.4)    # ← 改這個比例：存起來
+    me = money - family - saving   # 留給自己（不用改，會自動算剩下的）
     return family, saving, me
 
 pay = calc_take_home(32000)
 family, saving, me = split_budget(pay)
+print(f"實際拿到：{pay} 元")
 print(f"給爸媽 {family} 元，存起來 {saving} 元，自己用 {me} 元")
 ```
 success: 給爸媽 {family_share} 元。函式寫好一次，以後每個月發薪水都能直接用。

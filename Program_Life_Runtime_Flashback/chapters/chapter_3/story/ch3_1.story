@@ -46,6 +46,21 @@ confirm: 出發！
 
 派森：對了，要確認某樣東西有沒有在 list 裡，可以用 in。
 
+系統：in 會檢查某樣東西在不在 list 裡，結果是 True 或 False，常常放在 if 後面：
+
+```python
+bag = ["手機", "錢包"]
+print(len(bag))          # 2
+if "錢包" in bag:
+    has_wallet = True
+else:
+    has_wallet = False
+print(has_wallet)        # True
+```
+
+系統：len(bag) 算出書包裡有幾樣；if 條件成立做上面那段，不成立就做 else 底下那段。
+派森：這關先印出書包、算出有幾樣，再用 in 檢查手作巧克力有沒有在裡面，把答案存進 gave_gift。
+
 @level ch3_1_check_bag
 title: 確認書包
 goal: 剛剛的動作都變成了程式。印出書包裡的東西和數量，再用 in 檢查手作巧克力有沒有在書包裡。請保留兩行輸出：第一行印出 bag 清單，第二行印「書包裡有 ○ 樣東西」，○使用實際數量；不要另外印其他內容。
@@ -55,6 +70,7 @@ hint: if "手作巧克力" in bag: 底下寫 gave_gift = True，else 底下寫 g
 starter:
 ```python
 <<explore_code>>
+# ↓ 下面的程式不用改，按「執行」看看你的書包
 print(bag)
 print(f"書包裡有 {len(bag)} 樣東西")
 
@@ -115,13 +131,11 @@ set_flag("forgot_homework", "數學作業" not in bag)
 ```
 solution:
 ```python
-bag = ["手機", "錢包", "漫畫"]
-bag.append("悠遊卡")
-bag.append("數學課本")
-bag.append("手作巧克力")
-bag.remove("漫畫")
+<<explore_code>>
+# ↓ 下面的程式不用改，按「執行」看看你的書包
 print(bag)
 print(f"書包裡有 {len(bag)} 樣東西")
+
 if "手作巧克力" in bag:
     gave_gift = True
 else:

@@ -19,15 +19,32 @@ else:
     print("派森：很好，簡單、真誠，送出吧。")
 ```
 
+系統：一個一個來看：strip() 把前後的空白剪掉（中間的不會動）；replace("……", "，") 把每一個「……」換成「，」；len() 算出還剩幾個字。
+
+```python
+s = "  早安……  "
+print(s.strip())                      # 早安……
+print(s.strip().replace("……", "！"))  # 早安！
+print(len("早安！"))                   # 3
+```
+
+系統：這些方法不會改掉原本的字串，而是做出一個新的，所以要用 message = 把結果接住。
+派森：這關你只要把 draft 換成你想說的話，下面的程式會幫你整理、數字數，50 個字以內就能送出。
+
 @level ch4_3_message
 title: 一則訊息
 goal: 修改 draft，寫出一則你想傳給倖芳的訊息。整理之後要在 50 個字以內，前後不能有多餘的空白。
+intro: 只要改第一行引號裡的字就好，下面的程式會幫你整理。
+step: 把第一行 draft 引號裡的字，換成你想對倖芳說的話
+step: 下面的 strip()、replace() 不用動
+step: 執行後字數在 50 以內就可以送出
 tags: draft.strip() | .replace("……", "，") | len(message) <= 50
 hint: 把 draft 引號裡的文字換成你自己想說的話。
 hint: 下面的 strip() 和 replace() 會幫你整理；只要印出的字數在 50 以內就可以送出。
 starter:
 ```python
-draft = "   倖芳……好久不見……   "
+draft = "   倖芳……好久不見……   "   # ← 把引號裡換成你想說的話
+# ↓ 下面的程式不用改
 message = draft.strip()
 message = message.replace("……", "，")
 print(message)
@@ -47,10 +64,16 @@ set_flag("message", message)
 ```
 solution:
 ```python
-draft = "   倖芳……好久不見……那年的約定……對不起。   "
+draft = "   倖芳……好久不見……那年的約定……對不起。   "   # ← 把引號裡換成你想說的話
+# ↓ 下面的程式不用改
 message = draft.strip()
 message = message.replace("……", "，")
 print(message)
+print(f"一共 {len(message)} 個字")
+if len(message) > 50:
+    print("派森：太長了，她會以為你在寫作文。")
+else:
+    print("派森：很好，簡單、真誠，送出吧。")
 ```
 success: 「{message}」——前後的空白和刪節號都整理好了，簡單又真誠。送出吧。
 @end

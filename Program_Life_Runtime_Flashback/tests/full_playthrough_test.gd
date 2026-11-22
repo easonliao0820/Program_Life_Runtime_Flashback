@@ -57,6 +57,8 @@ func _test_parse_and_levels() -> void:
 		if ids.has(id):
 			_failures.append("關卡 id 重複：" + id)
 		ids[id] = true
+		# 探索之後的關卡：放入探索示範會拿到的東西（跟觀看模式、自動駕駛一樣）
+		GameState.set_value("explore_code", EXPLORE_CODE.get(id, ""))
 		var check := CodingMode.fill_code(str(lv.get("check", "")))
 		if str(lv.get("solution", "")) == "":
 			_failures.append("%s 沒有 solution" % id)
@@ -69,6 +71,14 @@ func _test_parse_and_levels() -> void:
 		var s: Dictionary = await PythonRunner.run(CodingMode.fill_code(str(lv.get("starter", ""))), check, lv.get("stdin", []))
 		if s.get("passed", false) == true and not id in ["ch1_first_words_x"]:
 			print("　（注意：%s 的 starter 不用修改就能過關）" % id)
+
+
+## 探索示範（explore_mode.gd 的 DEMO_PICKS）產生的程式碼，給單獨驗證解答時用
+const EXPLORE_CODE := {
+	"ch2_1_types": "mom_age = 30\nmy_age = 1.5\nmy_name = \"測試員\"\nslide = \"和爸媽玩溜滑梯\"\ncartoon = \"在電視前面看卡通\"\nwish = \"身體健康、開心長大\"",
+	"ch3_1_check_bag": "bag = [\"手機\", \"錢包\", \"漫畫\"]\nbag.remove(\"漫畫\")\nbag.append(\"悠遊卡\")\nbag.append(\"手作巧克力\")",
+	"ch3_4_check": "my_bag = []\nmy_bag.append(\"准考證\")\nmy_bag.append(\"身分證\")\nmy_bag.append(\"2B鉛筆\")\nmy_bag.append(\"橡皮擦\")\nmy_bag.append(\"手錶\")",
+}
 
 
 func _collect_levels(events: Array, out: Array) -> void:

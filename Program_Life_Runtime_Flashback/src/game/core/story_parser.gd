@@ -239,7 +239,7 @@ func _start_block(kind: String, arg: String, line_no: int) -> Dictionary:
 	var data := {}
 	match kind:
 		"level":
-			data = {"id": arg, "title": arg, "goal": "", "tags": [], "hints": [], "starter": "", "check": "",
+			data = {"id": arg, "title": arg, "goal": "", "steps": [], "lesson": [], "tags": [], "hints": [], "starter": "", "check": "",
 				"solution": "", "stdin": [], "theme": "default", "counts": true, "success": ""}
 		"explore":
 			data = {"id": arg, "title": "", "goal": "", "list": "bag", "start": [], "items": [], "capacity": 0,
@@ -322,6 +322,12 @@ func _block_line(block: Dictionary, line: String, source_name: String, line_no: 
 			data[key] = arr
 		"hint":
 			data["hints"].append(value)
+		"lesson":
+			# 關卡開始前的教學台詞（「系統：…」「派森：…」），回憶遊戲裡的關卡也能教
+			data["lesson"].append(value)
+		"step":
+			# 題目卡上的步驟（①②③），一行一步
+			data["steps"].append(value)
 		"capacity", "timer", "hidden_count":
 			data[key] = int(value)
 		"counts":

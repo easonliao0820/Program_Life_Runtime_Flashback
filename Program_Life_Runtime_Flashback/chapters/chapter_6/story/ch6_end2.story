@@ -33,6 +33,29 @@ cg: Hello, python!
 @level end2_habit
 title: 回憶一：找回你的習慣
 goal: 用 Memory 設計圖，重新做出你一輩子的習慣，並讓它 recall()。
+intro: 用設計圖做物件：類別名稱( 資料… )。
+step: 在 habit = 後面用 Memory( ) 做出一段回憶
+step: 括號裡依序填：你的習慣（加引號）、幾歲、心情（加引號）
+step: 第二行 habit.recall() 不用改，按執行
+tags: Memory("發生什麼", 幾歲, "心情") | habit.recall()
+hint: 三個資料用逗號隔開，文字要加引號，年齡是數字不用加。
+hint: 例如：habit = Memory("每天早上一份培根蛋吐司", 13, "安心")
+lesson: 系統：class 是設計圖。照設計圖做出物件的寫法是：類別名稱(資料1, 資料2, …)，資料要照 __init__ 括號裡的順序填。
+lesson: @example
+lesson: 系統：Memory 的順序是 (title, age, feeling)：發生了什麼、幾歲、心情。文字要加引號，年齡是數字不用加。做好之後，用 habit.recall() 讓它說出來。
+example:
+```python
+class Pet:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def hello(self):
+        print(f"我是{self.name}，{self.age} 歲")
+
+dog = Pet("小白", 3)   # 做出一個物件
+dog.hello()           # 我是小白，3 歲
+```
 starter:
 ```python
 class Memory:
@@ -44,7 +67,7 @@ class Memory:
     def recall(self):
         print(f"{self.age} 歲那年，{self.title}，那時候的心情是「{self.feeling}」。")
 
-habit = 
+habit =    # ← 在這裡用 Memory(習慣, 幾歲, 心情) 做出一段回憶
 habit.recall()
 ```
 check:
@@ -103,7 +126,7 @@ class Memory:
     def recall(self):
         print(f"{self.age} 歲那年，{self.title}，那時候的心情是「{self.feeling}」。")
 
-habit = Memory("每天早上買一份培根蛋吐司", 5, "幸福")
+habit = Memory("每天早上買一份培根蛋吐司", 5, "幸福")    # ← 在這裡用 Memory(習慣, 幾歲, 心情) 做出一段回憶
 habit.recall()
 ```
 success: 每天早上一份培根蛋吐司——你一輩子的習慣，回來了。
@@ -112,10 +135,27 @@ success: 每天早上一份培根蛋吐司——你一輩子的習慣，回來�
 @level end2_love
 title: 回憶二：愛的函式
 goal: 寫一個函式 say_love(name)，不管輸入誰的名字，都會回傳「○○，謝謝你，我愛你。」，再對每個人說一次。
+intro: 函式用 return 把結果交回去，外面的 print 會幫你印。
+step: 在 return 後面組出一句話：名字＋「，謝謝你，我愛你。」
+step: 用 f-string 把 name 放進大括號裡，下面的 for 不用改
+tags: def say_love(name) | return | f-string
+hint: return 後面接 f"……"，大括號裡放 name，後面接「，謝謝你，我愛你。」。
+hint: 句子要一字不差：名字後面是全形逗號，最後有句號。
+lesson: 系統：def 建立函式，return 把結果交回去；外面的 print() 會把交回來的東西印出來。
+lesson: @example
+lesson: 系統：name 每次都會換成傳進來的名字，所以同一個函式可以對每個人說。這關要在 return 後面，用 f-string 組出「名字，謝謝你，我愛你。」。
+example:
+```python
+def greet(name):
+    return f"{name}，早安！"
+
+print(greet("媽媽"))   # 媽媽，早安！
+print(greet("爸爸"))   # 爸爸，早安！
+```
 starter:
 ```python
 def say_love(name):
-    return 
+    return    # ← 在這裡組出那句話：名字＋，謝謝你，我愛你。
 
 for person in ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞"]:
     print(say_love(person))
@@ -155,7 +195,7 @@ assert [x.strip() for x in lines if x.strip()] == [f"{name}，謝謝你，我愛
 solution:
 ```python
 def say_love(name):
-    return f"{name}，謝謝你，我愛你。"
+    return f"{name}，謝謝你，我愛你。"    # ← 在這裡組出那句話：名字＋，謝謝你，我愛你。
 
 for person in ["爸爸", "媽媽", "奶奶", "倖芳", "翊丞"]:
     print(say_love(person))
@@ -166,6 +206,27 @@ success: 爸爸、媽媽、奶奶、倖芳、翊丞……每個人都聽到你�
 @level end2_divination
 title: 回憶三：奶奶的筊杯
 goal: 重現奶奶為你擲出的三個聖杯：用 while 一直擲，直到連續三個聖杯。
+intro: 連續三個聖杯：擲到聖杯就加 1，不是就從 0 重新數。
+step: if 底下（擲到聖杯）：連續次數加 1
+step: else 底下（不是聖杯）：連續次數歸零
+step: while 看到 3 就會自己停下來
+tags: consecutive_holy += 1 | consecutive_holy = 0 | while
+hint: if 底下寫：consecutive_holy += 1
+hint: else 底下寫：consecutive_holy = 0
+lesson: 系統：while 條件：只要條件成立，就一直重複。迴圈裡要讓計數器有機會改變，迴圈才會停下來。
+lesson: 系統：「連續」的關鍵是：成功就加 1，失敗就歸零，重新數。
+lesson: @example
+lesson: 系統：這關的 if 底下（擲到聖杯）讓 consecutive_holy 加 1，else 底下讓它歸零；數到 3，while 就會自己停。
+example:
+```python
+streak = 0
+for shot in ["進", "沒進", "進", "進", "進"]:
+    if shot == "進":
+        streak += 1     # 連續次數加 1
+    else:
+        streak = 0      # 斷掉了，從 0 重新數
+print(streak)   # 3
+```
 starter:
 ```python
 import random
@@ -173,9 +234,9 @@ results = ["聖杯", "聖杯", "笑杯", "陰杯"]
 consecutive_holy = 0
 while consecutive_holy < 3:
     if random.choice(results) == "聖杯":
-        
+        # ← 在這裡寫：擲到聖杯，連續次數加 1
     else:
-        
+        # ← 在這裡寫：不是聖杯，連續次數歸零
 print("三個聖杯。奶奶，謝謝你。")
 ```
 check:
@@ -257,8 +318,10 @@ results = ["聖杯", "聖杯", "笑杯", "陰杯"]
 consecutive_holy = 0
 while consecutive_holy < 3:
     if random.choice(results) == "聖杯":
+        # ← 在這裡寫：擲到聖杯，連續次數加 1
         consecutive_holy += 1
     else:
+        # ← 在這裡寫：不是聖杯，連續次數歸零
         consecutive_holy = 0
 print("三個聖杯。奶奶，謝謝你。")
 ```
@@ -268,9 +331,23 @@ success: 三個聖杯。奶奶，謝謝你。
 @level end2_check
 title: 回憶四：對帳
 goal: 想起國中那天早上，你第一次自己判斷「對」與「錯」：豆漿 25 元＋草莓吐司 60 元，打 85 折，店員收 72 元。
+intro: 先加起來，再打折，最後四捨五入。
+step: 在 my_answer = 後面算出打 85 折後的價錢
+step: 用 round( ) 把結果變成整數，下面的 if 不用改
+tags: (25 + 60) * 0.85 | round()
+hint: 先加再打折：(25 + 60) * 0.85，要用括號。
+hint: 寫法：my_answer = round((25 + 60) * 0.85)
+lesson: 系統：先加起來、再打折，要用括號把加法包起來；round() 會四捨五入成整數。
+lesson: @example
+lesson: 系統：算好 my_answer 之後，if my_answer == 72 會比較你算的跟 72 一不一樣，一樣才會印出那一句。
+example:
+```python
+total = round((30 + 50) * 0.9)
+print(total)   # 72
+```
 starter:
 ```python
-my_answer = 
+my_answer =    # ← 在這裡算：先加起來，再打 85 折，最後 round
 if my_answer == 72:
     print("沒問題，總共 72 元。")
 ```
@@ -281,7 +358,7 @@ assert out.strip() == "沒問題，總共 72 元。", "店員算對了，請依�
 ```
 solution:
 ```python
-my_answer = round((25 + 60) * 0.85)
+my_answer = round((25 + 60) * 0.85)    # ← 在這裡算：先加起來，再打 85 折，最後 round
 if my_answer == 72:
     print("沒問題，總共 72 元。")
 ```
@@ -294,9 +371,11 @@ goal: 回到一切的起點。編輯器裡已經寫好了你人生的第一行�
 intro: 還記得嗎？你來到這個世界時，第一句話是跟「世界」打招呼。
 tags: print("Hello, World!") | World → python
 hint: 只要把引號裡的 World 換成 python 就好。
+lesson: 派森：……最後一題了。
+lesson: 系統：print 印的就是引號裡的文字。引號裡改成什麼，畫面上就會出現什麼。
 starter:
 ```python
-print("Hello, World!")
+print("Hello, World!")   # ← 把 World 改成 python
 ```
 check:
 ```python
@@ -305,7 +384,7 @@ assert said == "hellopython", "把 World 換成 python，跟派森打聲招呼�
 ```
 solution:
 ```python
-print("Hello, python!")
+print("Hello, python!")   # ← 把 World 改成 python
 ```
 success: Hello, python. ——我一直都在。
 @end

@@ -60,6 +60,20 @@ print(100 - (bacon_egg_toast + iced_milk)) # 付 100 元，要找 40 元
 系統：Python 的加減乘除是 +、-、*、/。先算括號裡面，再算外面，跟數學課一樣。
 派森：在日常生活中，對會寫程式的人來說，只要寫得出算式，就能得到答案。
 
+系統：也可以先把算好的結果放進盒子，再印出來，程式比較好讀：
+
+```python
+toast = 35
+milk = 25
+total = toast + milk      # 先把總價放進盒子
+change = 100 - total      # 再算找零
+print(total)              # 60
+print(change)             # 40
+print(toast * 2)          # 買兩份：70
+```
+
+系統：+ 加、- 減、* 乘、/ 除。盒子裡的數字可以直接拿來算，算出來的結果也能再放進新的盒子。
+
 @level ch2_2_breakfast
 title: 算算早餐錢
 goal: 你點了{food}和{drink}。用程式算出總共多少錢，以及付 100 元要找多少。請保留 food、drink 的價格，第一行只印總價，第二行只印找零；兩行都只輸出整數，不加文字。
@@ -70,8 +84,8 @@ starter:
 ```python
 food = <<food_price>>
 drink = <<drink_price>>
-print()   # 總共多少錢？
-print()   # 付 100 元要找多少？
+print()   # ← 在括號裡寫算式：總共多少錢？
+print()   # ← 在括號裡寫算式：付 100 元要找多少？
 ```
 check:
 ```python
@@ -97,8 +111,8 @@ solution:
 ```python
 food = <<food_price>>
 drink = <<drink_price>>
-print(food + drink)
-print(100 - (food + drink))
+print(food + drink)   # ← 在括號裡寫算式：總共多少錢？
+print(100 - (food + drink))   # ← 在括號裡寫算式：付 100 元要找多少？
 ```
 success: {food} {food_price} 元＋{drink} {drink_price} 元，算得剛剛好，找回來的零錢一塊都沒少！
 @end

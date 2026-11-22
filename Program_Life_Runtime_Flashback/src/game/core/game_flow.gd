@@ -17,6 +17,8 @@ const MAP_SCENE := "res://src/ui/level_select/level_select.tscn"
 var autopilot: bool = false
 ## 觀看模式（tests/watch_playthrough 用）：一樣自動玩，但對話用正常速度播，讓人看得清楚。
 var autopilot_watch: bool = false
+## 預覽工具用：打開 game_stage 但不自動播劇情（tests/credits_preview）
+var stage_preview: bool = false
 signal autopilot_finished
 
 ## 開發用：從章節選擇跳進某一節時，帶著預設的旗標，避免缺少前面章節的變數。
@@ -39,6 +41,8 @@ var _bgm_fade: Tween
 
 
 func _ready() -> void:
+	if _is_mobile_device():
+		_show_desktop_only.call_deferred()
 	_bgm = AudioStreamPlayer.new()
 	_bgm.volume_db = BGM_VOLUME
 	# 播完從頭再播，直到 stop_bgm()
@@ -77,6 +81,46 @@ func type_tick(ch: String = "x") -> void:
 	_type_i = (_type_i + 1) % _type_players.size()
 	p.pitch_scale = randf_range(0.85, 1.15)
 	p.play()
+
+
+## 手機、平板不能玩（要用鍵盤寫程式）：網頁版看瀏覽器，原生版看作業系統。
+## 測試用：加上命令列參數 -- --pretend-mobile 可以假裝是手機。
+func _is_mobile_device() -> bool:
+	if "--pretend-mobile" in OS.get_cmdline_user_args():
+		return true
+	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
+		return true
+	if OS.has_feature("web"):
+		# iPad 的 Safari 會假裝自己是 Mac，要再看能不能多點觸控
+		var r = JavaScriptBridge.eval("""(function(){var u=navigator.userAgent||'';
+			return /Android|iPhone|iPad|iPod|Mobile|Silk|Kindle|Opera Mini|IEMobile/i.test(u)
+				|| (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);})()""", true)
+		return r == true
+	return false
+
+
+func _show_desktop_only() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 128
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	var bg := ColorRect.new()
+	bg.color = Color("#161F2B")
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_STOP
+	layer.add_child(bg)
+	var v := VBoxContainer.new()
+	v.set_anchors_preset(Control.PRESET_FULL_RECT)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_theme_constant_override("separation", 28)
+	bg.add_child(v)
+	var title := UIKit.label("請用電腦遊玩", 72, UIKit.GOLD)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(title)
+	var body := UIKit.label("《派森與我的一生》需要用鍵盤寫程式，\n請用桌上型電腦或筆電開啟。", 36, Color("#e6edf3"))
+	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(body)
+	get_tree().root.add_child(layer)
+	get_tree().paused = true
 
 
 func _bgm_target(audio_name: String) -> float:

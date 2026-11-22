@@ -176,7 +176,8 @@ func _ready() -> void:
 
 	if GameState.user_name == "":
 		GameState.new_game("你")
-	play_section.call_deferred(GameState.section_id if GameState.section_id != "" else ChapterRegistry.first_section_id())
+	if not GameFlow.stage_preview:   # 預覽工具（例如只看跑馬燈）不要自動開始劇情
+		play_section.call_deferred(GameState.section_id if GameState.section_id != "" else ChapterRegistry.first_section_id())
 
 
 func _add(node: Control) -> Control:
@@ -548,6 +549,8 @@ func classify(def: Dictionary) -> void:
 
 func play_level(level: Dictionary, index: int, total: int, extra: Dictionary = {}) -> Dictionary:
 	var was_split := _split
+	if not (level.get("lesson", []) as Array).is_empty():
+		await _teach(level)
 	if not was_split:
 		await enter_split()
 	var ctx := {"index": index, "total": total, "chapter": str(_section.get("title", ""))}
@@ -561,6 +564,33 @@ func play_level(level: Dictionary, index: int, total: int, extra: Dictionary = {
 		bool(level.get("counts", true)) and not extra.has("theme"))
 	GameState.save_game()
 	return result
+
+
+## 關卡前的教學：lesson 一行一句（「系統：」「派森：」開頭），遇到「@example」那行秀出範例程式卡；
+## 沒寫 @example 時，範例放在第一句之後
+func _teach(level: Dictionary) -> void:
+	var lesson: Array = level["lesson"]
+	var example := str(level.get("example", "")).strip_edges()
+	var has_marker := lesson.has("@example")
+	dialogue.set_box_visible(true)
+	for i in lesson.size():
+		var line := str(lesson[i])
+		if line == "@example":
+			if example != "":
+				show_code(example, true)
+			continue
+		var cut := line.find("：")
+		var who := line.substr(0, cut) if cut > 0 and cut <= 4 else ""
+		var text := GameState.format_text(line.substr(cut + 1) if who != "" else line)
+		if who == "系統":
+			await system_line(text)
+		elif who != "":
+			await say(who, text)
+		else:
+			await narrate(text)
+		if i == 0 and not has_marker and example != "":
+			show_code(example, true)
+	code_card.hide_card()
 
 
 func play_explore(def: Dictionary) -> void:
@@ -827,19 +857,87 @@ func credits() -> void:
 	t.tween_property(hello, "modulate:a", 0.0, 1.5)
 	await t.finished
 
-	var lines := ["《派森與我的一生》", "Program Life: Runtime Flashback", "", "劇本・企劃・程式・美術", "專題團隊",
-		"", "特別感謝", "每一個陪你寫下第一行程式的人", "", "你的故事還沒結束。"]
+	# 工作人員名單：依組內分工表（● 主要負責、◐ 共同負責；○ 協助不列）。
+	# ["# 分工領域"] 大標題；[工作內容, 人名] 顯示成「工作內容：人名」；[""] 空一行
+	var lines := [
+		["# 《派森與我的一生》"], ["# Program Life: Runtime Flashback"], [""],
+		["# 遊戲與劇情設計"],
+		["劇情、對話、故事分支與兩種結局", "廖翊丞"],
+		["劇本格式、解析器、場景切換及對話介面", "廖翊丞"],
+		["開場動畫、前言、首頁", "廖翊丞"],
+		["主選單", "廖翊丞"],
+		["章節地圖", "劉欣庭"],
+		["Python 關卡題目、學習順序、參考解答", "廖翊丞"],
+		["介面功能", "廖翊丞"],
+		["美術素材", "廖翊丞"],
+		["探索模式小遊戲", "廖翊丞"],
+		["逐章測試、故事錯誤及介面調整", "廖翊丞"],
+		[""], ["# Python 執行與錯誤處理"],
+		["Python Sandbox、Pyodide", "劉欣庭、林恩妤"],
+		["Web Worker", "林恩妤"],
+		["程式編輯、執行、輸入輸出、關卡檢查", "劉欣庭、廖翊丞"],
+		["Python 執行保護強化", "林恩妤"],
+		["錯誤解析、Gemini AI 轉譯串接", "林恩妤"],
+		["離線錯誤規則、白話解釋", "劉欣庭、林恩妤"],
+		["參考答案測試、無限迴圈與重複執行驗證", "劉欣庭"],
+		[""], ["# AI 與 RAG 系統"],
+		["Gemini AI 提示詞與角色回覆設計", "張倖芳"],
+		["人物設定、角色對話、教學問答", "張倖芳"],
+		["向量化、內容檢索、知識與情境整合", "張倖芳"],
+		["AI NPC「派森」與人物性格、語氣", "張倖芳"],
+		["AI 回答正確性與角色一致性驗證", "張倖芳"],
+		[""], ["# 後端與雲端服務"],
+		["Desktop／Web Google 登入與 Token 驗證", "林恩妤"],
+		["遊戲 JWT、Refresh Token、Session 管理", "許睿宸、林恩妤"],
+		["玩家資料、工作階段與帳號管理", "許睿宸、廖翊丞"],
+		["DynamoDB 玩家資料與雲端存檔", "許睿宸"],
+		["程式錯誤紀錄儲存及 API 整合", "許睿宸"],
+		["AWS Lambda、FastAPI、Amplify 部署", "林恩妤"],
+		["API 整合測試與部署測試", "林恩妤"],
+		[""], ["# 其他"],
+		["系統測試", "全體組員"],
+		["自動化測試工具", "廖翊丞"],
+		["問卷設計、發放", "劉欣庭、全體組員"],
+		["文件製作", "林恩妤"],
+		["簡報製作", "林恩妤"],
+		["音樂與音效", "廖翊丞"],
+		[""], [""],
+		["# 製作團隊"],
+		["A11423009", "張倖芳"], ["A11423026", "許睿宸"], ["A11423028", "廖翊丞"],
+		["A11423033", "劉欣庭"], ["A11423041", "林恩妤"],
+		[""], [""],
+		["# 特別感謝"], ["# 每一個陪你寫下第一行程式的人"], [""], [""],
+		["# 你的故事還沒結束。"],
+	]
 	var col := VBoxContainer.new()
-	col.position = Vector2(560, 1100)
-	col.custom_minimum_size = Vector2(800, 0)
+	col.position = Vector2(360, 1100)
+	col.custom_minimum_size = Vector2(1200, 0)
+	col.add_theme_constant_override("separation", 10)
 	for l in lines:
-		var lbl := UIKit.label(l, 36, UIKit.INK)
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.custom_minimum_size = Vector2(800, 56)
-		col.add_child(lbl)
+		var text: String = l[0]
+		if l.size() == 2:
+			# 工作內容：人名（置中一行）
+			var lbl := UIKit.rich(34)
+			lbl.fit_content = true
+			lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+			lbl.custom_minimum_size = Vector2(1200, 52)
+			# 工作內容和人名一樣大：工作內容灰色、人名深色
+			lbl.text = "[center][color=#556877]%s：[/color][color=#1e2a38]%s[/color][/center]" % [text, l[1]]
+			col.add_child(lbl)
+		else:
+			var head := text.begins_with("# ")
+			var lbl := UIKit.label(text.trim_prefix("# "), 40 if head else 20, UIKit.INK)
+			lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			lbl.custom_minimum_size = Vector2(1200, 64 if head else 30)
+			col.add_child(lbl)
 	_montage_layer.add_child(col)
+	await get_tree().process_frame
+	# 捲到最後一行停在畫面中間附近，速度固定（每秒約 90 像素）
+	var end_y := 540.0 - col.size.y
 	var roll := create_tween()
-	roll.tween_property(col, "position:y", -700.0, 16.0)
+	roll.tween_property(col, "position:y", end_y, (1100.0 - end_y) / 90.0)
+	roll.tween_interval(3.0)
+	roll.tween_property(col, "modulate:a", 0.0, 1.5)
 	await roll.finished
 	col.queue_free()
 	hello.queue_free()

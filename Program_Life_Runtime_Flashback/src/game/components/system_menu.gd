@@ -34,7 +34,7 @@ func _ready() -> void:
 	var row := HBoxContainer.new()
 	row.anchor_left = 1.0
 	row.anchor_right = 1.0
-	row.offset_left = -690
+	row.offset_left = -560
 	row.offset_right = -30
 	row.offset_top = 24
 	row.offset_bottom = 80
@@ -43,13 +43,13 @@ func _ready() -> void:
 	add_child(row)
 	for spec in [["筆記", _open_notes], ["回顧", _open_backlog], ["存檔", _save], ["成就", _open_achievements], ["設定", _open_settings]]:
 		var b := UIKit.button(spec[0], UIKit.NAVY, Color.WHITE, UIKit.SMALL_SIZE)
-		b.custom_minimum_size = Vector2(110, 52)
+		b.custom_minimum_size = Vector2(86, 52)
 		b.pressed.connect(spec[1])
 		# 「設定」就是原本的齒輪：沿用齒輪圖示
 		if spec[0] == "設定" and ResourceLoader.exists(GEAR_ICON):
 			b.icon = load(GEAR_ICON)
 			b.expand_icon = true
-			b.custom_minimum_size = Vector2(130, 52)
+			b.custom_minimum_size = Vector2(118, 52)
 		row.add_child(b)
 
 	_overlay = Control.new()

@@ -167,7 +167,15 @@ func play_level(level: Dictionary, ctx: Dictionary) -> Dictionary:
 	_update_progress()
 
 	_task_title.text = GameState.format_text(str(level.get("title", "")))
-	_task_goal.text = GameState.format_text(str(level.get("goal", "")))
+	var goal_text := GameState.format_text(str(level.get("goal", "")))
+	var steps: Array = level.get("steps", [])
+	if not steps.is_empty():
+		const NUMS := ["①", "②", "③", "④", "⑤"]
+		goal_text += "[font_size=21][color=#556877]"
+		for i in steps.size():
+			goal_text += "\n%s %s" % [NUMS[mini(i, NUMS.size() - 1)], GameState.format_text(str(steps[i]))]
+		goal_text += "[/color][/font_size]"
+	_task_goal.text = goal_text
 	for c in _tags.get_children():
 		c.queue_free()
 	for tag in level.get("tags", []):
@@ -415,26 +423,137 @@ func _autopilot() -> void:
 ## 觀看模式：把解答一個字一個字打進編輯器（跟著倍速；空白和縮排打得比較快）
 const WATCH_TYPE_SPEED := 14.0   ## 每秒幾個字
 func _type_out(code: String) -> void:
-	_editor.text = ""
+	# 像真正的玩家：從起始程式開始，只改不一樣的地方
 	_editor.grab_focus()
-	var shown := ""
-	for i in code.length():
+	var ops := _line_diff(_editor.text.split("\n"), code.split("\n"))
+	var row := 0
+	for op in ops:
 		if not is_inside_tree():
 			return
-		var ch := code[i]
-		shown += ch
-		_editor.text = shown
-		_editor.set_caret_line(_editor.get_line_count() - 1)
-		_editor.set_caret_column(_editor.get_line(_editor.get_line_count() - 1).length())
-		if ch == " " or ch == "\t":
-			continue
-		GameFlow.type_tick(ch)
-		var wait := 1.0 / WATCH_TYPE_SPEED
-		if ch == "\n":
-			wait *= 4.0   # 換行停一下，像在想下一行
-		await get_tree().create_timer(wait).timeout
+		match op[0]:
+			"eq":
+				row += 1
+			"rep":
+				await _edit_line(row, op[1], op[2])
+				row += 1
+			"del":
+				await _delete_line(row)
+			"ins":
+				await _insert_line(row, op[2])
+				row += 1
 	_editor.release_focus()
 	await get_tree().create_timer(0.6).timeout
+
+
+## 一行一行比對（最長共同子序列）。回傳 [["eq"|"rep"|"del"|"ins", 舊行, 新行], …]
+func _line_diff(a: PackedStringArray, b: PackedStringArray) -> Array:
+	var n := a.size()
+	var m := b.size()
+	var dp := []
+	for i in n + 1:
+		var r := PackedInt32Array()
+		r.resize(m + 1)
+		dp.append(r)
+	for i in range(n - 1, -1, -1):
+		for j in range(m - 1, -1, -1):
+			dp[i][j] = dp[i + 1][j + 1] + 1 if a[i] == b[j] else maxi(dp[i + 1][j], dp[i][j + 1])
+	var raw := []
+	var i := 0
+	var j := 0
+	while i < n or j < m:
+		if i < n and j < m and a[i] == b[j]:
+			raw.append(["eq", a[i], b[j]]); i += 1; j += 1
+		elif j < m and (i >= n or dp[i][j + 1] >= dp[i + 1][j]):
+			raw.append(["ins", "", b[j]]); j += 1
+		else:
+			raw.append(["del", a[i], ""]); i += 1
+	# 連在一起的「刪掉幾行＋新增幾行」：一對一當成「改這一行」
+	var out := []
+	var k := 0
+	while k < raw.size():
+		if raw[k][0] == "eq":
+			out.append(raw[k]); k += 1
+			continue
+		var dels := []
+		var inss := []
+		while k < raw.size() and raw[k][0] != "eq":
+			(dels if raw[k][0] == "del" else inss).append(raw[k]); k += 1
+		var pairs := mini(dels.size(), inss.size())
+		for p in pairs:
+			out.append(["rep", dels[p][1], inss[p][2]])
+		for p in range(pairs, dels.size()):
+			out.append(dels[p])
+		for p in range(pairs, inss.size()):
+			out.append(inss[p])
+	return out
+
+
+func _type_wait(ch: String) -> void:
+	if ch == " " or ch == "\t":
+		return
+	GameFlow.type_tick(ch)
+	await get_tree().create_timer(1.0 / WATCH_TYPE_SPEED).timeout
+
+
+func _caret_to(row: int, col: int) -> void:
+	_editor.set_caret_line(row)
+	_editor.set_caret_column(col)
+	_editor.adjust_viewport_to_caret()
+
+
+## 改一行：保留前後相同的部分，只把中間刪掉再打上新的
+func _edit_line(row: int, old: String, new: String) -> void:
+	var p := 0
+	while p < old.length() and p < new.length() and old[p] == new[p]:
+		p += 1
+	var s := 0
+	while s < old.length() - p and s < new.length() - p and old[old.length() - 1 - s] == new[new.length() - 1 - s]:
+		s += 1
+	var line := old
+	_caret_to(row, old.length() - s)
+	await get_tree().create_timer(0.35).timeout
+	# 刪掉舊的中間（一個一個退格）
+	var cut := old.length() - s
+	while cut > p:
+		line = line.substr(0, cut - 1) + line.substr(cut)
+		cut -= 1
+		_editor.set_line(row, line)
+		_caret_to(row, cut)
+		await get_tree().create_timer(0.03).timeout
+	# 打上新的中間
+	var mid := new.substr(p, new.length() - p - s)
+	for c in mid:
+		line = line.substr(0, cut) + c + line.substr(cut)
+		cut += 1
+		_editor.set_line(row, line)
+		_caret_to(row, cut)
+		await _type_wait(c)
+
+
+func _delete_line(row: int) -> void:
+	_editor.select(row, 0, row, _editor.get_line(row).length())
+	await get_tree().create_timer(0.4).timeout
+	_editor.deselect()
+	if _editor.get_line_count() > 1:
+		_editor.remove_line_at(row)
+	else:
+		_editor.set_line(row, "")
+	await get_tree().create_timer(0.15).timeout
+
+
+func _insert_line(row: int, text: String) -> void:
+	if row < _editor.get_line_count():
+		_editor.insert_line_at(row, "")
+	else:
+		_editor.text += "\n"
+	_caret_to(row, 0)
+	await get_tree().create_timer(0.3).timeout   # 換行停一下，像在想下一行
+	var line := ""
+	for c in text:
+		line += c
+		_editor.set_line(row, line)
+		_caret_to(row, line.length())
+		await _type_wait(c)
 
 
 func _flash_success() -> void:
