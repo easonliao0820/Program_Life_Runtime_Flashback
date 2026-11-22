@@ -360,13 +360,40 @@ func _on_item(entry: Dictionary) -> void:
 		_code_lines.append(GameState.format_text(custom))
 		if str(entry.get("note", "")) != "":
 			_say("【%s】%s" % [item_name, GameState.format_text(entry["note"])])
-	elif _items.has(item_name):
-		_items.erase(item_name)
-		_code_lines.append('%s.remove("%s")' % [list_name, item_name])
 	else:
-		_items.append(item_name)
-		_code_lines.append('%s.append("%s")' % [list_name, item_name])
+		# 同一樣東西拿進拿出會互相抵銷，每樣東西最多只留一行程式，
+		# 避免來回點產生一長串 append／remove（這段程式之後還會變成下一關的 starter）。
+		var add_line := '%s.append("%s")' % [list_name, item_name]
+		var remove_line := '%s.remove("%s")' % [list_name, item_name]
+		if _items.has(item_name):
+			var i := _code_lines.rfind(add_line)
+			if i != -1:
+				_code_lines.remove_at(i)  # 剛剛才放進去的 → 當作沒放過
+			else:
+				_code_lines.append(remove_line)  # 一開始就在清單裡的 → 真的要拿掉
+		else:
+			var j := _code_lines.rfind(remove_line)
+			if j != -1:
+				_code_lines.remove_at(j)  # 剛剛才拿出來的 → 當作沒拿過
+			else:
+				_code_lines.append(add_line)
+		_items = _simulate_items()
 	_refresh()
+
+
+## 照著 start 清單＋目前的程式碼算出清單內容，讓畫面上的清單順序和程式跑出來的一模一樣。
+func _simulate_items() -> Array:
+	var list_name := str(_def.get("list", "bag"))
+	var items: Array = (_def.get("start", []) as Array).duplicate()
+	var add_prefix := '%s.append("' % list_name
+	var remove_prefix := '%s.remove("' % list_name
+	for line in _code_lines:
+		var s := str(line)
+		if s.begins_with(add_prefix):
+			items.append(s.substr(add_prefix.length(), s.length() - add_prefix.length() - 2))
+		elif s.begins_with(remove_prefix):
+			items.erase(s.substr(remove_prefix.length(), s.length() - remove_prefix.length() - 2))
+	return items
 
 
 func _refresh() -> void:
@@ -465,7 +492,13 @@ func _process(delta: float) -> void:
 			_timer_label.modulate = Color(1, 0.5, 0.5)
 			_say(str(_lay["timer_soft"]))
 		else:
-			_say("捷運進站了！")
+			# 時間到還沒拿出來的東西（leave），出門前順手拿掉，程式碼裡一樣會留下 remove
+			var left := _leave_item()
+			if left != "" and _items.has(left):
+				_on_item(_entries[left])
+				_say("捷運進站了！（出門前，你順手把%s拿了出來。）" % left)
+			else:
+				_say("捷運進站了！")
 			_done.emit()
 
 
@@ -793,6 +826,12 @@ func _on_confirm() -> void:
 	if cap > 0 and _items.size() > cap:
 		_say("（東西太多了，跑不快，會趕不上捷運！先拿掉一樣吧。）")
 		return
+	# 劇本的 leave：這樣東西一定要拿出來才能出發（3.1 的漫畫，讓每個人的程式碼都有一行 remove）
+	var left := _leave_item()
+	if left != "" and _items.has(left):
+		var parts := str(_def.get("leave", "")).split("|", true, 1)
+		_say(GameState.format_text(parts[1].strip_edges()) if parts.size() > 1 else "（%s不用帶，先拿出來吧。）" % left)
+		return
 	if _uses_custom_code() and _found.size() < (_def.get("items", []) as Array).size():
 		_say("（還有回憶盒子沒打開喔。）")
 		return
@@ -812,6 +851,14 @@ func _on_confirm() -> void:
 			return
 
 	_done.emit()
+
+
+## 劇本 leave: 物品 | 擋下時派森說的話
+func _leave_item() -> String:
+	var leave := str(_def.get("leave", ""))
+	if leave == "":
+		return ""
+	return leave.split("|", true, 1)[0].strip_edges()
 
 
 func _scroll_code_to_end() -> void:
