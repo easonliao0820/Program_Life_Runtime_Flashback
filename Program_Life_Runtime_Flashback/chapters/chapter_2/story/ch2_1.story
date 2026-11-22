@@ -221,10 +221,46 @@ tree = ast.parse(code)
 assert any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
            and n.func.id == "type" for n in ast.walk(tree)), "請使用 type() 查詢變數型別。"
 expected = ["<class 'int'>", "<class 'float'>", "<class 'str'>"]
-assert [x.strip() for x in lines if x.strip()] == expected, "請依 mom_age、my_age、my_name 的順序印出三個型別。"
-# 重跑完整程式，保留玩家自己的變數、迴圈及函式；不再只抽取頂層print。
-_, captured, _ = _rerun({"mom_age":"測試", "my_age":2, "my_name":3.5})
-assert [x.strip() for x in captured.splitlines() if x.strip()] == ["<class 'str'>", "<class 'int'>", "<class 'float'>"], "請輸出變數的實際 type()，不要寫死型別文字。"
+names = ["mom_age", "my_age", "my_name"]
+
+actual = [x.strip() for x in lines if x.strip()]
+
+# 先檢查是否有三行輸出。
+assert len(actual) == 3, \
+    "請分三行印出 mom_age、my_age、my_name 的型別，不要多印其他內容。"
+
+# 分別指出哪一行輸出需要確認。
+for index, (got, wanted) in enumerate(zip(actual, expected)):
+    assert got == wanted, \
+        "第 %d 行輸出不符合題目，請確認查看的是 %s 的型別。" % (
+            index + 1, names[index]
+        )
+
+# 換一組資料測試，確認輸出會跟著指定變數改變。
+# 保留完整程式重跑，支援使用迴圈或中間變數的寫法。
+_, captured, _ = _rerun({
+    "mom_age": "測試",
+    "my_age": 2,
+    "my_name": 3.5
+})
+
+tested = [
+    x.strip()
+    for x in captured.splitlines()
+    if x.strip()
+]
+
+assert len(tested) == 3, \
+    "換一組資料後，仍應分三行印出三個指定變數的型別。"
+
+changed = ["<class 'str'>", "<class 'int'>", "<class 'float'>"]
+
+for index, (got, wanted) in enumerate(zip(tested, changed)):
+    assert got == wanted, \
+        "第 %d 行輸出沒有隨 %s 的型別改變。請確認 type() 查詢的是 %s，並印出查詢結果。" % (
+            index + 1, names[index], names[index]
+        )
+
 ```
 solution:
 ```python
