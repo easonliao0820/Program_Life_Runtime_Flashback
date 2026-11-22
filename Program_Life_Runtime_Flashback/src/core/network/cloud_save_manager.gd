@@ -7,6 +7,8 @@ extends Node
 const BACKEND_URL := "https://oj3wxp63b5ttx6sfklndqcrccq0nnxwq.lambda-url.ap-southeast-2.on.aws"
 
 var _busy := false
+var _auto_save_pending := false
+var _auto_save_running := false
 
 
 ## 下載雲端存檔。
@@ -72,11 +74,29 @@ func _send_request(
 	method: int,
 	request_data: Dictionary
 ) -> Dictionary:
-	if _busy:
-		return {
-			"ok": false,
-			"message": "已有雲端存檔請求正在執行"
-		}
+		
+	var request_player_id := PlayerSession.player_id
+	var wait_started := Time.get_ticks_msec()
+
+	# 其他存檔請求還沒結束時，依序等待。
+	while _busy:
+		if Time.get_ticks_msec() - wait_started >= 25000:
+			return {
+				"ok": false,
+				"message": "等待雲端存檔逾時"
+			}
+
+		await get_tree().create_timer(0.2, true).timeout
+
+		if (
+			not PlayerSession.is_logged_in
+			or PlayerSession.player_id != request_player_id
+		):
+			return {
+				"ok": false,
+				"message": "登入狀態已變更"
+			}
+
 
 	if not PlayerSession.is_logged_in:
 		return {
@@ -172,3 +192,74 @@ func _send_request(
 		"status": status_code,
 		"data": data
 	}
+
+
+## 收到小節完成事件，要求自動同步。
+func request_auto_save() -> void:
+	if not PlayerSession.is_logged_in:
+		return
+
+	_auto_save_pending = true
+
+	if not _auto_save_running:
+		_process_auto_save.call_deferred()
+
+
+## 依序上傳，短時間內多次更新以最新進度為準。
+func _process_auto_save() -> void:
+	if _auto_save_running:
+		return
+
+	_auto_save_running = true
+	var player_id := PlayerSession.player_id
+
+	while (
+		_auto_save_pending
+		and PlayerSession.is_logged_in
+		and PlayerSession.player_id == player_id
+	):
+		_auto_save_pending = false
+
+		print("[CloudSave] 小節完成，正在同步 AWS...")
+
+		var result: Dictionary = await upload_save()
+
+		if (
+			not PlayerSession.is_logged_in
+			or PlayerSession.player_id != player_id
+		):
+			break
+
+		if result.get("ok", false):
+			print("[CloudSave] 小節雲端存檔成功")
+		else:
+			push_warning(
+				"[CloudSave] 自動同步失敗：" +
+				str(result.get("message", "未知錯誤"))
+			)
+
+			# 失敗後等待三秒再試一次。
+			await get_tree().create_timer(
+				3.0, true
+			).timeout
+
+			if (
+				not PlayerSession.is_logged_in
+				or PlayerSession.player_id != player_id
+			):
+				break
+
+			result = await upload_save()
+
+			if result.get("ok", false):
+				print("[CloudSave] 自動存檔重試成功")
+			else:
+				push_warning(
+					"[CloudSave] 重試仍失敗，進度保留在本機"
+				)
+
+	_auto_save_running = false
+
+	# 如果執行期間切換帳號，新帳號有待同步資料就再啟動。
+	if _auto_save_pending and PlayerSession.is_logged_in:
+		_process_auto_save.call_deferred()

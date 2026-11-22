@@ -233,14 +233,32 @@ func goto_section(section_id: String) -> void:
 		_open_stage()
 
 
-## 一節播完後由 GameStage 呼叫。
-func section_finished(section_id: String) -> void:
+
+## 完成每個劇情小節後，自動同步 AWS。
+## jump_to 用於劇情的 @jump / @ending 分支。
+func section_finished(
+	section_id: String,
+	jump_to: String = ""
+) -> void:
 	GameState.mark_completed(section_id)
-	var next_id := ChapterRegistry.next_section_id(section_id)
-	if next_id == "":
+
+	var next_id: String = jump_to
+	if next_id.is_empty():
+		next_id = ChapterRegistry.next_section_id(section_id)
+
+	if next_id.is_empty():
 		finish_game()
 	else:
+		# 更新下一小節並儲存本機進度。
 		goto_section(next_id)
+
+	# 自動測試不需要存 AWS。
+	if autopilot or not PlayerSession.is_logged_in:
+		return
+
+	# 每個小節結束都要求雲端同步。
+	CloudSaveManager.request_auto_save()
+
 
 
 ## 第六章：依「第一次就通過」的比例決定結局。
