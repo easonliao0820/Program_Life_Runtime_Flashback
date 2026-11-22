@@ -68,6 +68,12 @@ class GameSaveRequest(BaseModel):
 	save: dict[str, Any]
 
 
+class AIRequest(BaseModel):
+    prompt: str = Field(
+        min_length=1,
+        max_length=1000
+    )
+
 
 class GameAIRequest(BaseModel):
 	player_message: str = Field(
@@ -487,19 +493,6 @@ def ai_generate(
 	authorization: str | None = Header(default=None),
 ):
 	# 預設匿名可用；登入政策仍由獨立 AI policy 決定。
-	authorize_ai(authorization, verify_google_token)
-
-	if not payload.prompt.strip():
-		raise HTTPException(status_code=422, detail="Prompt 不可為空白")
-
-	return {"text": generate(payload.prompt)}
-
-
-@app.post("/ai/generate")
-def ai_generate(
-	payload: AIRequest,
-	authorization: str | None = Header(default=None),
-):
 	authorize_ai(authorization, verify_google_token)
 
 	if not payload.prompt.strip():
