@@ -86,11 +86,15 @@ for name, num in bag.items():
 
 @level ch4_1_scores
 title: 成績單守護者
-goal: 教授把翊丞的物理改成 60 分了。修改字典裡物理的分數，再執行一次，確認翊丞 All pass。
+goal: 教授把物理改成 60 分了。更新字典裡物理的分數，讓翊丞 All pass。
 intro: 字典改分數跟放東西進去一樣：字典["鍵"] = 新的值。
 step: 找到「在這裡修改物理的分數」那行註解
 step: 在底下用 字典["科目"] = 分數 把物理改成 60
 step: 按執行，看到 All pass 就成功了
+expect:
+```text
+翊丞：All pass！明年可以繼續一起打遊戲！
+```
 tags: scores["物理"] = 60 | for subject, score in scores.items()
 hint: 在字典建立之後、for 迴圈之前，加上一行 scores["物理"] = 60。
 starter:

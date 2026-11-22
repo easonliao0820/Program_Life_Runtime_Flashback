@@ -50,10 +50,16 @@ except ValueError:
 
 @level ch5_3_pressure
 title: 爸爸的血壓紀錄
-goal: 修改 record_pressure()，讓爸爸輸入國字時不會當機，並給出貼心的提示；輸入數字時照常記錄。
+goal: 讓爸爸輸入國字時程式不會當掉，改成提醒他輸入數字。
 step: 在 value = int(text) 上面加一行 try:，並把它往內縮
 step: 和 try 對齊寫 except ValueError:，底下印出提示，再 return None
 step: 下面的 if / else 不用動
+expect:
+```text
+（第一行的提醒可以自己寫，要提到「數字」，例如：）
+要輸入阿拉伯數字喔，像是 120。
+記錄 128，很好，今天也很健康！
+```
 tags: try: | except ValueError: | 140 以上偏高
 hint: 把 value = int(text) 放進 try: 底下；except ValueError: 底下印出提示，然後 return None。
 hint: try 和 except 要對齊，底下的程式各自往內縮。

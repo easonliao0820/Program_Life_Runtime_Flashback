@@ -76,7 +76,16 @@ print(toast * 2)          # 買兩份：70
 
 @level ch2_2_breakfast
 title: 算算早餐錢
-goal: 你點了{food}和{drink}。用程式算出總共多少錢，以及付 100 元要找多少。請保留 food、drink 的價格，第一行只印總價，第二行只印找零；兩行都只輸出整數，不加文字。
+goal: 算出早餐總共多少錢，以及付 100 元要找多少。
+step: 在第一個 print() 的括號裡寫總價的算式：food 加 drink
+step: 在第二個 print() 的括號裡寫找零的算式：100 減掉總價（記得加括號）
+step: 只印數字，不要加文字，按執行
+expect:
+```text
+（例如 35 元＋25 元：）
+60
+40
+```
 tags: {food}　{food_price} 元 | {drink}　{drink_price} 元 | 付 100 元
 hint: 先把兩個價格放進盒子，再用 + 加起來。
 hint: 找零就是 100 - (food + drink)，記得括號。

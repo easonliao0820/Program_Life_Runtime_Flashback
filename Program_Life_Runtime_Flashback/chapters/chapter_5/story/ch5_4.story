@@ -83,11 +83,18 @@ pets.append(Pet("咪咪", 2))  # 物件也可以放進 list
 
 @level ch5_4_album
 title: 回憶相簿
-goal: 用 Memory 這張設計圖，建立一段屬於你自己的回憶，加進 album，然後印出整本相簿。
+goal: 照著 Memory 設計圖，做出一段你自己的回憶，放進相簿。
 intro: 相簿裡已經有 4 段回憶，再加 1 段你自己的就完成了。
 step: 在「加入一段你自己的回憶」底下寫 album.append( )
 step: 括號裡放 Memory( )，依序填：發生了什麼（加引號）、幾歲（數字）、心情（加引號）
 step: 執行，相簿會多印出你的那一段
+expect:
+```text
+（前四段一樣，最後一段是你寫的回憶，例如：）
+5 歲那年，第一次自己算早餐錢，那時候的心情是「驕傲」。
+……
+30 歲那年，在湖邊看日出，那時候的心情是「平靜」。
+```
 tags: class Memory | Memory("發生了什麼", 幾歲, "心情") | album.append(...) | memory.recall()
 hint: 在 album 的中括號裡加一行：Memory("你的回憶", 年齡, "心情"),
 hint: 也可以在 album 建立之後寫 album.append(Memory("……", 30, "……"))。

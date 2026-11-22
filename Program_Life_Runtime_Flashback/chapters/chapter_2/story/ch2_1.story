@@ -26,7 +26,14 @@ print("爸爸的肩膀好寬")
 
 @level ch2_1_feeling
 title: 說說你的感想
-goal: 用 print("") 說出你現在的感想。
+goal: 用 print() 說出你現在的感想。
+step: 在引號中間寫下你的感想，中文也可以
+step: 按執行
+expect:
+```text
+（寫什麼就印出什麼，例如：）
+這裡好溫暖
+```
 tags: print("……")
 hint: 把感想寫在引號裡面，例如 print("這裡好溫暖")。
 starter:
@@ -65,7 +72,14 @@ print(f"我愛我的{love}")
 
 @level ch2_1_love
 title: 愛的盒子
-goal: 建立 love 變數，放進一串文字，再用 print 印出「我愛我的○○」。
+goal: 做一個叫 love 的盒子放進你愛的人，再印出「我愛我的○○」。
+step: 在 love = 後面放進你愛的人，文字要加引號，例如 "爸爸媽媽"
+step: 第二行不用改，按執行
+expect:
+```text
+（例如 love = "爸爸媽媽"：）
+我愛我的爸爸媽媽
+```
 tags: love = "……" | print(f"我愛我的{love}")
 hint: 第一行寫 love = "爸爸媽媽"，引號裡也可以換成你想放進去的人。
 hint: 第二行的 f 要放在引號前面，盒子的名字放進 { } 裡。
@@ -118,7 +132,16 @@ print(type(name))     # <class 'str'>
 
 @level ch2_1_types
 title: 盒子裡裝的是什麼？
-goal: 剛剛打開的回憶盒子都變成了程式。用 type() 印出 mom_age、my_age、my_name 各是哪一種資料。
+goal: 用 type() 印出 mom_age、my_age、my_name 各是哪一種資料。
+step: 上面的盒子是你剛剛打開的回憶，不用改
+step: 前兩行 print(type(…)) 已經寫好了
+step: 在最後照樣寫一行，印出 my_name 的種類，按執行
+expect:
+```text
+<class 'int'>
+<class 'float'>
+<class 'str'>
+```
 tags: int 整數 | float 浮點數 | str 字串
 hint: 每一行寫 print(type(盒子的名字))。
 starter:

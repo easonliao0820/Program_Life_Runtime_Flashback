@@ -31,9 +31,57 @@ else:
     print("咦？好像哪裡算錯了，跟店員確認一下吧。")
 ```
 
+派森：先別急著對帳。我們先暖身一下，只練「比較」這一件事。
+@level ch2_3_compare
+title: 暖身：對還是錯？
+goal: 用 == 比較兩邊一不一樣，讓程式印出 True（對）或 False（錯）。
+step: 第一行已經寫好了：25 + 60 跟 85 一樣嗎？
+step: 照第一行的樣子，在第二行的括號裡寫：25 + 60 跟 80 一樣嗎？
+step: 按執行，看看兩行各印出什麼
+expect:
+```text
+True
+False
+```
+tags: == 比較兩邊 | 一樣 → True | 不一樣 → False
+hint: 第二行跟第一行幾乎一樣，只是把 85 換成 80：print(25 + 60 == 80)
+hint: 記得是兩個等號 ==。一個等號 = 是「放進盒子」，不能拿來比較。
+starter:
+```python
+print(25 + 60 == 85)   # 25 + 60 跟 85 一樣嗎？
+print()   # ← 在括號裡寫：25 + 60 跟 80 一樣嗎？
+```
+check:
+```python
+import ast
+compares = [n for n in ast.walk(ast.parse(code)) if isinstance(n, ast.Compare) and any(isinstance(op, ast.Eq) for op in n.ops)]
+assert len(compares) >= 2, "第二行也要用兩個等號 == 來比較喔。"
+assert any(isinstance(c, ast.Constant) and c.value == 80 for n in compares for c in [n.left] + n.comparators), \
+    "第二行要比較的是 25 + 60 跟 80。"
+assert lines == ["True", "False"], "第一行應該印出 True、第二行印出 False。第二行寫的是 print(25 + 60 == 80) 嗎？"
+```
+solution:
+```python
+print(25 + 60 == 85)   # 25 + 60 跟 85 一樣嗎？
+print(25 + 60 == 80)   # ← 在括號裡寫：25 + 60 跟 80 一樣嗎？
+```
+success: 85 對、80 錯。== 就像一台判斷機，只會回答 True 或 False。接下來把它放進 if，讓程式自己決定要說什麼。
+counts: false
+@end
+
+系統：if 後面放的就是剛剛那種比較。比較結果是 True，就執行 if 底下的那行；是 False，就改做 else 底下的那行。
+系統：下一關的 if 和 else 都已經寫好了，你只要在 my_answer = 後面寫出打折後的算式。
+
 @level ch2_3_breakfast
 title: 關卡一：早餐時段
-goal: 豆漿 25 元＋草莓吐司 60 元，早餐時段打 85 折。結帳螢幕上，店員收 72 元。算算看店員對不對。請保留起始程式的判斷與輸出格式，只補上 my_answer 的計算式。
+goal: 算出打 85 折後要付多少，讓程式判斷店員收 72 元對不對。
+step: 在 my_answer = 後面寫算式：先把豆漿和吐司加起來，再乘上 0.85
+step: 加法要用括號包起來，最外面再用 round( ) 變成整數
+step: 下面的 if / else 不用改，按執行
+expect:
+```text
+沒問題！總共是 72 元。
+```
 tags: 豆漿 25 元 | 草莓吐司 60 元 | 85 折 = × 0.85 | 店員收 72 元
 hint: 打 85 折就是乘上 0.85；算完記得用 round() 變成整數。
 starter:
@@ -98,7 +146,15 @@ print(round(total))                    # 70
 
 @level ch2_3_onigiri
 title: 關卡二：第二件 6 折
-goal: 御飯糰35元，兩瓶奶茶各30元，只有第二瓶打6折。店員收95元，算得對嗎？請完成兩處：①把 my_answer 的0換成計算式；②把 if 後的 False 換成「自己算的金額等於店員收費」的比較式。輸出文字已準備好，請保留。
+goal: 算出「第二瓶 6 折」的金額，讓程式判斷店員收 95 元對不對。
+step: 把 my_answer 的 0 換成算式：飯糰＋第一瓶奶茶＋第二瓶奶茶 × 0.6，最外面用 round( )
+step: 把 if 後面的 False 換成比較：my_answer 跟 clerk_total 一樣嗎？（用 ==）
+step: 下面的 print 不用改，按執行
+expect:
+```text
+店員算錯了，請再確認金額。
+應付金額： 83
+```
 tags: 第一瓶原價 | 第二瓶 × 0.6 | == 比較是否相等
 hint: 總價是「御飯糰＋第一瓶奶茶＋第二瓶奶茶」，只有第二瓶乘上0.6。
 hint: my_answer = round(onigiri + milk_tea + milk_tea * 0.6)，判斷條件使用 my_answer == clerk_total。
@@ -239,7 +295,14 @@ print(round(wrong), round(right))    # 67 63
 
 @level ch2_3_noodles
 title: 關卡三：幫她算算看
-goal: 三明治49元兩個＋茶葉蛋13元，全部打9折，店員收111元。使用 round() 計算金額，保留原本的 if / else 判斷及輸出格式，只補上 my_answer 的計算式。只輸出判斷結果那一句。
+goal: 幫她算出全部打 9 折後的金額，看看店員收 111 元對不對。
+step: 在 my_answer = 後面寫算式：三明治 × 2 加上茶葉蛋，再整筆乘上 0.9
+step: 要先加總再打折，所以加法要用括號包起來，最外面用 round( )
+step: 下面的 if / else 不用改，按執行
+expect:
+```text
+咦？好像哪裡算錯了，跟店員確認一下吧。
+```
 tags: 三明治 49 元 × 2 | 茶葉蛋 13 元 | 全部 9 折 | 店員收 111 元
 hint: (49 × 2 + 13) × 0.9 = 99.9，round() 之後是多少？
 hint: 算出來跟 111 不一樣，else 底下要印出提醒。

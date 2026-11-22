@@ -70,14 +70,22 @@ print(best_name, best_score)   # 小華 92
 ```
 
 系統：注意縮排：if 在 for 裡面，所以每一個人都會比一次；if 底下的兩行再往內縮，只有「比較大」的時候才會更新。
+派森：這關有兩件事，一件一件來：先把寫死的 3 改掉，再寫打擂台找冠軍。兩件都改好再按執行，不然只改一半也會被算成錯一次喔。
 
 @level ch5_2_report
 title: Claire 的報表（還有十分鐘）
-goal: 找出第一版程式的錯誤，修正 summarize()；再加上找出「本季冠軍」的程式，印出冠軍和它的總業績。
+goal: 修好 summarize() 的平均，再找出本季業績冠軍。
 intro: 先修平均，再用「打擂台」找冠軍。
-step: summarize() 裡的 3 改成 len(months)
-step: 在「找出本季冠軍」底下寫 if：這區的 total 比 best_total 大，就更新 best_total 和 best_region
-step: 執行，最後一行會印出冠軍
+step: 先修 bug：summarize() 裡的 3 改成 len(months)，中區的月平均就會變成 95.0
+step: 再找冠軍：在「找出本季冠軍」底下寫 if，這區的 total 比 best_total 大，就更新 best_total 和 best_region
+step: 兩件都做完再按執行，最後一行會印出冠軍
+expect:
+```text
+北區：總業績 361 萬，月平均 120.3 萬
+中區：總業績 190 萬，月平均 95.0 萬
+南區：總業績 415 萬，月平均 138.3 萬
+本季冠軍：南區，總業績 415 萬
+```
 tags: 北區 120・98・143 | 中區 88・102 | 南區 130・125・160 | 不要把 3 寫死
 hint: 月平均應該除以 len(months)，而不是 3。
 hint: 用 best_region、best_total 兩個盒子記住目前最高的一區：if total > best_total 就更新。

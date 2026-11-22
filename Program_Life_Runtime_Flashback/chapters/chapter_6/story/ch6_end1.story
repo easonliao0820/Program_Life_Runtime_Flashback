@@ -29,10 +29,14 @@ cg: 人生地圖
 
 @level end1_voice
 title: 回憶一：第一聲
-goal: 讓派森聽見你的聲音：用 print() 說出「別走，派森」。
+goal: 用 print() 說出「別走，派森」。
 intro: 還記得第一章學的 print() 嗎？
 step: 把「別走，派森」放進引號
 step: 再放進 print( ) 的括號裡，按執行
+expect:
+```text
+別走，派森
+```
 tags: print("……")
 hint: 文字要用英文半形的引號包起來，再放進 print( ) 裡。
 hint: 寫法：print("別走，派森")
@@ -65,10 +69,15 @@ success: 「別走，派森」——你的聲音，派森聽見了。
 
 @level end1_love
 title: 回憶二：愛的盒子
-goal: 找回剛出生時存下的那個變數：建立 love，再用 f-string 印出「我愛我的○○」。
+goal: 建立 love 盒子，印出「我愛我的○○」。
 intro: 變數就是貼了名字的盒子。
 step: 在 love = 後面放進你愛的人，記得加引號
 step: 第二行不用改，按執行
+expect:
+```text
+（例如 love = "爸爸媽媽"：）
+我愛我的爸爸媽媽
+```
 tags: love = "文字" | f-string
 hint: 文字要加引號，例如 "爸爸媽媽"。
 hint: 寫法：love = "爸爸媽媽"
@@ -101,10 +110,14 @@ success: 愛的盒子找回來了：{last_output}
 
 @level end1_friends
 title: 回憶三：朋友清單
-goal: 朋友清單裡少了一個人。用 append() 把派森找回來，再印出朋友的人數和名單。
+goal: 用 append() 把派森加回朋友清單。
 intro: list 加東西用 append()。
 step: 在中間空白那一行，用 append() 把 "派森" 加進 friends
 step: 執行，人數會從 7 變成 8
+expect:
+```text
+我的朋友有 8 個：['爸爸', '媽媽', '奶奶', '倖芳', '翊丞', 'Claire', 'Cindy', '派森']
+```
 tags: friends.append("派森") | len(friends)
 hint: 要寫在 friends 建立之後、print 之前。
 hint: 寫法：friends.append("派森")
@@ -155,10 +168,17 @@ success: 朋友清單又是 8 個人了，派森也在裡面。
 
 @level end1_days
 title: 回憶四：那 100 天
-goal: 用迴圈和 if，找出倒數時每一個「撐過一段」的日子（可以被 25 整除的那幾天）。
+goal: 找出倒數時每一個「撐過一段」的日子（可以被 25 整除的那幾天）。
 intro: 「可以被 25 整除」就是除以 25 的餘數是 0。
 step: 在 if 和冒號中間，寫出「day 可以被 25 整除」的條件
 step: 執行，會印出 100、75、50、25 四天
+expect:
+```text
+倒數第 100 天，我還在。
+倒數第 75 天，我還在。
+倒數第 50 天，我還在。
+倒數第 25 天，我還在。
+```
 tags: range(100, 0, -1) | day % 25 == 0
 hint: % 是取餘數：day % 25 就是 day 除以 25 的餘數。
 hint: 條件寫法：day % 25 == 0
@@ -198,10 +218,18 @@ success: 倒數 100、75、50、25 天——那 100 天，你一直都在。
 
 @level end1_places
 title: 回憶五：人生地圖
-goal: 用字典的 .items() 查出每段回憶發生在哪裡，一行印一段：「事件 -> 地點」。
+goal: 用 .items() 一行印出一段回憶，和它發生的地方。
 intro: .items() 可以一次拿出字典的鍵和值。
 step: 在空白處寫 for，用 .items() 一次拿出事件 event 和地點 place
 step: 在 for 裡面（往內縮）用 print 印出「事件 -> 地點」
+expect:
+```text
+出生 -> 醫院
+第一次算數 -> 早餐店
+遇見倖芳 -> 捷運站
+奶奶的祈禱 -> 文昌帝君廟
+第一次被說做得好 -> Claire 的會議室
+```
 tags: for event, place in places.items() | ->（減號＋大於）
 hint: 第一行：for event, place in places.items():
 hint: 第二行往內縮，用 f-string 印出：大括號放 event、中間是 -> 、再一個大括號放 place。-> 是「減號」加「大於」兩個符號。
