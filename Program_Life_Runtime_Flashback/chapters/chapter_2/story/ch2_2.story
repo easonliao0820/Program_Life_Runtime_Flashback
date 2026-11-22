@@ -98,23 +98,106 @@ print()   # ← 在括號裡寫算式：付 100 元要找多少？
 ```
 check:
 ```python
+import ast
+import copy
+import contextlib
+import io
+import sys
+
 expected_food = <<food_price>>
 expected_drink = <<drink_price>>
 expected_total = expected_food + expected_drink
 expected_change = 100 - expected_total
 
+# 先確認玩家沒有修改實際選餐的價格。
 assert "food" in globals() and type(food) is int and food == expected_food, \
     "請保留你點的食物價格。"
+
 assert "drink" in globals() and type(drink) is int and drink == expected_drink, \
     "請保留你點的飲料價格。"
 
-actual_lines = [line.strip() for line in lines if line.strip()]
+# 確認本次答案的輸出正確。
+actual_lines = [line.strip() for line in out.splitlines() if line.strip()]
+
 assert len(actual_lines) == 2, \
-    "請只輸出兩行整數：第一行總價，第二行找零，不加其他文字。"
+    "請輸出兩行：第一行總價，第二行找零，只印整數，不加文字。"
+
 assert actual_lines[0] == str(expected_total), \
     "第一行總價不正確，請把食物與飲料價格加起來。"
+
 assert actual_lines[1] == str(expected_change), \
     "第二行找零不正確，請用100減掉總價。"
+
+# 找到起始程式裡 food、drink 的第一次價格設定。
+tree = ast.parse(code)
+price_positions = {}
+
+for index, statement in enumerate(tree.body):
+    target = None
+
+    if isinstance(statement, ast.Assign) and len(statement.targets) == 1:
+        target = statement.targets[0]
+    elif isinstance(statement, ast.AnnAssign):
+        target = statement.target
+
+    if isinstance(target, ast.Name):
+        if target.id in ("food", "drink") and target.id not in price_positions:
+            price_positions[target.id] = index
+
+assert set(price_positions) == {"food", "drink"}, \
+    "請保留起始程式中 food = 價格、drink = 價格這兩行，再於下方計算。"
+
+def test_prices(food_value, drink_value):
+    # 只替換測試用程式中的起始價格，不修改玩家的原始答案。
+    test_tree = copy.deepcopy(tree)
+
+    for name, value in (("food", food_value), ("drink", drink_value)):
+        statement = test_tree.body[price_positions[name]]
+        statement.value = ast.Constant(value=value)
+
+    ast.fix_missing_locations(test_tree)
+    compiled = compile(test_tree, "<breakfast-test>", "exec")
+
+    # 每組測試使用新的變數環境。
+    scope = {"__name__": "__main__"}
+    captured = io.StringIO()
+    steps = [0]
+
+    def guard(frame, event, arg):
+        if event == "line" and frame.f_code.co_filename == "<breakfast-test>":
+            steps[0] += 1
+            if steps[0] > 10000:
+                raise RuntimeError("測試執行過久")
+        return guard
+
+    previous_trace = sys.gettrace()
+
+    try:
+        sys.settrace(guard)
+        with contextlib.redirect_stdout(captured):
+            exec(compiled, scope)
+    except Exception:
+        raise AssertionError(
+            "你的原本金額正確，但換一組價格後程式無法完成。"
+            "請使用 food 和 drink 計算總價，再用100減掉總價。"
+        ) from None
+    finally:
+        sys.settrace(previous_trace)
+
+    return [
+        line.strip()
+        for line in captured.getvalue().splitlines()
+        if line.strip()
+    ]
+
+# 固定寫 print(60)、print(40)，無法通過不同價格的測試。
+for test_food, test_drink in ((40, 20), (35, 20), (50, 25)):
+    total = test_food + test_drink
+    expected_lines = [str(total), str(100 - total)]
+
+    assert test_prices(test_food, test_drink) == expected_lines, \
+        "你算出的金額正確！但換一組價格後，程式沒有算出正確結果。" \
+        "請不要直接印出固定答案；改用 food 和 drink 計算總價，再用100減掉總價。"
 ```
 solution:
 ```python
