@@ -49,13 +49,20 @@ func _ready() -> void:
 	visible = false
 
 
+const CHOICE_OFF := preload("res://assets/ui/choice_off.png")
+const CHOICE_ON := preload("res://assets/ui/choice_on.png")
+
+
 func choose(prompt: String, options: Array) -> String:
 	for c in _list.get_children():
 		c.queue_free()
 	_header.text = prompt if prompt != "" else "點餐單"
 	for opt in options:
-		var b := UIKit.button("☐　" + GameState.format_text(str(opt["label"])), Color.TRANSPARENT, UIKit.INK, 30)
+		var b := UIKit.button(GameState.format_text(str(opt["label"])), Color.TRANSPARENT, UIKit.INK, 30)
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		# 勾選框用圖片（字型沒有 ☐☑，網頁版會變成方塊）
+		b.icon = CHOICE_OFF
+		b.add_theme_constant_override("h_separation", 18)
 		b.custom_minimum_size = Vector2(656, 70)
 		var line := UIKit.box(Color.TRANSPARENT, 0, Color("#d8cfc0"), 0, 12)
 		line.border_width_bottom = 2
@@ -63,9 +70,8 @@ func choose(prompt: String, options: Array) -> String:
 		b.add_theme_stylebox_override("normal", line)
 		b.add_theme_stylebox_override("hover", UIKit.box(Color("#ffe9a8"), 6, UIKit.GOLD, 2, 12))
 		b.add_theme_stylebox_override("pressed", UIKit.box(Color("#ffd97a"), 6, UIKit.GOLD, 2, 12))
-		var label_text := b.text
-		b.mouse_entered.connect(func(): b.text = label_text.replace("☐", "☑"))
-		b.mouse_exited.connect(func(): b.text = label_text)
+		b.mouse_entered.connect(func(): b.icon = CHOICE_ON)
+		b.mouse_exited.connect(func(): b.icon = CHOICE_OFF)
 		var value := str(opt["value"])
 		b.pressed.connect(func(): chosen.emit(value))
 		_list.add_child(b)
