@@ -192,34 +192,63 @@ func _fallback_reason(who: String) -> String:
 	return "（%s好像沒聽清楚，訊號有點不穩。等一下再說一次吧。）" % who
 
 
+
 func _prompt(who: String, question: String, ctx: String) -> String:
 	var me := GameState.user_name if GameState.user_name != "" else "主角"
-	var who_desc: String = persona.call(who) if persona.is_valid() else "你是遊戲裡的角色「%s」。" % who
-	var memory := ""
-	var past: Array = GameState.chat_history.get(who, [])
-	if not past.is_empty():
-		var lines: Array = []
-		for i in range(maxi(0, past.size() - MEMORY_IN_PROMPT), past.size()):
-			lines.append("%s：%s\n%s：%s" % [me, past[i]["q"], who, past[i]["a"]])
-		memory = "\n【你們之前聊過的話（請記得，必要時接著聊）】\n" + "\n".join(lines) + "\n"
-	var rules := """1. 繁體中文、80 字以內、不要用表情符號、不要加名字前綴，完全用「%s」的口吻與身分說話。
-2. 只聊遊戲裡的故事、主角的人生、Python 與程式；被問到現實新聞、政治、色情、暴力或與遊戲無關的事，用角色的方式自然地把話題帶回來。
-3. 不要說自己是 AI、Gemini 或語言模型。
-4. 配合主角現在的年紀與這一段的劇情，不要提到還沒發生的事。""" % who
+	var who_desc: String = persona.call(who) if persona.is_valid() else "你是遊戲角色「%s」。" % who
+
+	# 控制 Prompt 總長度，配合目前 AWS 的 1000 字元限制
+	const MAX_TOTAL := 1000
+
+	# 簡化規則，保留角色個性和重要行為限制
+	var rules := "請用繁體中文、80字內，以角色口吻回答，不加名字前綴、不用表情符號。只談遊戲、人生與程式，其他話題自然帶回遊戲。不要自稱AI。配合目前劇情，不劇透。"
 	if who == "派森":
-		rules += "\n5. 如果主角正在解關卡，只給方向和提示，不要直接寫出完整答案的程式碼。"
+		rules += "解題時只給提示，不直接給完整答案。"
 	else:
-		rules += "\n5. 你不知道派森的存在（只有主角看得見派森），也不太懂程式，除非你的角色本來就會。"
-	return """%s
-主角的名字是「%s」。
+		rules += "你看不見派森，除非角色設定另有說明，否則不熟悉程式。"
 
-【目前情境】
-%s
-%s
-【規則】
-%s
+	# 優先保留玩家最新問題、角色設定和規則
+	var latest_question := question.left(120)
+	var header := "%s\n主角：%s\n【情境】\n" % [who_desc.left(180), me.left(30)]
+	var footer := "\n【規則】\n%s\n【玩家最新問題】\n%s" % [rules, latest_question]
 
-主角對你說：%s""" % [who_desc, me, ctx, memory, rules, question]
+	# 情境只使用剩餘字元預算的一部分
+	var available := maxi(0, MAX_TOTAL - header.length() - footer.length())
+	var context_text := ctx.left(mini(available, 250))
+	var prompt := header + context_text
+
+	# 剩餘空間用來加入最近的聊天紀錄
+	var remaining := MAX_TOTAL - prompt.length() - footer.length()
+	var past: Array = GameState.chat_history.get(who, [])
+	var memory_lines: Array[String] = []
+
+	for i in range(past.size() - 1, -1, -1):
+		if memory_lines.size() >= MEMORY_IN_PROMPT:
+			break
+
+		var item: Dictionary = past[i]
+		var line := "\n%s：%s\n%s：%s" % [
+			me.left(20),
+			str(item.get("q", "")).left(60),
+			who,
+			str(item.get("a", "")).left(100)
+		]
+
+		if line.length() > remaining:
+			break
+
+		memory_lines.push_front(line)
+		remaining -= line.length()
+
+	if not memory_lines.is_empty():
+		prompt += "\n【最近對話】" + "".join(memory_lines)
+
+	prompt += footer
+
+	print("===== AI Prompt =====")
+	print(prompt)
+	print("Prompt 長度：", prompt.length())
+	return prompt.left(MAX_TOTAL)
 
 
 func _show_bubble(who: String, text: String, auto_hide: bool) -> void:

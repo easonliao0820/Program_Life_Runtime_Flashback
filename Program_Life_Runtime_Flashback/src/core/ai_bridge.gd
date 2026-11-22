@@ -72,7 +72,7 @@ func ask(prompt: String, fallback: String, timeout_sec: float = 10.0) -> String:
 	add_child(req)
 	# 只送 prompt，不附 Google Token；私人存檔 API 的驗證應另外實作。
 	var err := req.request(api_url, PackedStringArray(["Content-Type: application/json"]),
-		HTTPClient.METHOD_POST, JSON.stringify({"prompt": prompt}))
+    	HTTPClient.METHOD_POST, JSON.stringify({"prompt": prompt}))
 	if err != OK:
 		print("AI 請求無法啟動，錯誤碼：", err)
 		_active_prompts.erase(key)
@@ -86,6 +86,7 @@ func ask(prompt: String, fallback: String, timeout_sec: float = 10.0) -> String:
 		print("AI HTTP 請求失敗")
 		print("Godot 請求結果：", res[0])
 		print("HTTP 狀態碼：", res[1])
+		print("後端錯誤內容：", (res[3] as PackedByteArray).get_string_from_utf8())
 		return fallback
 	# 後端合約是 {"text": "..."}，不再解析 Gemini 原始 candidates 格式。
 	var data = JSON.parse_string((res[3] as PackedByteArray).get_string_from_utf8())

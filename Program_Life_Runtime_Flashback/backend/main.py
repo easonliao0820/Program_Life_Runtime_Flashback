@@ -71,7 +71,7 @@ class GameSaveRequest(BaseModel):
 class AIRequest(BaseModel):
     prompt: str = Field(
         min_length=1,
-        max_length=1000
+        max_length=4000
     )
 
 
