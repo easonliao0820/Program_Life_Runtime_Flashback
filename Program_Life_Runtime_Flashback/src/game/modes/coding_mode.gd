@@ -9,8 +9,11 @@ extends Control
 ##   上方：這一節有幾關、目前第幾關、錯誤次數（用於結局判定）
 
 signal _continue_pressed
+signal _tutorial_next
 
 const RUN_ICON := "res://src/ui/coding_panel/run.png"
+## 存檔旗標：看過第一次的操作引導
+const TUTORIAL_FLAG := "seen_coding_tutorial"
 
 ## GameStage 提供：func(text: String, mood: String) —— 讓派森在劇情區的對話框裡說話
 var speak: Callable
@@ -19,11 +22,14 @@ var _progress: Label
 var _task_panel: PanelContainer
 var _task_title: Label
 var _task_goal: RichTextLabel
+var _expect_box: PanelContainer
+var _expect_text: Label
 var _tags: HFlowContainer
 var _code_panel: PanelContainer
 var _editor: CodeEdit
 var _out_panel: PanelContainer
 var _output: RichTextLabel
+var _out_bg: PanelContainer
 var _flash: ColorRect
 var _run_btn: Button
 var _hint_btn: Button
@@ -42,6 +48,7 @@ var _running := false
 var _passed: bool = false
 var _memory_theme: bool = false
 var _last_said: String = ""
+var _tutorial_active := false
 
 
 func _ready() -> void:
@@ -64,9 +71,14 @@ func _ready() -> void:
 	_task_panel.size = UIKit.SPLIT_OBJECT.size
 	_task_panel.add_theme_stylebox_override("panel", UIKit.split_frame("task", Vector4(44, 42, 44, 36)))
 	add_child(_task_panel)
+	# 目標＋步驟＋預期輸出＋標籤可能放不下，超出時可以捲動
+	var task_scroll := ScrollContainer.new()
+	task_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_task_panel.add_child(task_scroll)
 	var card := PanelContainer.new()
 	card.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
-	_task_panel.add_child(card)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	task_scroll.add_child(card)
 	var card_v := VBoxContainer.new()
 	card_v.add_theme_constant_override("separation", 12)
 	card.add_child(card_v)
@@ -82,6 +94,18 @@ func _ready() -> void:
 	head.add_child(_task_title)
 	_task_goal = UIKit.rich(24, UIKit.INK)
 	card_v.add_child(_task_goal)
+	# 預期輸出：「執行後應該看到 ↓」＋一段跟輸出區一樣風格的深色文字
+	_expect_box = PanelContainer.new()
+	_expect_box.add_theme_stylebox_override("panel", UIKit.box(Color("#161F2B"), 8, Color.TRANSPARENT, 0, 12))
+	card_v.add_child(_expect_box)
+	var expect_v := VBoxContainer.new()
+	expect_v.add_theme_constant_override("separation", 6)
+	_expect_box.add_child(expect_v)
+	expect_v.add_child(UIKit.label("執行後應該看到 ↓", UIKit.SMALL_SIZE, Color("#a89c86")))
+	_expect_text = UIKit.label("", UIKit.SMALL_SIZE, Color("#f3e6c8"))
+	_expect_text.add_theme_font_override("font", UIKit.mono_font())
+	_expect_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	expect_v.add_child(_expect_text)
 	_tags = HFlowContainer.new()
 	_tags.add_theme_constant_override("h_separation", 12)
 	_tags.add_theme_constant_override("v_separation", 12)
@@ -132,6 +156,7 @@ func _ready() -> void:
 	_skip_btn.pressed.connect(_on_skip)
 
 	var out_bg := PanelContainer.new()
+	_out_bg = out_bg
 	out_bg.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	out_bg.add_theme_stylebox_override("panel", UIKit.box(Color("#0A0F17"), 8, Color.TRANSPARENT, 0, 14))
 	out_v.add_child(out_bg)
@@ -176,6 +201,9 @@ func play_level(level: Dictionary, ctx: Dictionary) -> Dictionary:
 			goal_text += "\n%s %s" % [NUMS[mini(i, NUMS.size() - 1)], GameState.format_text(str(steps[i]))]
 		goal_text += "[/color][/font_size]"
 	_task_goal.text = goal_text
+	var expect := GameState.format_text(str(level.get("expect", ""))).strip_edges()
+	_expect_text.text = expect
+	_expect_box.visible = expect != ""
 	for c in _tags.get_children():
 		c.queue_free()
 	for tag in level.get("tags", []):
@@ -197,6 +225,14 @@ func play_level(level: Dictionary, ctx: Dictionary) -> Dictionary:
 	visible = true
 	modulate.a = 0.0
 	UIKit.fade(self, 1.0, 0.3)
+	# 第一次進程式關卡：先帶玩家認識畫面（每個存檔只出現一次）
+	if not GameFlow.autopilot and not GameState.get_value(TUTORIAL_FLAG, false):
+		await get_tree().create_timer(0.35).timeout
+		await _run_tutorial()
+		GameState.set_value(TUTORIAL_FLAG, true)
+		GameState.save_game()
+		if intro != "":
+			_say(intro, "idle")
 	_editor.grab_focus()
 	if GameFlow.autopilot:
 		_autopilot.call_deferred()
@@ -216,6 +252,67 @@ func current_info() -> Dictionary:
 		return {}
 	return {"title": GameState.format_text(str(_level.get("title", ""))),
 		"goal": GameState.format_text(str(_level.get("goal", ""))), "code": _editor.text, "passed": _passed}
+
+
+## 第一次的操作引導：金框依序圈出畫面上的每一區，派森在劇情區的對話框裡說明；
+## 按空白鍵／Enter 或點一下滑鼠看下一步。引導期間擋住滑鼠，避免誤按執行。
+func _run_tutorial() -> void:
+	var steps := [
+		[_task_panel, "第一次寫程式嗎？我帶你認識一下。左下是任務卡：寫著這一關要做到什麼、步驟，還有執行後應該看到的結果。"],
+		[_code_panel, "右上是程式區。直接點進去就能打字、修改程式，跟一般的文字框一樣。"],
+		[_run_btn, "寫好之後按綠色的「執行」。執行就是送出：程式跑完，我會馬上檢查有沒有過關，不用另外交卷。"],
+		[_out_bg, "印出來的結果會出現在這裡。沒過關的話，我會在左上角告訴你哪裡不對，改好再按一次執行就行。"],
+		[_hint_btn, "卡住了可以按黃色的「提示」，不過用過提示就不算「一次過關」喔。灰色的「重置」會把程式變回一開始的樣子。"],
+		[null, "過關之後，按空白鍵就能繼續劇情。好，輪到你了！"],
+	]
+	_tutorial_active = true
+	_editor.release_focus()
+	var layer := Control.new()
+	UIKit.full_rect(layer)
+	layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	layer.gui_input.connect(func(e: InputEvent):
+		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+			_tutorial_next.emit())
+	add_child(layer)
+	var frame := Panel.new()
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.add_theme_stylebox_override("panel", UIKit.box(Color(UIKit.GOLD, 0.08), 14, UIKit.GOLD, 5))
+	layer.add_child(frame)
+	var tip_box := PanelContainer.new()
+	tip_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tip_box.add_theme_stylebox_override("panel", UIKit.navy_panel(8, 8))
+	tip_box.add_child(UIKit.label(UIKit.CONTINUE_HINT, UIKit.SMALL_SIZE, UIKit.GOLD))
+	layer.add_child(tip_box)
+	var pulse := frame.create_tween().set_loops()
+	pulse.tween_property(frame, "modulate:a", 0.45, 0.6)
+	pulse.tween_property(frame, "modulate:a", 1.0, 0.6)
+	var screen := get_viewport_rect().size
+	for step in steps:
+		var target = step[0]
+		if target is Control:
+			var r: Rect2 = (target as Control).get_global_rect().grow(10)
+			frame.visible = true
+			frame.global_position = r.position
+			frame.size = r.size
+			# 提示放在框的下方；太靠近底部就改放上方
+			var tip_y := r.end.y + 8 if r.end.y + 60 < screen.y else r.position.y - 52
+			tip_box.global_position = Vector2(r.position.x, tip_y)
+		else:
+			frame.visible = false
+			tip_box.global_position = UIKit.SPLIT_FEEDBACK.position + Vector2(24, 24)
+		_say(str(step[1]), "happy" if target == null else "idle")
+		await _tutorial_next
+		if not is_inside_tree():
+			return
+	pulse.kill()
+	layer.queue_free()
+	_tutorial_active = false
+
+
+func _input(event: InputEvent) -> void:
+	if _tutorial_active and UIKit.is_continue_key(event):
+		get_viewport().set_input_as_handled()
+		_tutorial_next.emit()
 
 
 ## 過關後按空白鍵（或 Enter）繼續
@@ -317,14 +414,22 @@ func _on_run() -> void:
 			"backend": str(result.get("backend", ""))
 		})
 		var plain := ErrorExplainer.explain(err, code)
-		_output.text = stdout + "[color=#ff8f80]（程式在這裡停下來了）[/color]"
+		var stopped := stdout + "[color=#ff8f80]（程式在這裡停下來了）[/color]"
+		_output.text = stopped
 		if int(err.get("line", 0)) > 0:
 			_editor.set_caret_line(int(err["line"]) - 1)
-		_say(plain, "worried")
-		# AI 開啟時，讓派森用自己的話再說一次；回來時如果玩家已經又按了執行，就不覆蓋
+		# AI 關閉：直接說固定回覆。
+		if not GameState.settings.get("ai_enabled", true):
+			_say(plain, "worried")
+			return
+		# AI 開啟：先等 AI，有回覆就只說 AI 的話；AI 失敗或逾時（回傳 plain）才說固定回覆。
+		# 等待中的提示放在輸出區，不寫進對話框，才不會留在「回顧」裡。
+		_output.text = stopped + "\n[color=#a89c86]派森正在想怎麼跟你說……[/color]"
 		var ai_line: String = await AiBridge.ask(ErrorExplainer.ai_prompt(err, code, plain), plain, 8.0)
-		if attempt == _attempt and not _passed and ai_line != plain:
-			_say(ai_line, "worried")
+		if not is_inside_tree() or attempt != _attempt or _passed:
+			return  # 玩家已經又按了執行或過關，這次的回覆就不用說了
+		_output.text = stopped
+		_say(ai_line, "worried")
 		return
 
 	if result.get("passed", false) != true:

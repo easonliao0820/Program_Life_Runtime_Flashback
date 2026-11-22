@@ -55,11 +55,17 @@ print(cake, tea)   # 50 50
 
 @level ch5_1_budget
 title: 第一份薪水
-goal: 修改 split_budget() 裡的比例，決定第一份薪水要怎麼分：給爸媽、存起來、自己用。三份加起來要剛好等於實際拿到的錢。
+goal: 決定第一份薪水怎麼分：給爸媽、存起來、自己用。
 intro: 函式像一台機器：放進 money，return 吐出三份金額。
 step: 找到 split_budget() 裡面的兩個 0.3
 step: 改成你想要的比例（加起來不要超過 1）
 step: me 那行不用改，按執行看三份金額
+expect:
+```text
+（比例不同，金額就不同。例如兩成給爸媽、四成存起來：）
+實際拿到：30720 元
+給爸媽 6144 元，存起來 12288 元，自己用 12288 元
+```
 tags: 月薪 32000 元 | 勞健保約 4% | def split_budget(money) | return family, saving, me
 hint: 只要改 0.3 這兩個數字就好，例如給爸媽 0.2、存起來 0.4。
 hint: me 用 money 減掉另外兩份，這樣三份加起來一定剛好。

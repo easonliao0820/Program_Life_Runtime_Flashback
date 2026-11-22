@@ -30,7 +30,23 @@ func _ready() -> void:
 	
 	# 設定初始 pivot_offset 供縮放動畫使用
 	self.pivot_offset = self.size / 2.0
-	
+
+	# 鎖頭圖示放在「已鎖定」上面（表情符號 🔒 網頁版的字型沒有）
+	var lock_icon := TextureRect.new()
+	lock_icon.texture = preload("res://assets/ui/lock.png")
+	lock_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	lock_icon.set_anchors_preset(Control.PRESET_CENTER)
+	lock_icon.offset_left = -24
+	lock_icon.offset_right = 24
+	lock_icon.offset_top = -44
+	lock_icon.offset_bottom = 4
+	lock_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	locked_overlay.add_child(lock_icon)
+	var lock_label := locked_overlay.get_node_or_null("LockLabel") as Control
+	if lock_label:
+		lock_label.offset_top += 16
+		lock_label.offset_bottom += 16
+
 	update_status()
 
 # 根據 ProgressManager 更新關卡節點狀態

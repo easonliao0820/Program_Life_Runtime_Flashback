@@ -43,7 +43,14 @@ print("Hello, World!")
 # 只差在引號或括號是全形時，派森會跳出全形符號的提示（ErrorExplainer）。
 @level ch1_first_words
 title: 第一句話
-goal: 把「Hello, World!」放進引號裡，再用 print() 包起來，跟這個世界打聲招呼。
+goal: 用 print() 讓電腦說出「Hello, World!」，跟這個世界打聲招呼。
+step: 在 print("") 的兩個引號中間，打上 Hello, World!
+step: 括號和引號都要用英文半形的 ( ) 和 " "
+step: 按執行
+expect:
+```text
+Hello, World!
+```
 tags: print("Hello, World!")
 hint: 括號和引號都要用英文半形：( ) 與 " "。全形的（ ）是 Python 看不懂的。
 hint: 完整的寫法是：print("Hello, World!")
