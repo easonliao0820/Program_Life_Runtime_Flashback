@@ -35,12 +35,8 @@
 
 ```python
 scores = {
-    "微積分": 60,
-    "計算機概論": 62,
-    "物理": 58,
-    "體育": 90,
-    "英文": 65,
-    "通識邏輯": 70,
+    "微積分": 60, "計算機概論": 62, "物理": 58,
+    "體育": 90, "英文": 65, "通識邏輯": 70,
 }
 failed = []
 for subject, score in scores.items():
@@ -82,38 +78,53 @@ for name, num in bag.items():
 # 尺 1
 ```
 
-派森：所以只要在字典建立之後，加一行把物理改成 60，下面的迴圈就會用新的分數重新檢查一次。
+系統：.items() 常常跟 if 一起用：一筆一筆檢查，符合條件的就用 append 放進另一個 list。例如找出數量 2 個以上的文具：
+
+```python
+bag = {"筆": 3, "書": 2, "尺": 1}
+many = []
+for name, num in bag.items():   # 一次拿出一筆：name 是鍵、num 是值
+    if num >= 2:                # 符合條件……
+        many.append(name)       # ……就把「鍵」放進 many
+print(many)                     # ['筆', '書']
+```
+
+翊丞：對了，「程式設計」的成績剛剛也公布了，75 分！你幫我一起加進去。
+派森：這次要你自己動手三個地方：① 把物理改成 60 ② 把程式設計 75 分加進字典 ③ 自己寫迴圈，把不及格的科目找出來。
+派森：改分數跟加科目的寫法一模一樣，都是 字典["鍵"] = 值——鍵已經有就是更新，還沒有就是新增。迴圈的寫法，照上面找文具的例子改就對了。
 
 @level ch4_1_scores
 title: 成績單守護者
-goal: 教授把物理改成 60 分了。更新字典裡物理的分數，讓翊丞 All pass。
-intro: 字典改分數跟放東西進去一樣：字典["鍵"] = 新的值。
-step: 找到「在這裡修改物理的分數」那行註解
-step: 在底下用 字典["科目"] = 分數 把物理改成 60
-step: 按執行，看到 All pass 就成功了
+goal: 更新物理分數、加上程式設計的成績，再自己寫迴圈找出不及格的科目，看看翊丞能不能 All pass。
+intro: 三個地方都要自己寫：更新、新增、用 for 和 .items() 檢查。
+step: 在註解底下用 scores["物理"] = 60 把物理改成 60
+step: 用一樣的寫法，把「程式設計」75 分加進字典
+step: 寫 for subject, score in scores.items():，分數小於 60 就 failed.append(subject)
 expect:
 ```text
+翊丞：這學期一共修了 7 科
 翊丞：All pass！明年可以繼續一起打遊戲！
 ```
-tags: scores["物理"] = 60 | for subject, score in scores.items()
-hint: 在字典建立之後、for 迴圈之前，加上一行 scores["物理"] = 60。
+tags: ① scores["物理"] = 60 | ② scores["程式設計"] = 75 | ③ for … in scores.items()
+hint: ① 在字典底下加一行 scores["物理"] = 60。
+hint: ② 新增跟更新寫法一樣：scores["程式設計"] = 75。加完後「一共修了」會變成 7 科。
+hint: ③ 第一行寫 for subject, score in scores.items():，下一行縮排寫 if score < 60:，再下一行再縮排寫 failed.append(subject)。
 starter:
 ```python
 scores = {
-    "微積分": 60,
-    "計算機概論": 62,
-    "物理": 58,
-    "體育": 90,
-    "英文": 65,
-    "通識邏輯": 70,
+    "微積分": 60, "計算機概論": 62, "物理": 58,
+    "體育": 90, "英文": 65, "通識邏輯": 70,
 }
-# ← 教授改分數了！在這裡把物理改成 60
+# ① 教授改分數了：在這裡把物理改成 60
 
+# ② 程式設計的成績公布了（75 分）：在這裡加進字典
 
 failed = []
-for subject, score in scores.items():
-    if score < 60:
-        failed.append(subject)
+# ③ 用 for 和 .items() 一科一科檢查，分數小於 60 的科目放進 failed
+
+
+# ↓ 下面的程式不用改
+print(f"翊丞：這學期一共修了 {len(scores)} 科")
 if len(failed) == 0:
     print("翊丞：All pass！明年可以繼續一起打遊戲！")
 elif len(failed) >= 3:
@@ -124,28 +135,38 @@ else:
 check:
 ```python
 import ast
-expected_scores = {"微積分":60,"計算機概論":62,"物理":60,"體育":90,"英文":65,"通識邏輯":70}
-assert "scores" in globals() and isinstance(scores, dict) and scores == expected_scores, "請保留全部科目與原分數，只把物理改成60。"
-assert "failed" in globals() and isinstance(failed, list) and failed == [], "請依成績正確計算 failed，這次應是空清單。"
-assert out.strip() == "翊丞：All pass！明年可以繼續一起打遊戲！", "請保留原本 All pass 的完整結果，不加矛盾訊息。"
+base = {"微積分": 60, "計算機概論": 62, "體育": 90, "英文": 65, "通識邏輯": 70}
+assert "scores" in globals() and isinstance(scores, dict), "請保留 scores 這個字典。"
+assert scores.get("物理") == 60, "① 物理還是 %s 分，用 scores[\"物理\"] = 60 把它改掉。" % scores.get("物理")
+assert "程式設計" in scores, "② 字典裡還沒有「程式設計」，用 scores[\"程式設計\"] = 75 加進去。"
+assert scores["程式設計"] == 75, "② 程式設計是 75 分喔。"
+assert all(scores.get(k) == v for k, v in base.items()) and len(scores) == 7, "其他科目的分數不用動，也不要多加別的科目。"
+loops = [n for n in ast.walk(ast.parse(code)) if isinstance(n, ast.For) and "scores.items()" in ast.unparse(n.iter)]
+assert loops, "③ 還沒看到 for … in scores.items(): 的迴圈。"
+trial = {"scores": {"甲": 59, "乙": 60, "丙": 30}, "failed": []}
+exec(ast.unparse(loops[0]), trial)
+assert trial["failed"] == ["甲", "丙"], "③ 迴圈要把分數小於 60 的科目 append 進 failed（剛好 60 分算及格）。"
+assert failed == [], "③ 這次所有科目都及格了，failed 應該是空的。"
+assert out.strip().splitlines() == ["翊丞：這學期一共修了 7 科", "翊丞：All pass！明年可以繼續一起打遊戲！"], "下面印出結果的程式不用改喔。"
 ```
 solution:
 ```python
 scores = {
-    "微積分": 60,
-    "計算機概論": 62,
-    "物理": 58,
-    "體育": 90,
-    "英文": 65,
-    "通識邏輯": 70,
+    "微積分": 60, "計算機概論": 62, "物理": 58,
+    "體育": 90, "英文": 65, "通識邏輯": 70,
 }
-# ← 教授改分數了！在這裡把物理改成 60
+# ① 教授改分數了：在這裡把物理改成 60
 scores["物理"] = 60
-
+# ② 程式設計的成績公布了（75 分）：在這裡加進字典
+scores["程式設計"] = 75
 failed = []
+# ③ 用 for 和 .items() 一科一科檢查，分數小於 60 的科目放進 failed
 for subject, score in scores.items():
     if score < 60:
         failed.append(subject)
+
+# ↓ 下面的程式不用改
+print(f"翊丞：這學期一共修了 {len(scores)} 科")
 if len(failed) == 0:
     print("翊丞：All pass！明年可以繼續一起打遊戲！")
 elif len(failed) >= 3:
@@ -153,7 +174,7 @@ elif len(failed) >= 3:
 else:
     print(f"翊丞：還好，只要重修 {failed} 就好……")
 ```
-success: 物理改成 60 分，failed 清單空了——All pass！翊丞抱著你又叫又跳。
+success: 物理 60、程式設計 75，七科全部及格，failed 清單是空的——All pass！翊丞抱著你又叫又跳。
 @end
 
 你：All pass 了，你可以安心過年了。

@@ -8,6 +8,13 @@ var _editor: CodeEdit
 var _output: Label
 var _run_btn: Button
 var _code: String = ""
+var _row: HBoxContainer
+
+## 卡片的上下界（1920×1080）：上面避開右上角的按鈕列，下面不能蓋到對話框和名字牌
+## （對話框在 dialogue_box.gd 的 FULL_RECT，y = 790；名字牌再往上凸出一點）。
+const TOP := 100.0
+const BOTTOM := 744.0
+const MIN_CODE_SIZE := 18  # 再小就不好讀了，放不下改用捲動
 
 
 func _ready() -> void:
@@ -16,7 +23,7 @@ func _ready() -> void:
 	anchor_right = 0.5
 	offset_left = -560
 	offset_right = 560
-	offset_top = 150
+	offset_top = TOP
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
@@ -27,6 +34,7 @@ func _ready() -> void:
 	v.add_child(_editor)
 
 	var row := HBoxContainer.new()
+	_row = row
 	row.add_theme_constant_override("separation", 16)
 	v.add_child(row)
 	_run_btn = UIKit.button("▶ 執行看看", UIKit.RUN_GREEN, Color.WHITE, UIKit.SMALL_SIZE)
@@ -46,6 +54,7 @@ func show_code(code: String, runnable: bool) -> void:
 	_output.text = ""
 	_run_btn.visible = runnable
 	_run_btn.disabled = false
+	_fit()
 	visible = true
 	modulate.a = 0.0
 	UIKit.fade(self, 1.0, 0.25)
@@ -57,6 +66,8 @@ func highlight_line(line: int) -> void:
 		_editor.set_line_background_color(i, Color(0, 0, 0, 0))
 	if line >= 1 and line <= _editor.get_line_count():
 		_editor.set_line_background_color(line - 1, Color(UIKit.PY_YELLOW, 0.22))
+		if not _editor.scroll_fit_content_height:
+			_editor.set_line_as_center_visible(line - 1)  # 卡片在捲動時，把解說的那一行捲到中間
 
 
 func hide_card() -> void:
@@ -76,3 +87,23 @@ func _on_run() -> void:
 	else:
 		_output.text = ErrorExplainer.explain(result.get("error", {}), _code)
 		_output.add_theme_color_override("font_color", Color("#ffb4a8"))
+	_fit()  # 輸出可能有好幾行，重新算一次，卡片才不會往下長到對話框
+
+
+## 程式太長時：先把字縮小（最小 MIN_CODE_SIZE），還放不下就固定高度、讓程式在卡片裡捲動，
+## 卡片永遠不超過 BOTTOM，不會被對話框蓋住。
+func _fit() -> void:
+	var avail := BOTTOM - TOP - 36.0  # 卡片上下內距（navy_panel 18 × 2）
+	if _row.visible and (_run_btn.visible or _output.text != ""):
+		avail -= 10.0 + _row.get_combined_minimum_size().y  # 執行按鈕＋輸出那一列
+	var lines := maxi(_editor.get_line_count(), 1)
+	var pad := 28.0  # 程式區上下內距（code_editor 14 × 2）
+	var fs := UIKit.CODE_SIZE
+	_editor.add_theme_font_size_override("font_size", fs)
+	while fs > MIN_CODE_SIZE and _editor.get_line_height() * lines + pad > avail:
+		fs -= 1
+		_editor.add_theme_font_size_override("font_size", fs)
+	var fits := _editor.get_line_height() * lines + pad <= avail
+	_editor.scroll_fit_content_height = fits
+	_editor.custom_minimum_size.y = 0.0 if fits else avail
+	size = Vector2(size.x, 0.0)  # 依新的內容重新算高度（變矮時才會縮回來）

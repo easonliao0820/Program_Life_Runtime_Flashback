@@ -218,11 +218,15 @@ func play_section(section_id: String) -> void:
 	await runner.run(parsed["events"])
 	if runner != _runner or runner._aborted:
 		return  # 中途被章節選擇切走了
+	
 	hide_dialogue()
-	if runner.jumped_to != "":
-		GameFlow.goto_section(runner.jumped_to)
-	else:
-		GameFlow.section_finished(section_id)
+
+	# 一般小節與劇情跳轉都統一通知 GameFlow。
+	GameFlow.section_finished(
+		section_id,
+		runner.jumped_to
+	)
+
 
 
 func _reset_view() -> void:

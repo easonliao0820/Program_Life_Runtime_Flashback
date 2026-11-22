@@ -29,15 +29,16 @@ print(len("早安！"))                   # 3
 ```
 
 系統：這些方法不會改掉原本的字串，而是做出一個新的，所以要用 message = 把結果接住。
-派森：這關你只要把 draft 換成你想說的話，下面的程式會幫你整理、數字數，50 個字以內就能送出。
+派森：這次整理的程式要你自己寫：① 把 draft 換成你想說的話 ② 用 strip() 去掉前後空白 ③ 用 replace() 把「……」換成「，」。字數算好、50 個字以內，就能送出。
+派森：記得每一步都要用 message = 把結果接住，不然整理好的字串會不見。
 
 @level ch4_3_message
 title: 一則訊息
-goal: 寫一則想傳給倖芳的訊息，整理之後要在 50 個字以內。
-intro: 只要改第一行引號裡的字就好，下面的程式會幫你整理。
+goal: 寫一則想傳給倖芳的訊息，自己用 strip() 和 replace() 整理好，在 50 個字以內送出。
+intro: 三個地方要自己寫：訊息內容、strip()、replace()。
 step: 把第一行 draft 引號裡的字，換成你想對倖芳說的話
-step: 下面的 strip()、replace() 不用動
-step: 執行後字數在 50 以內就可以送出
+step: 寫 message = draft.strip()，去掉前後的空白
+step: 寫 message = message.replace("……", "，")，把刪節號換成逗號
 expect:
 ```text
 （依你寫的內容而不同，例如：）
@@ -45,15 +46,20 @@ expect:
 一共 18 個字
 派森：很好，簡單、真誠，送出吧。
 ```
-tags: draft.strip() | .replace("……", "，") | len(message) <= 50
-hint: 把 draft 引號裡的文字換成你自己想說的話。
-hint: 下面的 strip() 和 replace() 會幫你整理；只要印出的字數在 50 以內就可以送出。
+tags: ① draft = "……" | ② draft.strip() | ③ .replace("……", "，")
+hint: ① 把 draft 引號裡的文字換成你自己想說的話（前後的空白和「……」可以留著，等一下會整理）。
+hint: ② 在註解下面寫 message = draft.strip()。
+hint: ③ 再下一行寫 message = message.replace("……", "，")，要用 message = 接住結果。
 starter:
 ```python
-draft = "   倖芳……好久不見……   "   # ← 把引號裡換成你想說的話
+draft = "   倖芳……好久不見……   "   # ① 把引號裡換成你想說的話
+
+# ② 用 strip() 去掉 draft 前後的空白，存進 message
+message = draft
+# ③ 用 replace() 把 message 裡的「……」換成「，」
+
+
 # ↓ 下面的程式不用改
-message = draft.strip()
-message = message.replace("……", "，")
 print(message)
 print(f"一共 {len(message)} 個字")
 if len(message) > 50:
@@ -63,18 +69,25 @@ else:
 ```
 check:
 ```python
+assert "draft" in globals() and isinstance(draft, str), "請保留 draft 這個變數。"
+assert draft.strip() not in ("", "倖芳……好久不見……"), "① 把 draft 換成你自己想對倖芳說的話。"
 assert "message" in globals() and isinstance(message, str), "要把整理好的訊息存在 message 裡。"
-assert message.strip() != "", "訊息不能是空的。"
-assert message == message.strip(), "訊息前後還有空白，用 strip() 去掉吧。"
+assert ".strip()" in code and message == message.strip(), "② 訊息前後還有空白，用 message = draft.strip() 去掉吧。"
+assert "……" not in message, "③ 訊息裡還有「……」，用 message = message.replace(\"……\", \"，\") 換掉。"
+assert message == draft.strip().replace("……", "，"), "message 要是 draft 用 strip() 和 replace() 整理後的結果。"
 assert len(message) <= 50, "太長了（%d 個字），她會以為你在寫作文。" % len(message)
 set_flag("message", message)
 ```
 solution:
 ```python
-draft = "   倖芳……好久不見……那年的約定……對不起。   "   # ← 把引號裡換成你想說的話
-# ↓ 下面的程式不用改
+draft = "   倖芳……好久不見……那年的約定……對不起。   "   # ① 把引號裡換成你想說的話
+
+# ② 用 strip() 去掉 draft 前後的空白，存進 message
 message = draft.strip()
+# ③ 用 replace() 把 message 裡的「……」換成「，」
 message = message.replace("……", "，")
+
+# ↓ 下面的程式不用改
 print(message)
 print(f"一共 {len(message)} 個字")
 if len(message) > 50:
