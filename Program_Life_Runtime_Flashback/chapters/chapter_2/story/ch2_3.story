@@ -89,7 +89,10 @@ starter:
 soy_milk = 25
 strawberry_toast = 60
 clerk_total = 72
-my_answer =    # ← 在這裡算：打 85 折之後是多少？（記得用 round）
+
+# 把下面的 0 換成計算式：兩樣價格相加、乘上0.85，再用round()
+my_answer = 0
+
 if my_answer == clerk_total:
     print(f"沒問題！總共是 {my_answer} 元。")
 else:
@@ -165,10 +168,10 @@ milk_tea = 30
 clerk_total = 95
 
 # ① 把 0 換成正確的計算式
-my_answer = 0          # ← 把 0 換成計算式
+my_answer = 0
 
 # ② 把 False 換成兩個金額是否相等的比較式
-if False:              # ← 把 False 換成比較式
+if False:
     print("店員算對了！")
 else:
     print("店員算錯了，請再確認金額。")
@@ -311,7 +314,8 @@ starter:
 sandwich = 49
 tea_egg = 13
 clerk_total = 111
-my_answer =    # ← 在這裡算：全部加起來再打 9 折（記得括號和 round）
+# 把下面的 0 換成計算式：先加總、乘上0.9，再用round()
+my_answer = 0
 if my_answer == clerk_total:
     print(f"沒問題！總共是 {my_answer} 元。")
 else:
