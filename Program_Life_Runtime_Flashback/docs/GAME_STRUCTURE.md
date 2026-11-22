@@ -292,6 +292,5 @@ godot --headless --path Program_Life_Runtime_Flashback res://tests/full_playthro
 
 ## 還沒做的事
 
-- 還缺的圖（CG 小動畫）見 [IMAGE_TODO.md](IMAGE_TODO.md)。
 - 雲端存檔：AWS 資料庫已建好，但遊戲存檔仍是本機 `user://plrf_save.json`，還沒接上、也還沒依 Google 帳號分開。
 - 網頁版的 Pyodide 還沒有實際匯出測試過。

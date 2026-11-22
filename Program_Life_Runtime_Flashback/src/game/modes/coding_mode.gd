@@ -414,14 +414,22 @@ func _on_run() -> void:
 			"backend": str(result.get("backend", ""))
 		})
 		var plain := ErrorExplainer.explain(err, code)
-		_output.text = stdout + "[color=#ff8f80]（程式在這裡停下來了）[/color]"
+		var stopped := stdout + "[color=#ff8f80]（程式在這裡停下來了）[/color]"
+		_output.text = stopped
 		if int(err.get("line", 0)) > 0:
 			_editor.set_caret_line(int(err["line"]) - 1)
-		_say(plain, "worried")
-		# AI 開啟時，讓派森用自己的話再說一次；回來時如果玩家已經又按了執行，就不覆蓋
+		# AI 關閉：直接說固定回覆。
+		if not GameState.settings.get("ai_enabled", true):
+			_say(plain, "worried")
+			return
+		# AI 開啟：先等 AI，有回覆就只說 AI 的話；AI 失敗或逾時（回傳 plain）才說固定回覆。
+		# 等待中的提示放在輸出區，不寫進對話框，才不會留在「回顧」裡。
+		_output.text = stopped + "\n[color=#a89c86]派森正在想怎麼跟你說……[/color]"
 		var ai_line: String = await AiBridge.ask(ErrorExplainer.ai_prompt(err, code, plain), plain, 8.0)
-		if attempt == _attempt and not _passed and ai_line != plain:
-			_say(ai_line, "worried")
+		if not is_inside_tree() or attempt != _attempt or _passed:
+			return  # 玩家已經又按了執行或過關，這次的回覆就不用說了
+		_output.text = stopped
+		_say(ai_line, "worried")
 		return
 
 	if result.get("passed", false) != true:
