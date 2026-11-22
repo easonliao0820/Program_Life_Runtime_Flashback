@@ -51,7 +51,14 @@ print(count)   # 2
 
 @level ch3_4_check
 title: 簡章上的五樣東西
-goal: 用雙層 for 迴圈檢查：外層拿出簡章上的每一樣，內層翻書包裡的每一樣，找到就 count += 1，然後 break。五樣都要帶齊！
+goal: 確認簡章上的五樣東西都帶了。雙層迴圈已經寫好，只要補上「找到之後」要做的事。
+step: 找到 if item == req: 底下的 pass
+step: 把 pass 換成兩行：count += 1，下一行寫 break（兩行要對齊）
+step: 按執行，五樣都帶齊就會過關
+expect:
+```text
+（你檢查了一下背包，簡章要求的五樣物品都帶齊了！）
+```
 tags: 外層：for req in required | 內層：for item in my_bag | 找到 → count += 1、break
 hint: 把 pass 換成兩行：count += 1 和 break。
 hint: 如果 count 不到 5，代表書包裡少了東西：用 my_bag.append("……") 補上。

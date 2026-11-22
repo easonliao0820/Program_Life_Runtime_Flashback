@@ -144,7 +144,7 @@ func _next_target() -> void:
 
 
 func _update_target_label() -> void:
-	_target_btn.text = "對：%s ▸" % target
+	_target_btn.text = "對：%s ▶" % target
 	_input.placeholder_text = "想跟%s說什麼？（Enter 送出）" % target
 	var plate := UIKit.box(UIKit.MRT_BLUE, 8, ChapterRegistry.character_color(target), 3, 8)
 	if target == "派森":

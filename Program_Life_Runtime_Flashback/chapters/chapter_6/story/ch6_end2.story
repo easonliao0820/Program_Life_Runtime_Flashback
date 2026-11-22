@@ -32,11 +32,16 @@ cg: Hello, python!
 
 @level end2_habit
 title: 回憶一：找回你的習慣
-goal: 用 Memory 設計圖，重新做出你一輩子的習慣，並讓它 recall()。
+goal: 用 Memory 設計圖，做出你一輩子的習慣。
 intro: 用設計圖做物件：類別名稱( 資料… )。
 step: 在 habit = 後面用 Memory( ) 做出一段回憶
 step: 括號裡依序填：你的習慣（加引號）、幾歲、心情（加引號）
 step: 第二行 habit.recall() 不用改，按執行
+expect:
+```text
+（例如：）
+5 歲那年，每天早上買一份培根蛋吐司，那時候的心情是「幸福」。
+```
 tags: Memory("發生什麼", 幾歲, "心情") | habit.recall()
 hint: 三個資料用逗號隔開，文字要加引號，年齡是數字不用加。
 hint: 例如：habit = Memory("每天早上一份培根蛋吐司", 13, "安心")
@@ -134,10 +139,18 @@ success: 每天早上一份培根蛋吐司——你一輩子的習慣，回來�
 
 @level end2_love
 title: 回憶二：愛的函式
-goal: 寫一個函式 say_love(name)，不管輸入誰的名字，都會回傳「○○，謝謝你，我愛你。」，再對每個人說一次。
+goal: 完成 say_love(name)，對每個人說謝謝和我愛你。
 intro: 函式用 return 把結果交回去，外面的 print 會幫你印。
 step: 在 return 後面組出一句話：名字＋「，謝謝你，我愛你。」
 step: 用 f-string 把 name 放進大括號裡，下面的 for 不用改
+expect:
+```text
+爸爸，謝謝你，我愛你。
+媽媽，謝謝你，我愛你。
+奶奶，謝謝你，我愛你。
+倖芳，謝謝你，我愛你。
+翊丞，謝謝你，我愛你。
+```
 tags: def say_love(name) | return | f-string
 hint: return 後面接 f"……"，大括號裡放 name，後面接「，謝謝你，我愛你。」。
 hint: 句子要一字不差：名字後面是全形逗號，最後有句號。
@@ -205,11 +218,15 @@ success: 爸爸、媽媽、奶奶、倖芳、翊丞……每個人都聽到你�
 
 @level end2_divination
 title: 回憶三：奶奶的筊杯
-goal: 重現奶奶為你擲出的三個聖杯：用 while 一直擲，直到連續三個聖杯。
+goal: 用 while 一直擲筊，直到連續三個聖杯。
 intro: 連續三個聖杯：擲到聖杯就加 1，不是就從 0 重新數。
 step: if 底下（擲到聖杯）：連續次數加 1
 step: else 底下（不是聖杯）：連續次數歸零
 step: while 看到 3 就會自己停下來
+expect:
+```text
+三個聖杯。奶奶，謝謝你。
+```
 tags: consecutive_holy += 1 | consecutive_holy = 0 | while
 hint: if 底下寫：consecutive_holy += 1
 hint: else 底下寫：consecutive_holy = 0
@@ -330,10 +347,14 @@ success: 三個聖杯。奶奶，謝謝你。
 
 @level end2_check
 title: 回憶四：對帳
-goal: 想起國中那天早上，你第一次自己判斷「對」與「錯」：豆漿 25 元＋草莓吐司 60 元，打 85 折，店員收 72 元。
+goal: 算出打 85 折後的價錢，確認店員收 72 元是對的。
 intro: 先加起來，再打折，最後四捨五入。
 step: 在 my_answer = 後面算出打 85 折後的價錢
 step: 用 round( ) 把結果變成整數，下面的 if 不用改
+expect:
+```text
+沒問題，總共 72 元。
+```
 tags: (25 + 60) * 0.85 | round()
 hint: 先加再打折：(25 + 60) * 0.85，要用括號。
 hint: 寫法：my_answer = round((25 + 60) * 0.85)
@@ -367,8 +388,14 @@ success: 72 元，沒問題。國中那天早上，你第一次自己判斷了�
 
 @level end2_hello
 title: 回憶五：第一句話
-goal: 回到一切的起點。編輯器裡已經寫好了你人生的第一行程式。這一次，把 World 改成 python，跟陪了你一輩子的朋友打聲招呼。
+goal: 把 World 改成 python，跟陪了你一輩子的朋友打聲招呼。
 intro: 還記得嗎？你來到這個世界時，第一句話是跟「世界」打招呼。
+step: 把引號裡的 World 改成 python，其他不用動
+step: 按執行
+expect:
+```text
+Hello, python!
+```
 tags: print("Hello, World!") | World → python
 hint: 只要把引號裡的 World 換成 python 就好。
 lesson: 派森：……最後一題了。

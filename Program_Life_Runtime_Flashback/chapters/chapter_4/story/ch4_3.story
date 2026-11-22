@@ -33,11 +33,18 @@ print(len("早安！"))                   # 3
 
 @level ch4_3_message
 title: 一則訊息
-goal: 修改 draft，寫出一則你想傳給倖芳的訊息。整理之後要在 50 個字以內，前後不能有多餘的空白。
+goal: 寫一則想傳給倖芳的訊息，整理之後要在 50 個字以內。
 intro: 只要改第一行引號裡的字就好，下面的程式會幫你整理。
 step: 把第一行 draft 引號裡的字，換成你想對倖芳說的話
 step: 下面的 strip()、replace() 不用動
 step: 執行後字數在 50 以內就可以送出
+expect:
+```text
+（依你寫的內容而不同，例如：）
+倖芳，好久不見，那年的約定，對不起。
+一共 18 個字
+派森：很好，簡單、真誠，送出吧。
+```
 tags: draft.strip() | .replace("……", "，") | len(message) <= 50
 hint: 把 draft 引號裡的文字換成你自己想說的話。
 hint: 下面的 strip() 和 replace() 會幫你整理；只要印出的字數在 50 以內就可以送出。

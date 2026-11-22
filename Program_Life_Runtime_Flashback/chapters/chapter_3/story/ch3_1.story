@@ -63,7 +63,16 @@ print(has_wallet)        # True
 
 @level ch3_1_check_bag
 title: 確認書包
-goal: 剛剛的動作都變成了程式。印出書包裡的東西和數量，再用 in 檢查手作巧克力有沒有在書包裡。請保留兩行輸出：第一行印出 bag 清單，第二行印「書包裡有 ○ 樣東西」，○使用實際數量；不要另外印其他內容。
+goal: 看看書包裡裝了什麼、有幾樣，並檢查手作巧克力有沒有帶。
+step: 上面是你剛剛放東西、拿東西的動作，已經變成程式了
+step: 下面的程式不用改，直接按執行
+step: 看看第一行的清單裡，有沒有手作巧克力
+expect:
+```text
+（依你剛剛放進書包的東西而不同，例如：）
+['手機', '錢包', '悠遊卡', '手作巧克力']
+書包裡有 4 樣東西
+```
 tags: bag.append() | bag.remove() | len(bag) | "手作巧克力" in bag
 hint: 書包超過 5 樣的話，用 bag.remove("東西") 拿掉一樣。
 hint: if "手作巧克力" in bag: 底下寫 gave_gift = True，else 底下寫 gave_gift = False。
