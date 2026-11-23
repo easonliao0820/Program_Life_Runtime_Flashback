@@ -116,7 +116,7 @@ func _show_desktop_only() -> void:
 	var title := UIKit.label("請用電腦遊玩", 72, UIKit.GOLD)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(title)
-	var body := UIKit.label("《派森與我的一生》需要用鍵盤寫程式，\n請用桌上型電腦或筆電開啟。", 36, Color("#e6edf3"))
+	var body := UIKit.label("《程式人生：跑馬燈》需要用鍵盤寫程式，\n請用桌上型電腦或筆電開啟。", 36, Color("#e6edf3"))
 	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(body)
 	get_tree().root.add_child(layer)

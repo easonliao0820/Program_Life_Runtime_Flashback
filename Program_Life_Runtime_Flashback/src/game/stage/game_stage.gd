@@ -166,7 +166,7 @@ func _ready() -> void:
 	chat.context = _chat_context
 	chat.record = func(speaker: String, text: String): system_menu.add_backlog(speaker, text)
 	chat.targets = func() -> Array: return ["派森"] + _scene_people
-	chat.persona = func(who: String) -> String: return PERSONAS.get(who, "你是遊戲《派森與我的一生》裡的角色「%s」。" % who)
+	chat.persona = func(who: String) -> String: return PERSONAS.get(who, "你是遊戲《程式人生：跑馬燈》裡的角色「%s」。" % who)
 	chat.asked.connect(func(who: String, _q: String):
 		if who == "派森":
 			orb.speak(true)
@@ -507,7 +507,7 @@ func ai_line(speaker: String, instruction: String, fallback: String) -> String:
 	code_card.hide_card()
 	if not _phone_open:
 		dialogue.show_status(speaker, "……")
-	var persona: String = PERSONAS.get(speaker, "你是遊戲《派森與我的一生》裡的角色「%s」。" % speaker)
+	var persona: String = PERSONAS.get(speaker, "你是遊戲《程式人生：跑馬燈》裡的角色「%s」。" % speaker)
 	var prompt := """%s
 主角名字：%s（目前 %d 歲）。
 主角剛剛寫的程式印出了：「%s」
@@ -852,19 +852,31 @@ func credits() -> void:
 	await bg.show_bg("white")
 	var hello := UIKit.label("hello python", 72, UIKit.INK)
 	hello.add_theme_font_override("font", UIKit.mono_font())
-	hello.position = Vector2(700, 470)
+	hello.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hello.position = Vector2(0, 440)
+	hello.custom_minimum_size = Vector2(1920, 0)
 	hello.modulate.a = 0.0
 	_montage_layer.add_child(hello)
+	# hello python 下面：遊戲英文名稱
+	var en_title := UIKit.label("Program Life: Runtime Flashback", 36, Color("#556877"))
+	en_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	en_title.position = Vector2(0, 560)
+	en_title.custom_minimum_size = Vector2(1920, 0)
+	en_title.modulate.a = 0.0
+	_montage_layer.add_child(en_title)
 	var t := create_tween()
 	t.tween_property(hello, "modulate:a", 1.0, 2.0)
+	t.parallel().tween_property(en_title, "modulate:a", 1.0, 2.0).set_delay(0.6)
 	t.tween_interval(2.0)
 	t.tween_property(hello, "modulate:a", 0.0, 1.5)
+	t.parallel().tween_property(en_title, "modulate:a", 0.0, 1.5)
 	await t.finished
+	en_title.queue_free()
 
 	# 工作人員名單：依組內分工表（● 主要負責、◐ 共同負責；○ 協助不列）。
 	# ["# 分工領域"] 大標題；[工作內容, 人名] 顯示成「工作內容：人名」；[""] 空一行
 	var lines := [
-		["# 《派森與我的一生》"], ["# Program Life: Runtime Flashback"], [""],
+		["# 《程式人生：跑馬燈》"], ["# Program Life: Runtime Flashback"], [""],
 		["# 遊戲與劇情設計"],
 		["劇情、對話、故事分支與兩種結局", "廖翊丞"],
 		["劇本格式、解析器、場景切換及對話介面", "廖翊丞"],
@@ -907,32 +919,44 @@ func credits() -> void:
 		["音樂與音效", "廖翊丞"],
 		[""], [""],
 		["# 製作團隊"],
+		["", "國立雲林科技大學　資訊管理系"],
+		["", "115 年　專題發表"],
+		[""],
 		["A11423009", "張倖芳"], ["A11423026", "許睿宸"], ["A11423028", "廖翊丞"],
 		["A11423033", "劉欣庭"], ["A11423041", "林恩妤"],
 		[""], [""],
-		["# 特別感謝"], ["# 每一個陪你寫下第一行程式的人"], [""], [""],
+		["# 特別感謝"],
+		["", "國立雲林科技大學"],
+		["專題指導老師", "潘得龍教授"],
+		["", "每一位給我們建議的老師與玩家"],
+		[""],
+		["# 每一個陪你寫下第一行程式的人"], [""], [""],
 		["# 你的故事還沒結束。"],
 	]
 	var col := VBoxContainer.new()
 	col.position = Vector2(360, 1100)
 	col.custom_minimum_size = Vector2(1200, 0)
 	col.add_theme_constant_override("separation", 10)
+	var big := false   # 「特別感謝」那一段字放大
 	for l in lines:
 		var text: String = l[0]
+		if text.begins_with("# "):
+			big = text == "# 特別感謝"
 		if l.size() == 2:
-			# 工作內容：人名（置中一行）
-			var lbl := UIKit.rich(34)
+			# 工作內容：人名（置中一行）；工作內容留空就只顯示人名
+			var lbl := UIKit.rich(44 if big else 34)
 			lbl.fit_content = true
 			lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
-			lbl.custom_minimum_size = Vector2(1200, 52)
+			lbl.custom_minimum_size = Vector2(1200, 66 if big else 52)
 			# 工作內容和人名一樣大：工作內容灰色、人名深色
-			lbl.text = "[center][color=#556877]%s：[/color][color=#1e2a38]%s[/color][/center]" % [text, l[1]]
+			var job := "" if text == "" else "[color=#556877]%s：[/color]" % text
+			lbl.text = "[center]%s[color=#1e2a38]%s[/color][/center]" % [job, l[1]]
 			col.add_child(lbl)
 		else:
 			var head := text.begins_with("# ")
-			var lbl := UIKit.label(text.trim_prefix("# "), 40 if head else 20, UIKit.INK)
+			var lbl := UIKit.label(text.trim_prefix("# "), (54 if big else 40) if head else 20, UIKit.INK)
 			lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			lbl.custom_minimum_size = Vector2(1200, 64 if head else 30)
+			lbl.custom_minimum_size = Vector2(1200, (80 if big else 64) if head else 30)
 			col.add_child(lbl)
 	_montage_layer.add_child(col)
 	await get_tree().process_frame
